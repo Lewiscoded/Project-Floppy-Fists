@@ -1,12 +1,23 @@
 # Project Floppy Fists
 
-A wobbly ragdoll sandbox brawler built with three.js. Pick a loadout, then bonk, blast and rocket your friends off a floating island. Up to 5 players online.
+A wobbly ragdoll sandbox brawler built with three.js. Pick a map and a loadout, then bonk, blast and rocket your friends off it. Up to 5 players online.
 
 ## Play
 - **Online:** one person clicks **Host game** and shares the 4-letter room code. Everyone else types it in under **Join online**. Up to 5 fighters per room, and the host can add bots to fill empty slots.
 - **Practice:** play offline against 0–4 bots.
 
 Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so it needs to be served from a real site such as GitHub Pages (or run locally with `npx serve`).
+
+## Maps
+Pick a map on the main menu before starting. Online, the host's pick is the map, and the host can switch maps mid-game from the Esc menu.
+
+| Map | Setting | Weapons become |
+|---|---|---|
+| 🍳 Kitchen Chaos | Tiny fighters on a giant counter. Fall in the sink or off the edge. | Oven Mitts, Rolling Pin, Butter Knife, Ketchup Squirter, Pepper Blaster, Sprinkle Gun, Champagne Cannon, Eggs |
+| 🏢 Office Meltdown | A half-built skyscraper floor with cubicles, an open elevator shaft and a steel beam out over the city. | Fists, Keyboard, Metal Ruler, Staple Gun, Fire Extinguisher, Paperclip SMG, Toner Launcher, Coffee Mugs |
+| 🏰 Castle Siege | A courtyard with walls to climb, a keep, a broken east wall and a drawbridge. | Gauntlets, Mace, Longsword, Hand Crossbow, Blunderbuss, Repeater Crossbow, Hand Cannon, Firepots |
+
+Themes only change how weapons look and what they're called. Damage and other stats are the same on every map.
 
 ## Controls
 | Action | Key |
@@ -20,8 +31,8 @@ Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so i
 | Grab a ledge | Hold E while falling, then hold Space to climb |
 | Loadout / menu | Q / Esc |
 
-## Weapons
-| Class | Types |
+## Weapon classes
+| Class | Types (default names) |
 |---|---|
 | Melee | Fists, Bat, Sword |
 | Guns | Pistol, Shotgun, Rifle (full auto) |
