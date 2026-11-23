@@ -3,10 +3,22 @@
 A wobbly ragdoll sandbox brawler built with three.js. Pick a map and a loadout, then bonk, blast and rocket your friends off it. Up to 5 players online.
 
 ## Play
-- **Online:** one person clicks **Host game** and shares the 4-letter room code. Everyone else types it in under **Join online**. Up to 5 fighters per room, and the host can add bots to fill empty slots.
-- **Practice:** play offline against 0–4 bots.
+- **Online:** click **Host game** to open a lobby, then hit **Copy invite link** and send it to friends. Opening the link drops them straight into your room, or they can type the 4-letter code. Everyone readies up, the host picks the mode, map, bots and bot skill, then hits **Start match**.
+- **Practice:** the same lobby, offline, against 0–4 bots.
 
-Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so it needs to be served from a real site such as GitHub Pages (or run locally with `npx serve`).
+### Match modes
+- **Deathmatch:** first to the kill limit (5–50), with an optional time limit.
+- **Last Standing:** everyone gets 1–9 lives, and the last fighter with lives left wins. Eliminated players spectate.
+
+After each match there's a results screen with a podium, awards (most damage, longest flight, most headshots, most ring-outs) and full stats. Your lifetime record (matches, wins, kills, K/D, falls, damage) is saved in your browser.
+
+### Online extras
+- Up to 5 fighters, with pings shown on the scoreboard and in the lobby.
+- **Auto-reconnect:** if your connection drops, you rejoin and keep your score.
+- **Host migration:** if the host leaves, the longest-connected player takes over the room and the match keeps going.
+- Typed chat, 6 quick-chat lines, emotes (wave, dance, taunt, flop) and speech bubbles over heads.
+
+Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so it needs to be served from a real site such as GitHub Pages (or locally with `npx serve`).
 
 ## Maps
 Pick a map on the main menu before starting. Online, the host's pick is the map, and the host can switch maps mid-game from the Esc menu.
@@ -20,16 +32,28 @@ Pick a map on the main menu before starting. Online, the host's pick is the map,
 Themes only change how weapons look and what they're called. Damage and other stats are the same on every map.
 
 ## Controls
-| Action | Key |
-|---|---|
-| Move | WASD |
-| Aim | Mouse |
-| Attack | Left click (hold for the rifle) |
-| Block / parry | Hold right click or F with a melee weapon. Tap it just before a hit lands to parry |
-| Switch weapon | 1 melee · 2 gun · 3 explosive, or the mouse wheel |
-| Jump | Space |
-| Grab a ledge | Hold E while falling, then hold Space to climb |
-| Loadout / menu | Q / Esc |
+Every key can be rebound in **⚙ Settings**. These are the defaults:
+
+| Action | Keyboard + mouse | Controller |
+|---|---|---|
+| Move | WASD (or arrows) | Left stick |
+| Aim | Mouse | Right stick (with optional aim assist) |
+| Attack | Left click (hold for the rifle) | RT |
+| Block / parry | Right click or F (melee weapons) | LT |
+| Jump | Space | A |
+| Grab a ledge | Hold E while falling, then hold Space to climb | B |
+| Switch weapon | 1 / 2 / 3 or mouse wheel | LB / RB |
+| Loadout | Q | Y |
+| Chat / quick chat / emotes | Enter / T / G | D-pad |
+| Menu | Esc | Start |
+
+## Quality of life
+- 2 seconds of spawn protection (your fighter flickers; attacking cancels it)
+- Hitmarkers, floating damage numbers and a headshot ding
+- Arrows at the screen edge pointing to off-screen enemies, and a red arc showing where damage came from
+- A kill cam that follows whoever got you while you wait to respawn
+- Settings: master and effects volume, screen shake, camera distance, name tags, damage numbers, aim assist, graphics quality
+- A first-time tutorial (you can reopen it from Settings)
 
 ## Weapon classes
 | Class | Types (default names) |
