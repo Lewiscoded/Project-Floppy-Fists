@@ -487,7 +487,7 @@ function mat(color,o={}){
 const texFor=(color,o)=>{ if (o.tex!==undefined) return [o.tex,o.ts??2,o.bump??0]; const t=THEME&&THEME.tex&&THEME.tex[color]; return t||[null]; };
 // collider box (+ visible mesh unless hidden)
 function addBox(minx,miny,minz,maxx,maxy,maxz,color,o={}){
-  const b={min:new V3(minx,miny,minz),max:new V3(maxx,maxy,maxz)}; BOXES.push(b);
+  const b={min:new V3(minx,miny,minz),max:new V3(maxx,maxy,maxz),bound:!!o.bound}; BOXES.push(b);
   if (o.hidden) return b;
   const [tn,ts,tb]=texFor(color,o);
   const geo=tn?worldBox(maxx-minx,maxy-miny,maxz-minz,ts):bx(maxx-minx,maxy-miny,maxz-minz);
@@ -790,8 +790,8 @@ hood:{
     addBox(-60,-2,-60,60,0,60,walk);
     { const m=new THREE.Mesh(worldBox(420,1,420,6),mat(0x8a8a8a,{tex:'asphalt'})); m.position.set(0,-.52,0); m.receiveShadow=true; mapGroup.add(m); }
     // invisible walls keep the brawl on the block
-    addBox(-27.5,0,-21,-26.5,30,21,0,{hidden:true}); addBox(26.5,0,-21,27.5,30,21,0,{hidden:true});
-    addBox(-27.5,0,-21.5,27.5,30,-20.5,0,{hidden:true}); addBox(-27.5,0,20,27.5,30,21,0,{hidden:true});
+    addBox(-27.5,0,-21,-26.5,30,21,0,{hidden:true,bound:true}); addBox(26.5,0,-21,27.5,30,21,0,{hidden:true,bound:true});
+    addBox(-27.5,0,-21.5,27.5,30,-20.5,0,{hidden:true,bound:true}); addBox(-27.5,0,20,27.5,30,21,0,{hidden:true,bound:true});
     // street through the middle (runs off into the city both ways)
     flat(-200,-3,200,3,0,0x9a9a9a,'asphalt',4);
     for (let x=-60;x<60;x+=4) deco(bx(1.8,.02,.18),0xffd23f,x+1,.035,0,{cast:false});
@@ -1267,7 +1267,7 @@ function rayBox(o,d,b){
 }
 function raycast(o,d,maxT,ignore){
   let t=maxT, body=null, j=-1;
-  for (const b of BOXES){ const tt=rayBox(o,d,b); if (tt>=0&&tt<t){ t=tt; } }
+  for (const b of BOXES){ if (b.bound) continue; const tt=rayBox(o,d,b); if (tt>=0&&tt<t){ t=tt; } }
   for (const bd of bodies.values()){
     if (bd===ignore || bd.dead) continue;
     for (let k=0;k<N;k++){
@@ -2086,10 +2086,20 @@ function playerAim(r){
   const o=camera.position.clone(), d=new V3(mouse.nx,mouse.ny,.5).unproject(camera).sub(o).normalize();
   if (!isFinite(d.x)) return;
   const res=raycast(o,d,300,r);
-  let P;
-  if (res.t<300){ P=o.clone().addScaledVector(d,res.t); if (!res.body){ const hd=Math.hypot(P.x-ch.x,P.z-ch.z); if (hd>2.5 && P.y<ch.y) P.y+=Math.min(1.1,ch.y-P.y); } }
-  else { const t=(ch.y-o.y)/d.y; if (!(t>0)) return; P=o.clone().addScaledVector(d,t); }
-  const A=P.sub(ch); if (A.lengthSq()<.04) return; r.aim.copy(A.normalize());
+  const tPlane=d.y<-1e-4?(ch.y-o.y)/d.y:Infinity;
+  const planeP=isFinite(tPlane)?o.clone().addScaledVector(d,tPlane):null;
+  let P=res.t<300?o.clone().addScaledVector(d,res.t):null;
+  if (P && !res.body){
+    // is the hit between the camera and the fighter (a wall, roof or house in the way)?
+    const fh=new V3(o.x-ch.x,0,o.z-ch.z).normalize();
+    const hd=Math.hypot(P.x-ch.x,P.z-ch.z);
+    if (planeP && ((P.x-ch.x)*fh.x+(P.z-ch.z)*fh.z>.6 || (hd<1.5 && P.y>ch.y+.3))) P=planeP;   // in the way, or right above our head
+    else if (hd>2.5 && P.y<ch.y) P.y+=Math.min(1.1,ch.y-P.y);
+  }
+  if (!P){ if (!planeP) return; P=planeP; }
+  const A=P.sub(ch); if (A.lengthSq()<.04) return; A.normalize();
+  if (A.y>.6){ const h=Math.hypot(A.x,A.z)||1e-3; const k=Math.sqrt(1-.36)/h; A.set(A.x*k,.6,A.z*k); }   // no aiming straight at the sky
+  r.aim.copy(A);
 }
 
 /* ===================== chat, quick chat, emotes ===================== */
@@ -2661,7 +2671,7 @@ function frame(t){
   requestAnimationFrame(frame);
 }
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); if (composer){ composer.setSize(innerWidth,innerHeight); bloomPass.resolution.set(innerWidth,innerHeight); } });
-window.__game={applyHit,onBoom,raycast,V3,bodies,net,loadMap,chooseMap,THEMES,get BOXES(){return BOXES},get SPAWNS(){return SPAWNS},boxUnder,get mapKey(){return mapKey},get state(){return state},
+window.__game={applyHit,onBoom,raycast,camera,V3,bodies,net,loadMap,chooseMap,THEMES,get BOXES(){return BOXES},get SPAWNS(){return SPAWNS},boxUnder,get mapKey(){return mapKey},get state(){return state},
   addBot,keys,mouse,projs,localPlayer,get match(){return match},set match(v){match=v},endMatch,startMatchHost,prefs,startEmote,sendChat,get lobbyRoster(){return lobbyRoster}};
 applyQuality(prefs.quality); renderGfx(); renderHelp(); renderMyStats();
 loadMap(prefs.map); renderMaps();
