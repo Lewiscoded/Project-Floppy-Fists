@@ -27,7 +27,7 @@ Click **Choose map** on the main menu or in the lobby to open the map screen, wh
 |---|---|---|
 | 🍳 Kitchen Chaos | Tiny fighters on a giant counter. Fall in the sink or off the edge. | Oven Mitts, Rolling Pin, Butter Knife, Ketchup Squirter, Pepper Blaster, Sprinkle Gun, Champagne Cannon, Eggs |
 | 🏢 Office Meltdown | A half-built skyscraper floor with cubicles, an open elevator shaft and a steel beam out over the city. | Fists, Keyboard, Metal Ruler, Staple Gun, Fire Extinguisher, Paperclip SMG, Toner Launcher, Coffee Mugs |
-| 🏙️ Block Party | A floating city block with a streetball court, corner store, brownstone stoops, a graffiti wall, string lights and an elevated train track. | Boxing Gloves, Skateboard, Stop Sign, Slingshot, Hydrant Hose, Paintball Gun, Firework Launcher, Paint Balloons |
+| 🏙️ Block Party | A street-level city block surrounded by buildings: a streetball court, corner store, brownstone stoops, a graffiti wall, string lights and an elevated train track. | Fists, Baseball Bat, Crowbar, Pistol, Sawed-Off, Uzi, RPG, Grenades |
 | 🏰 Castle Siege | A courtyard with walls to climb, a keep, a broken east wall and a drawbridge. | Gauntlets, Mace, Longsword, Hand Crossbow, Blunderbuss, Repeater Crossbow, Hand Cannon, Firepots |
 
 Themes only change how weapons look and what they're called. Damage and other stats are the same on every map.
@@ -47,6 +47,16 @@ Every key can be rebound in **⚙ Settings**. These are the defaults:
 | Loadout | Q | Y |
 | Chat / quick chat / emotes | Enter / T / G | D-pad |
 | Menu | Esc | Start |
+
+## Customization
+Click **👕 Customize** on the menu, in the lobby or from the Esc menu. You'll see a live 3D preview that you can drag to spin.
+- **Hats:** cap, beanie, top hat, cowboy, crown, hard hat, chef, party hat (some come in any color)
+- **Face:** shades, glasses, mustache, eyepatch, clown nose, hero mask
+- **Shirt:** any color (or none), with short or long sleeves
+- **Pants:** any color (or none), as pants or shorts
+- **Body color** and a **🎲 Randomize** button
+
+Outfits sync to everyone online, and bots wear random outfits.
 
 ## Quality of life
 - 2 seconds of spawn protection (your fighter flickers; attacking cancels it)
