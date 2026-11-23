@@ -21,7 +21,7 @@ After each match there's a results screen with a podium, awards (most damage, lo
 Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so it needs to be served from a real site such as GitHub Pages (or locally with `npx serve`).
 
 ## Maps
-Click **Choose map** on the main menu or in the lobby to open the map screen, which shows a live preview of every map and its weapons. Online, the host's pick is the map, and the host can switch maps mid-game from the Esc menu.
+Click **Choose map** on the main menu or in the lobby to open the map screen, which shows a live preview of every map and its weapons. Online, the host picks the map in the lobby and everyone plays on it.
 
 | Map | Setting | Weapons become |
 |---|---|---|
