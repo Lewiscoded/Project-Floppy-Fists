@@ -42,6 +42,12 @@ Themes only change how weapons look and what they're called. Damage and other st
 
 Rockets damage you too, at 40% strength, so you can rocket-jump.
 
+## Graphics
+- Procedural textures for marble, tile, wood, carpet, brick, cobblestone and grass, plus gradient skies and image-based lighting
+- Glossy fighters with outlines and faces that react: they grin, frown when attacking, wince when hurt and show X-eyes when knocked out
+- Bloom, a color grade and a vignette, soft smoke, explosions with shockwaves and light flashes, muzzle flashes, glowing tracers and footstep dust
+- **Graphics: High / Low** toggle on the menu. Low turns off post-processing and grass and uses a lower resolution and smaller shadows, for slower PCs.
+
 ## How it works
 Each fighter is a 16-point Verlet ragdoll held together by distance constraints. Muscle springs keep it standing, turn it toward your aim, swing its feet and drive its punches. When a fighter is stunned, those springs switch off and it goes floppy.
 
