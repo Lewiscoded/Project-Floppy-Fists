@@ -67,6 +67,8 @@
   #bottom{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px}
   #hpbar{width:300px;height:22px;border-radius:999px;background:rgba(0,0,0,.35);overflow:hidden;position:relative;border:3px solid #fff}
   #hpfill{height:100%;background:linear-gradient(90deg,#5ee07a,#a4f26b);transition:width .15s}
+  #guardbar{width:200px;height:10px;border-radius:999px;background:rgba(0,0,0,.35);overflow:hidden;border:2px solid #fff}
+  #guardfill{height:100%;background:#7fc4ff;transition:width .1s}
   #hptxt{position:absolute;inset:0;text-align:center;font-weight:800;font-size:13px;color:#fff;line-height:16px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
   #slots{display:flex;gap:8px}
   .slot{background:rgba(255,255,255,.85);border-radius:14px;padding:6px 12px;font-weight:800;font-size:13px;min-width:110px;text-align:center;position:relative;overflow:hidden;border:3px solid transparent}
@@ -89,9 +91,10 @@
   <div id="center"></div>
   <div id="bottom">
     <div id="slots"></div>
+    <div id="guardbar" class="hidden"><div id="guardfill"></div></div>
     <div id="hpbar"><div id="hpfill"></div><span id="hptxt">100</span></div>
   </div>
-  <div id="help">WASD move · Mouse aim · Click attack · 1/2/3 or wheel: weapon · Space jump · E (hold) grab ledges · Q loadout · Esc menu</div>
+  <div id="help">WASD move · Mouse aim · Click attack · Right click/F block (tap to parry) · 1/2/3 or wheel: weapon · Space jump · E (hold) grab ledges · Q loadout · Esc menu</div>
 </div>
 
 <div id="menu" class="screen">
@@ -117,6 +120,7 @@
     <table>
       <tr><td>Move / aim</td><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + mouse</td></tr>
       <tr><td>Attack</td><td>Left click (hold for the rifle)</td></tr>
+      <tr><td>Block / parry</td><td>Hold right click or <kbd>F</kbd> with a melee weapon · tap it just before a hit lands to parry</td></tr>
       <tr><td>Switch weapon</td><td><kbd>1</kbd> melee · <kbd>2</kbd> gun · <kbd>3</kbd> explosive, or the mouse wheel</td></tr>
       <tr><td>Jump / grab ledge</td><td><kbd>Space</kbd> · hold <kbd>E</kbd> while falling, then hold <kbd>Space</kbd> to climb</td></tr>
       <tr><td>Loadout / menu</td><td><kbd>Q</kbd> · <kbd>Esc</kbd></td></tr>
@@ -288,7 +292,7 @@ class Body{
     this.pos=[];this.prev=[];this.acc=[];this.vel=[];this.tgt=[];
     for (let i=0;i<N;i++){ this.pos.push(new V3());this.prev.push(new V3());this.acc.push(new V3());this.vel.push(new V3());this.tgt.push(new V3()); }
     this.fwd=new V3(0,0,1); this.wantFwd=new V3(0,0,1); this.f3=new V3(0,0,1); this.aim=new V3(0,0,1);
-    this.hp=100;this.dead=false;this.deadT=0;this.kills=0;this.deaths=0;this.lastHitBy=null;this.lastHitT=-1e9;this.lastHitW='';
+    this.hp=100;this.dead=false;this.deadT=0;this.blocking=false;this.blockStart=-1e9;this.lastBlockEnd=-1e9;this.guard=100;this.guardBroken=0;this.msg='';this.msgT=0;this.kills=0;this.deaths=0;this.lastHitBy=null;this.lastHitT=-1e9;this.lastHitW='';
     this.loadout={melee:'bat',gun:'shotgun',boom:'rocket'}; this.slot='gun'; this.cd=0; this.recoilT=0; this.wKey='shotgun';
     this.ctrl={mx:0,mz:0,jump:false,fire:false,grab:false};
     this.lastFire=false;this.lastJump=false;this.fireEdge=false;this.jumpEdge=false;
@@ -344,7 +348,7 @@ function forces(r){
   spring(r,LSH,p[NECK].x-sx*.3,0,p[NECK].z-sz*.3,60,6,5);
   spring(r,RHIP,p[PELV].x+sx*.16,0,p[PELV].z+sz*.16,40,5,5);
   spring(r,LHIP,p[PELV].x-sx*.16,0,p[PELV].z-sz*.16,40,5,5);
-  const spd=3.9, kk=g?9:2.2;
+  const spd=r.blocking?2.1:3.9, kk=g?9:2.2;
   if (g||moving){
     const ax=clamp((mx*spd-v[PELV].x)*kk,-40,40), az=clamp((mz*spd-v[PELV].z)*kk,-40,40);
     for (const i of UPPER){ a[i].x+=ax; a[i].z+=az; }
@@ -385,7 +389,9 @@ function forces(r){
     if (c.grab){ spring(r,hand,ch.x+f.x*.75+sx*s*.22,ch.y-.05,ch.z+f.z*.75+sz*s*.22,170,16,7,NECK);
       if (r.grabs[gi]) for (const i of [NECK,LSH,RSH,FRONT]){ a[i].x-=F.x*.15; a[i].y-=F.y*.15; a[i].z-=F.z*.15; }
       continue; }
-    if (w.kind==='melee'){
+    if (w.kind==='melee' && r.blocking){
+      spring(r,hand,ch.x+A.x*.42+sx*s*.13,ch.y+.32,ch.z+A.z*.42+sz*s*.13,280,20,7,NECK);
+    } else if (w.kind==='melee'){
       if (r.punchT>.15 && r.punchHand===s){
         const hi=r.weapon==='fists'?.03:.25;
         spring(r,hand,ch.x+A.x*1.05+sx*s*.06,ch.y+A.y*.8+hi,ch.z+A.z*1.05+sz*s*.06,1600,34,7,NECK);
@@ -525,7 +531,26 @@ function dealHit(o,j,dmg,imp,by,wname){
   if (o.local) applyHit(o,j,dmg,imp,by,wname);
   else send({t:'hit',id:o.id,j,d:Math.round(dmg),i:[+imp.x.toFixed(2),+imp.y.toFixed(2),+imp.z.toFixed(2)],by,w:wname});
 }
+const weaponByName=n=>Object.values(WEAPONS).find(w=>w.name===n);
+const PARRY_MS=220;
 function applyHit(o,j,dmg,imp,by,wname){
+  const w=weaponByName(wname);
+  if (w && w.kind==='melee' && o.blocking && !o.dead){
+    TMP.set(-imp.x,0,-imp.z);
+    if (TMP.lengthSq()<1e-6 || TMP.normalize().dot(o.fwd)>.1){   // hit came from the front
+      if (now()-o.blockStart<PARRY_MS){
+        const p=o.pos[PELV];
+        sfx(1300,.25,'square',.12); sfx(1900,.18,'triangle',.08); spark(o.pos[o.punchHand<0?LHAND:RHAND]); spark(o.pos[HEAD]);
+        flashMsg(o,'PARRY!');
+        const a=bodies.get(by);
+        if (a && a.local) applyParried(a,p.x,p.z); else if (a) send({t:'parry',id:by,x:+p.x.toFixed(2),z:+p.z.toFixed(2)});
+        return;
+      }
+      o.guard-=dmg*1.6; dmg*=.25; imp=imp.clone().multiplyScalar(.3);
+      sfx(220,.12,'square',.1); spark(o.pos[RHAND]);
+      if (o.guard<=0){ o.guard=0; o.guardBroken=1.5; o.blocking=false; o.stun=Math.max(o.stun,1); flashMsg(o,'GUARD BROKEN'); sfx(120,.4,'sawtooth',.12); }
+    }
+  }
   for (let i=0;i<N;i++){ const m=i===j?1.6:.5; addVel(o,i,imp.x*m,imp.y*m,imp.z*m); }
   if (o.dead) return;
   if (by && by!==o.id){ o.lastHitBy=by; o.lastHitT=now(); o.lastHitW=wname; }
@@ -533,6 +558,14 @@ function applyHit(o,j,dmg,imp,by,wname){
   if (o.id===myBodyId) hurtFlash=.35;
   if (o.hp<=0) kill(o,by,wname);
 }
+function applyParried(a,fx,fz){
+  // the attacker got parried: stagger them and knock them back
+  TMP.set(a.pos[PELV].x-fx,0,a.pos[PELV].z-fz); if (TMP.lengthSq()<1e-6) TMP.copy(a.fwd).negate(); TMP.normalize();
+  for (let i=0;i<N;i++) addVel(a,i,TMP.x*5,2.5,TMP.z*5);
+  a.stun=Math.max(a.stun,1.1); a.cd=Math.max(a.cd,.9); a.punchT=0;
+  flashMsg(a,'PARRIED!'); sfx(1300,.25,'square',.1*volAt(a.pos[PELV]));
+}
+function flashMsg(b,t){ b.msg=t; b.msgT=.9; }
 function kill(o,by,wname){
   if (o.dead) return;
   o.dead=true; o.hp=0; o.deadT=3.5; o.stun=1e9; o.deaths++; o.grabs=[null,null];
@@ -610,7 +643,7 @@ function gunSfx(k,p){ const v=volAt(p); if (k==='shotgun'){ noise(.3,.35*v,1400)
 function weaponUpdate(r,dt){
   r.cd-=dt; r.recoilT-=dt;
   const edge=r.fireEdge; r.fireEdge=false;
-  if (r.dead||r.stun>0||r.ctrl.grab) return;
+  if (r.dead||r.stun>0||r.ctrl.grab||r.blocking) return;
   const w=WEAPONS[r.weapon];
   if (!(w.auto?r.ctrl.fire:edge) || r.cd>0) return;
   r.cd=w.cd; fire(r);
@@ -898,6 +931,7 @@ function handle(m){
     case 'pend': removeProj(m.id); break;
     case 'boom': removeProj(m.pid); onBoom(new V3(...m.p),m.k,m.by); break;
     case 'kill': onKill(m.v,m.vn,m.vc,m.by,m.w); break;
+    case 'parry': { const b=bodies.get(m.id); if (b&&b.local) applyParried(b,m.x,m.z); break; }
     case 'bye': dropOwner(m.o); break;
     case 'gone': { const b=bodies.get(m.id); if (b&&!b.local) removeBody(m.id); break; }
   }
@@ -977,6 +1011,9 @@ function botThink(b,dt){
     dx=dx*fwd+sxx*sm; dz=dz*fwd+szz*sm;
     if (keep===0 && bd<.9){ dx*=.2; dz*=.2; }
     B.react-=dt;
+    B.blockT=(B.blockT||0)-dt;
+    if (w.kind==='melee' && bd<2.4 && B.blockT<-.6 && Math.random()<.025) B.blockT=.35+Math.random()*.5;
+    if (B.blockT>0){ c.block=true; }
     const inRange=w.kind==='melee'?bd<1.7:bd<30;
     B.fireCd-=dt;
     if (inRange && B.react<=0 && B.fireCd<=0){ c.fire=w.auto?true:(B.toggle=!B.toggle); if (!w.auto && !B.toggle) B.fireCd=w.kind==='melee'?.15:w.cd*(w.cls==='boom'?1.8:.9); }
@@ -1007,10 +1044,10 @@ addEventListener('keydown',e=>{
   if (me && !menuOpen){ if (e.code==='Digit1') me.slot='melee'; if (e.code==='Digit2') me.slot='gun'; if (e.code==='Digit3') me.slot='boom'; }
 });
 addEventListener('keyup',e=>keys.delete(e.code));
-addEventListener('blur',()=>{ keys.clear(); mouse.down=false; });
+addEventListener('blur',()=>{ keys.clear(); mouse.down=false; mouse.right=false; });
 addEventListener('mousemove',e=>{ mouse.nx=e.clientX/innerWidth*2-1; mouse.ny=-(e.clientY/innerHeight)*2+1; });
-renderer.domElement.addEventListener('mousedown',e=>{ if (e.button===0) mouse.down=true; initAudio(); });
-addEventListener('mouseup',e=>{ if (e.button===0) mouse.down=false; });
+renderer.domElement.addEventListener('mousedown',e=>{ if (e.button===0) mouse.down=true; if (e.button===2) mouse.right=true; initAudio(); });
+addEventListener('mouseup',e=>{ if (e.button===0) mouse.down=false; if (e.button===2) mouse.right=false; });
 renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('wheel',e=>{ const me=localPlayer(); if (!me||menuOpen) return; const i=SLOT_ORDER.indexOf(me.slot); me.slot=SLOT_ORDER[(i+(e.deltaY>0?1:2))%3]; },{passive:true});
 const k=c=>keys.has(c);
@@ -1018,7 +1055,7 @@ function playerCtrl(r){
   const c={mx:0,mz:0,jump:false,fire:false,grab:false};
   if (menuOpen) return c;
   c.mx=(k('KeyD')?1:0)-(k('KeyA')?1:0); c.mz=(k('KeyS')?1:0)-(k('KeyW')?1:0);
-  c.jump=k('Space'); c.fire=mouse.down; c.grab=k('KeyE')||k('ShiftLeft');
+  c.jump=k('Space'); c.fire=mouse.down; c.block=mouse.right||k('KeyF'); c.grab=k('KeyE')||k('ShiftLeft');
   return c;
 }
 function playerAim(r){
@@ -1116,7 +1153,10 @@ function updateHud(dt){
   $('hpfill').style.background=me.hp>50?'linear-gradient(90deg,#5ee07a,#a4f26b)':me.hp>25?'#ffd23f':'#ff5a5a';
   $('slots').innerHTML=SLOT_ORDER.map((s,i)=>{ const w=WEAPONS[me.loadout[s]]; const cd=me.slot===s&&me.cd>0?clamp(me.cd/w.cd,0,1):0;
     return `<div class="slot ${me.slot===s?'sel':''}"><small>${i+1}</small>${w.name}<div class="cd" style="width:${cd*100}%"></div></div>`; }).join('');
-  $('center').innerHTML=me.dead?`SPLAT!<small>Respawning in ${Math.max(0,me.deadT).toFixed(1)}s · press Q to change loadout</small>`:'';
+  $('center').innerHTML=me.dead?`SPLAT!<small>Respawning in ${Math.max(0,me.deadT).toFixed(1)}s · press Q to change loadout</small>`:me.msgT>0?me.msg:'';
+  const melee=WEAPONS[me.weapon].kind==='melee';
+  $('guardbar').classList.toggle('hidden',!melee||(me.guard>=100&&!me.blocking));
+  $('guardfill').style.width=me.guard+'%'; $('guardfill').style.background=me.guardBroken>0?'#ff5a5a':'#7fc4ff';
   hudT-=dt; if (hudT>0) return; hudT=.3;
   const list=[...bodies.values()].sort((a,b)=>b.kills-a.kills||a.deaths-b.deaths);
   $('board').innerHTML=`<div style="color:#6b7486;font-size:12px"><span>FIGHTER</span><span>K / D</span></div>`+list.map(b=>`<div class="${b.id===myBodyId?'me':''}"><span><i style="background:${hex(b.col)}"></i>${esc(b.name)}</span><span>${b.kills} / ${b.deaths}</span></div>`).join('');
@@ -1160,6 +1200,12 @@ function frame(t){
     if (c.fire&&!r.lastFire) r.fireEdge=true;
     if (c.jump&&!r.lastJump) r.jumpEdge=true;
     r.lastFire=c.fire; r.lastJump=c.jump; r.ctrl=c;
+    r.guardBroken-=dt; r.msgT-=dt;
+    const canBlock=c.block && WEAPONS[r.weapon].kind==='melee' && !r.dead && r.stun<=0 && r.guardBroken<=0;
+    if (canBlock && !r.blocking){ r.blockStart=(now()-r.lastBlockEnd>350)?now():-1e9; }   // spamming block kills the parry window
+    if (!canBlock && r.blocking) r.lastBlockEnd=now();
+    r.blocking=canBlock;
+    if (!r.blocking) r.guard=Math.min(100,r.guard+30*dt);
     weaponUpdate(r,dt);
     if (r.dead){ r.deadT-=dt; if (r.deadT<=0){ const sp=SPAWNS[Math.floor(Math.random()*SPAWNS.length)]; r.reset(sp[0]+(Math.random()-.5)*2,sp[1]+(Math.random()-.5)*2); r.hp=100; r.dead=false; r.lastHitBy=null; r.cd=0; } }
   }
@@ -1179,7 +1225,7 @@ function frame(t){
   requestAnimationFrame(frame);
 }
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
-window.__game={bodies,net,get state(){return state},addBot,keys,mouse,projs,localPlayer};
+window.__game={applyHit,V3,bodies,net,get state(){return state},addBot,keys,mouse,projs,localPlayer};
 demoWorld();
 requestAnimationFrame(frame);
 </script>

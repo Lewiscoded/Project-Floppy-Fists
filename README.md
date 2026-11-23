@@ -14,6 +14,7 @@ Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so i
 | Move | WASD |
 | Aim | Mouse |
 | Attack | Left click (hold for the rifle) |
+| Block / parry | Hold right click or F with a melee weapon. Tap it just before a hit lands to parry |
 | Switch weapon | 1 melee · 2 gun · 3 explosive, or the mouse wheel |
 | Jump | Space |
 | Grab a ledge | Hold E while falling, then hold Space to climb |
@@ -25,6 +26,8 @@ Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so i
 | Melee | Fists, Bat, Sword |
 | Guns | Pistol, Shotgun, Rifle (full auto) |
 | Explosives | Rocket Launcher, Grenades |
+
+**Blocking:** with any melee weapon out, hold block to take 75% less damage and knockback from melee hits in front of you. You move slower while blocking, and each blocked hit drains your guard bar. If it runs out, your guard breaks and you're stunned. **Parrying:** start blocking within 0.22s of a hit landing and you take no damage, while the attacker is staggered and knocked back. Spamming block doesn't work, because the parry window only opens if you haven't blocked in the last 0.35s.
 
 Rockets damage you too, at 40% strength, so you can rocket-jump.
 
