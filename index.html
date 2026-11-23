@@ -35,6 +35,24 @@
   .mapc b{display:block;font-family:'Lilita One';font-weight:400;font-size:19px;margin-top:4px}
   .mapc span{font-size:12px;color:#5b6577;font-weight:600}
   #pmaps button.sel{background:#ff5a5a;color:#fff;box-shadow:0 4px 0 #c73c3c}
+  .curMap{display:flex;gap:14px;align-items:center;border:3px solid #e2e7ef;border-radius:18px;padding:10px;margin-bottom:16px}
+  .curMap .thumb{width:180px;aspect-ratio:16/9;border-radius:12px;background:#dfe6ef center/cover;flex:none}
+  .curMap b{display:block;font-family:'Lilita One';font-weight:400;font-size:24px}
+  .curMap span{font-size:13px;color:#5b6577;font-weight:600}
+  .curMap .grow{flex:1}
+  .card.wide{width:min(1080px,96vw)}
+  .mapGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:12px}
+  .mcard{border:3px solid #e2e7ef;border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .12s,box-shadow .12s;background:#fff;display:flex;flex-direction:column}
+  .mcard:hover{transform:translateY(-3px);box-shadow:0 8px 0 rgba(0,0,0,.08)}
+  .mcard.sel{border-color:#ff5a5a;box-shadow:0 0 0 3px #ffd6d0}
+  .mcard .thumb{aspect-ratio:16/9;background:#dfe6ef center/cover;position:relative}
+  .mcard .thumb em{position:absolute;left:10px;top:10px;font-style:normal;font-size:28px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
+  .mcard .thumb i{position:absolute;right:10px;top:10px;font-style:normal;background:#ff5a5a;color:#fff;font-weight:800;font-size:12px;border-radius:999px;padding:3px 10px}
+  .mcard .body{padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .mcard b{font-family:'Lilita One';font-weight:400;font-size:22px}
+  .mcard p{font-size:13px;color:#5b6577;font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+  .chips span{background:#f1f4f9;border-radius:8px;padding:2px 7px;font-size:11px;font-weight:800;color:#4b5568}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   @media (max-width:640px){.grid3{grid-template-columns:1fr}}
   .opt{background:#f3f6fa;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:6px}
@@ -174,8 +192,7 @@
       <button class="gfxBtn">Graphics: High</button>
       <button class="setBtn">⚙ Settings</button>
     </div>
-    <h3 style="margin-bottom:8px">Map <small style="font-family:Nunito;font-size:12px;color:#6b7486;font-weight:800">you can change it in the lobby too</small></h3>
-    <div class="maps" id="maps"></div>
+    <div class="curMap" id="maps"></div>
     <div class="grid3">
       <div class="opt"><h3>Practice</h3><p>Offline match against bots. Pick the mode and bots in the lobby.</p>
         <button class="go" id="practiceBtn">Play</button></div>
@@ -228,8 +245,7 @@
       <div><h3>Players <small id="lobbyCount" style="font-family:Nunito;font-size:13px;color:#6b7486"></small></h3><div id="lobbyPlayers" style="margin-top:6px"></div></div>
       <div><h3>Match</h3><div id="matchSet" style="margin-top:6px"></div></div>
     </div>
-    <h3 style="margin-bottom:8px">Map</h3>
-    <div class="maps" id="lmaps"></div>
+    <div class="curMap" id="lmaps"></div>
     <div class="row"><button id="readyBtn" class="go" style="flex:1">I'm ready!</button><button id="startBtn" class="go" style="flex:1">Start match</button><button id="lobbyLoadout" class="blue">Loadout…</button><button class="setBtn">⚙</button><button id="lobbyLeave">Leave</button></div>
     <p id="lobbyNote" style="margin-top:10px;font-weight:700;color:#6b7486"></p>
   </div>
@@ -261,6 +277,13 @@
     <h2>How to play</h2>
     <div class="tgrid" id="tutGrid"></div>
     <button id="tutClose" class="go" style="width:100%">Let's brawl!</button>
+  </div>
+</div>
+<div id="mapScreen" class="screen hidden" style="z-index:15">
+  <div class="card wide">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Choose a map</h2><button id="mapClose">Close</button></div>
+    <p id="mapNote" style="font-weight:700;color:#6b7486;margin-top:4px"></p>
+    <div class="mapGrid" id="mapGrid"></div>
   </div>
 </div>
 <div id="banner2" class="hidden"></div>
@@ -488,9 +511,44 @@ function cloudsBelow(n,ymin){
   }
 }
 
+/* ---------- extra textures + props for the city block ---------- */
+DRAW.asphalt=(x,s)=>{ pix(x,s,()=>120+(rnd()-.5)*40); for (let k=0;k<400;k++){ const v=150+rnd()*60; x.fillStyle=`rgba(${v},${v},${v},.5)`; x.fillRect(rnd()*s,rnd()*s,1.5,1.5); } x.strokeStyle='rgba(30,30,30,.35)'; x.lineWidth=1.5; for (let k=0;k<4;k++){ x.beginPath(); let px=rnd()*s, py=rnd()*s; x.moveTo(px,py); for (let t=0;t<5;t++){ px+=(rnd()-.5)*40; py+=(rnd()-.5)*40; x.lineTo(px,py); } x.stroke(); } };
+DRAW.court=(x,s)=>{ x.fillStyle='#3d6fb8'; x.fillRect(0,0,s,s); x.fillStyle='#c96a3a'; x.fillRect(s*.06,s*.08,s*.88,s*.84);
+  x.strokeStyle='#fff'; x.lineWidth=4; x.strokeRect(s*.06,s*.08,s*.88,s*.84); x.beginPath(); x.moveTo(s/2,s*.08); x.lineTo(s/2,s*.92); x.stroke();
+  x.beginPath(); x.arc(s/2,s/2,s*.1,0,7); x.stroke();
+  for (const [cx,d] of [[s*.06,1],[s*.94,-1]]){ x.fillStyle='rgba(208,74,74,.85)'; x.fillRect(Math.min(cx,cx+d*s*.17),s*.38,s*.17,s*.24); x.strokeRect(Math.min(cx,cx+d*s*.17),s*.38,s*.17,s*.24); x.beginPath(); x.arc(cx,s/2,s*.3,d>0?-1.25:1.9,d>0?1.25:4.4); x.stroke(); } };
+function stripes(){ return mkTex('stripes',(x,s)=>{ for (let i=0;i<8;i++){ x.fillStyle=i%2?'#ffffff':'#d04a4a'; x.fillRect(i*s/8,0,s/8,s); } }); }
+function graffiti(){ return mkTex('graffiti',(x,s)=>{
+  x.fillStyle='#d8d4cc'; x.fillRect(0,0,s,s);
+  const cols=['#ff4fd8','#2ec4b6','#ffd23f','#9b6bff','#ff6a1a','#4aa8ff','#5ee07a'];
+  for (let i=0;i<14;i++){ x.fillStyle=cols[i%cols.length]; x.globalAlpha=.85; x.beginPath(); x.ellipse(rnd()*s,rnd()*s,20+rnd()*60,14+rnd()*30,rnd()*3,0,7); x.fill(); }
+  x.globalAlpha=1; x.font='bold 64px "Lilita One", Impact, sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.lineJoin='round';
+  for (const [t,y,c] of [['FLOPPY',s*.38,'#ffd23f'],['FISTS!',s*.66,'#ff4fd8']]){ x.lineWidth=14; x.strokeStyle='#1d2433'; x.strokeText(t,s/2,y); x.lineWidth=6; x.strokeStyle='#ffffff'; x.strokeText(t,s/2,y); x.fillStyle=c; x.fillText(t,s/2,y); }
+  for (let i=0;i<40;i++){ x.fillStyle=cols[i%cols.length]; x.beginPath(); x.arc(rnd()*s,rnd()*s,1+rnd()*3,0,7); x.fill(); }
+},512); }
+function signBoard(text,x,y,z,w,h,bg,fg){
+  const c=document.createElement('canvas'); c.width=512; c.height=Math.round(512*h/w); const g=c.getContext('2d');
+  g.fillStyle=hex(bg); g.fillRect(0,0,c.width,c.height); g.fillStyle=hex(fg); g.font=`bold ${Math.round(c.height*.62)}px "Lilita One", Impact, sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,c.width/2,c.height/2+2);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  const m=deco(bx(w,h,.12),bg,x,y,z,{emissive:bg,ei:.35}); const face=new THREE.Mesh(new THREE.PlaneGeometry(w*.98,h*.95),new THREE.MeshStandardMaterial({map:t,emissive:0xffffff,emissiveMap:t,emissiveIntensity:.35,roughness:.6}));
+  face.position.set(x,y,z+.065); mapGroup.add(face); const back=face.clone(); back.rotation.y=Math.PI; back.position.z=z-.065; mapGroup.add(back); return m;
+}
+let chainTex=null;
+function fence(x1,z1,x2,z2,h){
+  const L=Math.hypot(x2-x1,z2-z1), alongX=Math.abs(x2-x1)>Math.abs(z2-z1);
+  if (alongX) addBox(Math.min(x1,x2),0,z1-.06,Math.max(x1,x2),h,z1+.06,0,{hidden:true}); else addBox(x1-.06,0,Math.min(z1,z2),x1+.06,h,Math.max(z1,z2),0,{hidden:true});
+  if (!chainTex){ const c=document.createElement('canvas'); c.width=c.height=64; const g=c.getContext('2d'); g.strokeStyle='#c8ccd2'; g.lineWidth=3; g.beginPath(); g.moveTo(0,0); g.lineTo(64,64); g.moveTo(64,0); g.lineTo(0,64); g.moveTo(32,-32); g.lineTo(96,32); g.moveTo(-32,32); g.lineTo(32,96); g.stroke(); chainTex=new THREE.CanvasTexture(c); chainTex.wrapS=chainTex.wrapT=THREE.RepeatWrapping; }
+  const t=chainTex.clone(); t.needsUpdate=true; t.repeat.set(L/.5,h/.5);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(L,h),new THREE.MeshStandardMaterial({map:t,transparent:true,alphaTest:.3,side:THREE.DoubleSide,metalness:.6,roughness:.4}));
+  m.position.set((x1+x2)/2,h/2,(z1+z2)/2); if (!alongX) m.rotation.y=R90; m.castShadow=true; mapGroup.add(m);
+  for (let i=0;i<=Math.ceil(L/3);i++){ const f=i/Math.ceil(L/3); deco(cyl(.05,.05,h+.1,8),0x9aa0a8,x1+(x2-x1)*f,h/2,z1+(z2-z1)*f,{metal:.7}); }
+  deco(cyl(.04,.04,L,8),0x9aa0a8,(x1+x2)/2,h,(z1+z2)/2,alongX?{rz:R90,metal:.7}:{rx:R90,metal:.7});
+}
+
 const THEMES={
 /* ---------- KITCHEN ---------- */
 kitchen:{
+  preview:{pos:[0,13,20],look:[0,0,-3]},
   name:'Kitchen Chaos', icon:'🍳', tag:'Tiny brawlers on a giant counter. Mind the sink.',
   sky:{top:0xf6e7cf,hor:0xf0dcbc,bot:0xc9ae86,sun:0xfff1d0,dir:[.5,.35,-1]}, fog:[0xeedcbf,55,170], hemi:[0xfff3e0,0x8a6a4a,.55], sun:[0xfff0d8,1.75], exposure:.86,
   tex:{0xe4d9c6:['marble',7,0],0xcfe8e4:['tile',2.4,.02],0xa0724e:['wood',3,.01],0xc89a62:['wood',2.5,.01],0x6b4a33:['wood',2,.01],0xd9dde3:['metal',3,0],0xf4f4f4:['plain',3,0],0x4aa8ff:['plain',2,0],0xff8c2b:['cardboard',2,0]},
@@ -558,6 +616,7 @@ kitchen:{
 },
 /* ---------- OFFICE ---------- */
 office:{
+  preview:{pos:[2,15,24],look:[0,0,-2]},
   name:'Office Meltdown', icon:'🏢', tag:'Cubicle combat on a half-built skyscraper floor.',
   sky:{top:0x3f7fd0,hor:0xcfe4f5,bot:0x7f97b8,sun:0xfff4e0,dir:[-.4,.3,-1]}, fog:[0xbcd6ee,45,190], hemi:[0xeaf3ff,0x5a6270,.7], sun:[0xffffff,2.3], exposure:1.0,
   tex:{0x6f7d8f:['carpet',3,0],0x9aa0a8:['concrete',4,0],0xe8e1d4:['carpet',1.2,0],0x8b6a4a:['wood',2,.01],0xa9afb8:['metal',2,0],0xc49a6c:['cardboard',1.2,0],0xc9c4ba:['concrete',2,0],0xb8bec6:['metal',2,0],0x6b4a33:['wood',2,.01],0xd8dbe0:['plain',2,0],0xd04a2a:['metal',2,0],0x8a8f98:['metal',2,0]},
@@ -617,6 +676,7 @@ office:{
 },
 /* ---------- MEDIEVAL ---------- */
 medieval:{
+  preview:{pos:[4,17,30],look:[0,0,-3]},
   name:'Castle Siege', icon:'🏰', tag:'Storm the walls, hold the drawbridge.',
   sky:{top:0x5d78c0,hor:0xffbf8f,bot:0xa07a70,sun:0xffd090,dir:[.35,.1,-1]}, fog:[0xf3c4a0,55,190], hemi:[0xffe2c8,0x6a5a4a,.75], sun:[0xffc890,2.5], exposure:1.02,
   tex:{0x9b958c:['brick',2.2,.03],0x8a847b:['brick',2.2,.03],0x7fa65a:['grass',5,0],0x8b5a32:['wood',2,.012],0x8a8a7a:['cobble',3,.03],0xd9b44a:['hay',1.2,.02],0x7a4a26:['wood',1.2,.01]},
@@ -676,6 +736,96 @@ medieval:{
   },
   proj:{ rocket:(a)=>a(sph(.17),0x1e1e22,0,0,0), grenade:(a)=>a(sph(.13),0xa0522d,0,0,0) },
 },
+/* ---------- BLOCK PARTY (city block) ---------- */
+hood:{
+  name:'Block Party', icon:'🏙️', tag:'A floating city block: streetball court, corner store, stoops and an elevated train track.',
+  sky:{top:0x6aa0e0,hor:0xffd2a6,bot:0x8a8fa0,sun:0xffe0b0,dir:[.3,.2,-1]}, fog:[0xf0d4bc,55,190], hemi:[0xfff0e0,0x5a5e6a,.65], sun:[0xffe2c0,2.2], exposure:1.0,
+  tex:{0xb9b6ae:['tile',2.5,.01],0xa8553f:['brick',2.2,.03],0x8f4a3a:['brick',2.2,.03],0x7a5a4a:['brick',2.2,.03],0x5a6068:['metal',2,0],0x3f7a4a:['metal',1.5,0],0x6b4a33:['wood',1.5,.01],0x9aa0a8:['concrete',3,0]},
+  dust:0xb0aaa0,
+  preview:{pos:[2,17,27],look:[0,0,-3]},
+  spawns:[[-6,0],[6,0],[14,-12],[-18,-6],[-4,9],[12,10],[0,-10],[-16,8],[18,2],[-21,0]],
+  names:{fists:'Boxing Gloves',bat:'Skateboard',sword:'Stop Sign',pistol:'Slingshot',shotgun:'Hydrant Hose',rifle:'Paintball Gun',rocket:'Firework Launcher',grenade:'Paint Balloons'},
+  tracer:{pistol:0x8b5a2b,shotgun:0x7fd0ff,rifle:0xff4fd8},
+  boom:{rocket:[0xffffff,0xff4fd8,0x9b6bff],grenade:[0x9ffff0,0x34c3ff,0xff7ad9]},
+  build(){
+    const walk=0xb9b6ae, brick=0xa8553f, metal=0x5a6068;
+    // the block + its foundation
+    addBox(-26,-4,-20,26,0,20,walk);
+    deco(bx(52,8,40),0x8d8a84,0,-8,0,{tex:'concrete',cast:false});
+    for (const [x,z] of [[-20,-14],[0,10],[18,-6],[-8,16]]) deco(cyl(.4,.4,10),0x6c7480,x,-14,z,{metal:.6,cast:false});
+    // street through the middle: asphalt, lane dashes, crosswalks
+    flat(-26,-3,26,3,0,0x9a9a9a,'asphalt',4);
+    for (let x=-24;x<24;x+=4) deco(bx(1.8,.02,.18),0xffd23f,x+1,.035,0,{cast:false});
+    for (const cx of [-9,9]) for (let z=-2.6;z<2.7;z+=.9) deco(bx(2.6,.02,.5),0xf4f4f4,cx,.035,z,{cast:false});
+    // corner store (brick) + awning + sign + fire-escape stairs to the roof
+    addBox(-24,0,-19,-12,4,-11,brick);
+    deco(bx(12.2,.15,12.2),0x6c6f75,-18,4.08,-15,{cast:false});
+    deco(bx(2,2.6,.1),0x3a2a22,-18,1.3,-10.95); deco(bx(3.2,1.6,.08),0x9fd8ff,-21.5,1.9,-10.95,{emissive:0xffe8b0,ei:.6});
+    deco(bx(3.2,1.6,.08),0x9fd8ff,-14.5,1.9,-10.95,{emissive:0xffe8b0,ei:.6});
+    { const aw=deco(bx(11,.12,1.6),0xd04a4a,-18,3.2,-10.3,{rx:.35}); aw.material.map=stripes(); }
+    signBoard('CORNER STORE',-18,3.75,-10.9,6,.8,0xffd23f,0x1d2433);
+    stairs(-12,-17,1,0,1.6,4,metal);
+    addBox(-11.5,0,-14.6,-9.3,1.3,-12.4,0x3f7a4a); deco(bx(2.3,.1,2.3),0x2f5a38,-10.4,1.36,-13.5);   // dumpster
+    // streetball court + hoops + chain-link fence
+    { const c=new THREE.Mesh(new THREE.PlaneGeometry(20,13),mat(0xffffff,{tex:'court',rough:.6})); c.rotation.x=-R90; c.position.set(12,.035,-12.5); c.receiveShadow=true; mapGroup.add(c); }
+    for (const [x,s] of [[2.8,1],[21.2,-1]]){
+      addBox(x-.15,0,-12.65,x+.15,3.6,-12.35,0xd8d8d8,{metal:.5});
+      addBox(x+s*.35-.06,3.1,-13.4,x+s*.35+.06,4.2,-11.6,0xffffff,{opacity:.85});
+      deco(new THREE.TorusGeometry(.32,.035,8,20),0xff6a1a,x+s*.75,3.25,-12.5,{rx:R90,metal:.5});
+      deco(cyl(.33,.22,.5,10,1),0xffffff,x+s*.75,3,-12.5,{opacity:.5,cast:false});
+    }
+    fence(2,-19.6,22,-19.6,2.6); fence(1.6,-19.6,1.6,-14,2.6); fence(22.4,-19.6,22.4,-14,2.6);
+    addBox(8,0,-5.6,13,.5,-5,0x6b4a33); for (const x of [8.3,12.7]) addBox(x-.1,0,-5.5,x+.1,.5,-5.1,metal);   // bench
+    // brownstones with stoops
+    const houses=[[-24,0x8f4a3a],[-17,0xa8553f],[-10,0x7a5a4a]];
+    for (const [x0,c] of houses){
+      addBox(x0,0,13,x0+6.6,5.5,19,c);
+      deco(bx(6.8,.3,6.2),0x5a3a2a,x0+3.3,5.6,16);
+      const dx=x0+3.3;
+      addBox(dx-.9,0,11.6,dx+.9,1.2,13,0x9aa0a8); stairs(dx,11.6,0,-1,1.8,1.2,0x9aa0a8);
+      deco(bx(1.2,2.2,.1),0x3a2616,dx,2.3,12.96);
+      for (const wx of [-2,2]) { deco(bx(1.1,1.4,.08),0x9fd8ff,dx+wx,3,12.96,{emissive:0xffe0a0,ei:.4}); deco(bx(1.1,1.4,.08),0x9fd8ff,dx+wx,4.6,12.96,{emissive:0xffe0a0,ei:.25}); }
+    }
+    // graffiti wall
+    addBox(10,0,14,18,3,14.5,0xd8d4cc);
+    { const g=deco(new THREE.PlaneGeometry(8,3),0xffffff,14,1.5,13.98,{cast:false,ry:Math.PI}); g.material.map=graffiti(); g.material.needsUpdate=true; g.rotation.y=Math.PI; }
+    { const g=deco(new THREE.PlaneGeometry(8,3),0xffffff,14,1.5,14.52,{cast:false}); g.material.map=graffiti(); }
+    // parked car
+    addBox(3.5,0,6,8.5,1.1,8.1,0xd04a4a,{metal:.4,rough:.35});
+    addBox(4.6,1.1,6.2,7.3,1.9,7.9,0xd04a4a,{metal:.4,rough:.35});
+    deco(bx(2.5,.6,1.62),0x9fd8ff,5.95,1.5,7.05,{rough:.1,metal:.3,cast:false});
+    for (const [x,z] of [[4.4,6],[7.6,6],[4.4,8.1],[7.6,8.1]]) deco(cyl(.38,.38,.3,14),0x222222,x,.38,z,{rx:R90});
+    // hydrant, trash cans, crates, street lamps with string lights
+    addBox(-4.25,0,4.75,-3.75,.9,5.25,0,{hidden:true}); deco(cyl(.22,.26,.8,12),0xd62828,-4,.4,5,{metal:.3}); deco(sph(.24),0xd62828,-4,.85,5); deco(cyl(.07,.07,.5,8),0xd62828,-4,.55,5,{rz:R90});
+    for (const [x,z] of [[-1,-5],[-.2,-5.2],[19,12],[-6,-18]]) { addBox(x-.3,0,z-.3,x+.3,1,z+.3,0,{hidden:true}); deco(cyl(.32,.28,1,12),0x7a8088,x,.5,z,{metal:.6,rough:.4}); deco(cyl(.35,.35,.08,12),0x6a7078,x,1.04,z,{metal:.6}); }
+    for (const [x,z] of [[-2,15],[20,6]]) addBox(x-.6,0,z-.6,x+.6,1.2,z+.6,0xc58b4e,{edges:0x7a4f25});
+    const lamps=[[-14,-4],[-2,-4],[10,-4],[22,-4],[-14,4],[-2,4],[10,4],[22,4]];
+    for (const [x,z] of lamps){ addBox(x-.1,0,z-.1,x+.1,4.2,z+.1,0x2b2f36,{metal:.6}); deco(bx(.7,.12,.3),0x2b2f36,x,4.25,z); deco(sph(.18),0xfff0c0,x,4.1,z,{emissive:0xffd890,ei:2.5,cast:false}); }
+    const bulbCols=[0xff5a5a,0xffd23f,0x5ee07a,0x4aa8ff,0xff7ad9];
+    for (const z of [-4,4]) for (let i=0;i<3;i++){ const x0=-14+i*12;
+      for (let k=1;k<12;k++){ const t=k/12, x=x0+t*12, y=4-Math.sin(t*Math.PI)*.8; const b=deco(sph(.08,8),bulbCols[k%5],x,y,z,{emissive:bulbCols[k%5],ei:2.2,cast:false}); const ph=k+i*3; animated.push(tt=>{ b.material.emissiveIntensity=1.6+Math.sin(tt*3+ph)*.9; }); } }
+    // elevated train track along the east edge
+    addBox(23,3.2,-19,26,3.6,19,metal);
+    for (let z=-17;z<=17;z+=6) addBox(23.3,0,z-.3,23.9,3.2,z+.3,metal);
+    for (const x of [24,25]) deco(bx(.12,.12,38),0xc0c4ca,x,3.66,0,{metal:.8,rough:.3,cast:false});
+    for (let z=-18.5;z<19;z+=1.2) deco(bx(2.6,.06,.25),0x5a3a2a,24.5,3.62,z,{cast:false});
+    stairs(23,8,-1,0,1.6,3.2,metal);
+    signBoard('BLOCK PARTY',-6,6.6,-18.8,7,1.4,0xff4fd8,0xffffff);
+    deco(bx(.2,3.2,.2),metal,-8.8,4.4,-18.9); deco(bx(.2,3.2,.2),metal,-3.2,4.4,-18.9);
+    cityBelow([0x8a7f9a,0x9a8faa,0x7a6f8a,0xa898b0,0xb8a8c0]);
+  },
+  meshes:{
+    bat:(a)=>{ a(bx(.22,.03,.82),0x2b2f36,0,0,.42); a(bx(.2,.005,.78),0xff4fd8,0,.018,.42); for (const z of [.15,.7]) for (const x of [-.08,.08]) a(cyl(.035,.035,.04,10),0xffd23f,x,-.04,z).rotation.z=R90; },
+    sword:(a)=>{ a(cyl(.025,.025,1.1),0x9aa0a8,0,0,.5,R90); a(cyl(.23,.23,.02,8),0xffffff,0,0,1.07).rotation.z=R90; a(cyl(.2,.2,.03,8),0xd62828,.01,0,1.07).rotation.z=R90; },
+    pistol:(a)=>{ a(bx(.04,.16,.04),0x8b5a32,0,-.04,.05); a(bx(.03,.12,.03),0x8b5a32,-.05,.08,.1); a(bx(.03,.12,.03),0x8b5a32,.05,.08,.1); a(bx(.12,.015,.015),0xd04a4a,0,.13,.1); },
+    shotgun:(a)=>{ a(cyl(.06,.075,.45),0xd62828,0,0,.15,R90); a(cyl(.035,.055,.16),0xc8a24a,0,0,.45,R90); a(cyl(.02,.02,.4),0x333333,0,-.06,-.05,R90); },
+    rifle:(a)=>{ a(bx(.08,.12,.5),0x2ec4b6,0,0,.15); a(sph(.1),0xffd23f,0,.14,.08); a(cyl(.03,.03,.35),0x333333,0,.02,.55,R90); },
+    rocket:(a)=>{ a(cyl(.11,.11,.9),0xd62828,0,.1,.25,R90); for (const z of [-.05,.25,.55]) a(cyl(.115,.115,.05),0xffd23f,0,.1,z,R90); a(cone(.11,.2),0x4aa8ff,0,.1,.8,R90); },
+    grenade:(a)=>{ a(sph(.13),0xff7ad9,0,0,.05).scale.set(1,1.15,1); a(cone(.03,.05),0xff7ad9,0,-.14,.05); },
+  },
+  proj:{ rocket:(a)=>{ a(cyl(.07,.07,.35),0xd62828,0,0,0,R90); a(cone(.07,.15),0xffd23f,0,0,.24,R90); },
+         grenade:(a)=>a(sph(.14),[0xff7ad9,0x2ec4b6,0xffd23f,0x9b6bff][Math.floor(Math.random()*4)],0,0,0) },
+}
 };
 const MAP_KEYS=Object.keys(THEMES);
 const wName=k=>(THEME&&THEME.names[k])||(WEAPONS[k]?WEAPONS[k].name:k);
@@ -2016,19 +2166,65 @@ function closeTutorial(){ $('tutorial').classList.add('hidden'); prefs.tutDone=t
 $('tutClose').onclick=closeTutorial;
 
 // ---------- maps ----------
-function renderMaps(){
-  const html=sel=>MAP_KEYS.map(k=>{ const t=THEMES[k]; return `<div class="mapc ${k===sel?'sel':''}" data-k="${k}"><div class="ic">${t.icon}</div><b>${t.name}</b><span>${t.tag}</span></div>`; }).join('');
-  $('maps').innerHTML=html(prefs.map);
-  $('lmaps').innerHTML=html(match.map);
+const thumbs={};
+let thumbsDone=false;
+function genThumbs(){
+  if (thumbsDone) return; thumbsDone=true;
+  const keep=mapKey, hidden=[];
+  for (const b of bodies.values()){ if (b.view.g.visible){ b.view.g.visible=false; hidden.push(b); } }
+  const fx0=[...projs.values()].map(q=>q.mesh); for (const m of fx0) m.visible=false;
+  const c=document.createElement('canvas'); c.width=480; c.height=270; const g=c.getContext('2d');
+  const oldPos=camera.position.clone(), oldAsp=camera.aspect;
+  for (const k of MAP_KEYS){
+    loadMap(k);
+    const pv=THEMES[k].preview||{pos:[0,16,26],look:[0,0,0]};
+    camera.position.set(...pv.pos); camera.lookAt(...pv.look); skyDome.position.copy(camera.position);
+    sun.position.set(9,22,8); sun.target.position.set(0,0,0); sun.target.updateMatrixWorld();
+    for (const f of animated) f(1,0);
+    renderer.render(scene,camera);
+    // crop the canvas to 16:9 around the center
+    const W=renderer.domElement.width, H=renderer.domElement.height, ar=16/9;
+    let sw=W, sh=W/ar; if (sh>H){ sh=H; sw=H*ar; }
+    g.drawImage(renderer.domElement,(W-sw)/2,(H-sh)/2,sw,sh,0,0,480,270);
+    try{ thumbs[k]=c.toDataURL('image/jpeg',.82); }catch(e){}
+  }
+  loadMap(keep); camera.position.copy(oldPos); camera.aspect=oldAsp;
+  for (const b of hidden) b.view.g.visible=true; for (const m of fx0) m.visible=true;
+  renderMaps(); if (!$('mapScreen').classList.contains('hidden')) renderMapGrid();
 }
+const weaponChips=k=>{ const t=THEMES[k]; return ['bat','sword','pistol','shotgun','rifle','rocket','grenade'].map(w=>`<span>${esc(t.names[w]||WEAPONS[w].name)}</span>`).join(''); };
+function curMapCard(k,canChange){
+  const t=THEMES[k];
+  return `<div class="thumb" style="background-image:${thumbs[k]?`url(${thumbs[k]})`:'none'}"></div><div class="grow"><small style="font-weight:800;color:#6b7486;font-size:12px">MAP</small><b>${t.icon} ${t.name}</b><span>${t.tag}</span></div>${canChange?'<button class="blue mapOpen">Choose map ▸</button>':''}`;
+}
+function renderMaps(){
+  $('maps').innerHTML=curMapCard(prefs.map,true);
+  $('lmaps').innerHTML=curMapCard(match.map,isHost());
+  for (const b of document.querySelectorAll('.mapOpen')) b.onclick=openMapScreen;
+}
+let mapScreenFor='menu';
+function renderMapGrid(){
+  const sel=state==='lobby'?match.map:prefs.map;
+  $('mapNote').textContent=state==='lobby'?'Everyone in the room will play on the map you pick.':'This map is used for Practice and for rooms you host.';
+  $('mapGrid').innerHTML=MAP_KEYS.map(k=>{ const t=THEMES[k];
+    return `<div class="mcard ${k===sel?'sel':''}" data-k="${k}"><div class="thumb" style="background-image:${thumbs[k]?`url(${thumbs[k]})`:'none'}"><em>${t.icon}</em>${k===sel?'<i>Selected</i>':''}</div>
+      <div class="body"><b>${t.name}</b><p>${t.tag}</p><div class="chips">${weaponChips(k)}</div></div></div>`; }).join('');
+}
+function openMapScreen(){
+  if (state==='lobby' && !isHost()) return;
+  renderMapGrid(); $('mapScreen').classList.remove('hidden');
+  if (!thumbsDone) setTimeout(genThumbs,30);
+}
+function closeMapScreen(){ $('mapScreen').classList.add('hidden'); }
+$('mapClose').onclick=closeMapScreen;
+addEventListener('keydown',e=>{ if (e.code==='Escape' && !$('mapScreen').classList.contains('hidden')) closeMapScreen(); });
+$('mapGrid').addEventListener('click',e=>{ const c=e.target.closest('.mcard'); if (!c) return; chooseMap(c.dataset.k); renderMapGrid(); setTimeout(closeMapScreen,180); });
 function chooseMap(k){
   if (!THEMES[k]) return;
   if (state==='lobby'){ if (!isHost()) return; match.map=k; prefs.map=k; savePrefs(); if (k!==mapKey) loadMap(k); broadcastLobby(); renderMaps(); return; }
   if (state==='menu'){ prefs.map=k; savePrefs(); if (k!==mapKey){ loadMap(k); for (const b of localBodies()) respawn(b); } renderMaps(); return; }
   if (state==='play' && isHost() && net.mode==='off'){ match.map=k; loadMap(k); for (const b of localBodies()) respawn(b); }
 }
-$('maps').addEventListener('click',e=>{ const c=e.target.closest('.mapc'); if (c) chooseMap(c.dataset.k); });
-$('lmaps').addEventListener('click',e=>{ const c=e.target.closest('.mapc'); if (c) chooseMap(c.dataset.k); });
 
 // ---------- lobby ----------
 const MODES={dm:'Deathmatch',lms:'Last Standing'};
@@ -2067,7 +2263,6 @@ function renderLobby(){
   $('readyBtn').classList.toggle('hidden',host);
   $('readyBtn').textContent=myReady?'✓ Ready! (click to cancel)':"I'm ready!";
   $('startBtn').classList.toggle('hidden',!host);
-  $('lmaps').style.pointerEvents=host?'':'none'; $('lmaps').style.opacity=host?'':'0.8';
   $('lobbyNote').textContent=host?(online?(clients.length?`${readyN}/${clients.length} players ready. You can start whenever you like.`:'Send the invite link to your friends. Add bots or start whenever you like.'):'Pick a mode and map, then start.'):'The host picks the mode and map. Hit ready when you are set!';
 }
 $('matchSet').addEventListener('click',e=>{
@@ -2303,6 +2498,7 @@ window.__game={applyHit,V3,bodies,net,loadMap,chooseMap,THEMES,get BOXES(){retur
 applyQuality(prefs.quality); renderGfx(); renderHelp(); renderMyStats();
 loadMap(prefs.map); renderMaps();
 demoWorld();
+setTimeout(genThumbs,900);
 // invite links: open the site with #CODE to jump straight into a room
 { const hc=(location.hash||'').slice(1).toUpperCase(); if (/^[A-Z]{4}$/.test(hc)){ $('codeIn').value=hc; setStatus('Joining room '+hc+'…',true); setTimeout(()=>joinGame(hc),400); } }
 requestAnimationFrame(frame);

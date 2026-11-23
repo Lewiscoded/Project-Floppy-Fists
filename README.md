@@ -21,12 +21,13 @@ After each match there's a results screen with a podium, awards (most damage, lo
 Online play uses peer-to-peer WebRTC through [PeerJS](https://peerjs.com/), so it needs to be served from a real site such as GitHub Pages (or locally with `npx serve`).
 
 ## Maps
-Pick a map on the main menu before starting. Online, the host's pick is the map, and the host can switch maps mid-game from the Esc menu.
+Click **Choose map** on the main menu or in the lobby to open the map screen, which shows a live preview of every map and its weapons. Online, the host's pick is the map, and the host can switch maps mid-game from the Esc menu.
 
 | Map | Setting | Weapons become |
 |---|---|---|
 | 🍳 Kitchen Chaos | Tiny fighters on a giant counter. Fall in the sink or off the edge. | Oven Mitts, Rolling Pin, Butter Knife, Ketchup Squirter, Pepper Blaster, Sprinkle Gun, Champagne Cannon, Eggs |
 | 🏢 Office Meltdown | A half-built skyscraper floor with cubicles, an open elevator shaft and a steel beam out over the city. | Fists, Keyboard, Metal Ruler, Staple Gun, Fire Extinguisher, Paperclip SMG, Toner Launcher, Coffee Mugs |
+| 🏙️ Block Party | A floating city block with a streetball court, corner store, brownstone stoops, a graffiti wall, string lights and an elevated train track. | Boxing Gloves, Skateboard, Stop Sign, Slingshot, Hydrant Hose, Paintball Gun, Firework Launcher, Paint Balloons |
 | 🏰 Castle Siege | A courtyard with walls to climb, a keep, a broken east wall and a drawbridge. | Gauntlets, Mace, Longsword, Hand Crossbow, Blunderbuss, Repeater Crossbow, Hand Cannon, Firepots |
 
 Themes only change how weapons look and what they're called. Damage and other stats are the same on every map.
