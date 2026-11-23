@@ -9,6 +9,7 @@ A wobbly ragdoll sandbox brawler built with three.js. Pick a map and a loadout, 
 ### Match modes
 - **Deathmatch:** first to the kill limit (5–50), with an optional time limit.
 - **Last Standing:** everyone gets 1–9 lives, and the last fighter with lives left wins. Eliminated players spectate.
+- **Melee only:** a weapons option that works with either mode. Everyone, bots included, fights with just their melee weapon.
 
 After each match there's a results screen with a podium, awards (most damage, longest flight, most headshots, most ring-outs) and full stats. Your lifetime record (matches, wins, kills, K/D, falls, damage) is saved in your browser.
 
