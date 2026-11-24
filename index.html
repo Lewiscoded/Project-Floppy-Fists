@@ -352,6 +352,7 @@ const WEAPONS={
   rocket: {cls:'boom',name:'Rocket Launcher',kind:'rocket',dmg:55,radius:3.6,cd:1.9,speed:20,blast:15,len:.9,recoil:4,desc:'Big boom, slow reload. Rocket-jump off your own feet.',s:[4,1,4]},
   grenade:{cls:'boom',name:'Grenades',kind:'grenade',dmg:55,radius:3.8,cd:1.2,fuse:1.7,blast:16,len:0,desc:'Lob them over cover. Bouncy.',s:[4,2,5]},
 };
+WEAPONS.throw={cls:'none',name:'Throw',kind:'none'};
 const CLASSES=[{key:'melee',name:'Melee',slot:1,types:['fists','bat','sword']},{key:'gun',name:'Guns',slot:2,types:['pistol','shotgun','rifle']},{key:'boom',name:'Explosives',slot:3,types:['rocket','grenade']}];
 const SLOT_ORDER=['melee','gun','boom'];
 
@@ -591,6 +592,7 @@ kitchen:{
   tex:{0xe4d9c6:['marble',7,0],0xcfe8e4:['tile',2.4,.02],0xa0724e:['wood',3,.01],0xc89a62:['wood',2.5,.01],0x6b4a33:['wood',2,.01],0xd9dde3:['metal',3,0],0xf4f4f4:['plain',3,0],0x4aa8ff:['plain',2,0],0xff8c2b:['cardboard',2,0]},
   dust:0xd8c8a8,
   spawns:[[-16,3],[-4,6],[0,-8],[12,7],[20,-1],[-10,10],[19,10],[5,4],[-21,0]],
+  props:[['crate',-10,5],['crate',-10.2,6.2],['barrel',-20,-2],['xbarrel',2,-8],['ball',-2,9.5],['pin',6.5,6],['pin',6.9,6.3],['pin',6.1,6.3],['pin',6.5,6.6],['crate',20,2]],
   names:{fists:'Oven Mitts',bat:'Rolling Pin',sword:'Butter Knife',pistol:'Ketchup Squirter',shotgun:'Pepper Blaster',rifle:'Sprinkle Gun',rocket:'Champagne Cannon',grenade:'Eggs'},
   tracer:{pistol:0xd62828,shotgun:0x2b2b2b,rifle:0xff6fcf},
   boom:{rocket:[0xfff3c0,0xffc84a,0xfffaf0],grenade:[0xfff27a,0xffb52c,0xfff3c4]},
@@ -659,6 +661,7 @@ office:{
   tex:{0x6f7d8f:['carpet',3,0],0x9aa0a8:['concrete',4,0],0xe8e1d4:['carpet',1.2,0],0x8b6a4a:['wood',2,.01],0xa9afb8:['metal',2,0],0xc49a6c:['cardboard',1.2,0],0xc9c4ba:['concrete',2,0],0xb8bec6:['metal',2,0],0x6b4a33:['wood',2,.01],0xd8dbe0:['plain',2,0],0xd04a2a:['metal',2,0],0x8a8f98:['metal',2,0]},
   dust:0xb0b8c4,
   spawns:[[-6,-8],[-16,-2],[6,6],[16,0],[-2,12],[20,10],[-16,12],[8,-2],[0,-12]],
+  props:[['crate',-6,-4],['crate',-6,-2.8],['barrel',6,0],['xbarrel',-14,0],['ball',0,8],['pin',16,-2],['pin',16.4,-1.7],['pin',15.6,-1.7],['pin',16,-1.4],['crate',10,12]],
   names:{fists:'Fists',bat:'Keyboard',sword:'Metal Ruler',pistol:'Staple Gun',shotgun:'Fire Extinguisher',rifle:'Paperclip SMG',rocket:'Toner Launcher',grenade:'Coffee Mugs'},
   tracer:{pistol:0xc0c6cc,shotgun:0xffffff,rifle:0xb8c0c8},
   boom:{rocket:[0x555555,0x1a1a1a,0x2a2a2a],grenade:[0xa8744a,0x5a3a1a,0x7a5230]},
@@ -719,6 +722,7 @@ medieval:{
   tex:{0x9b958c:['brick',2.2,.03],0x8a847b:['brick',2.2,.03],0x7fa65a:['grass',5,0],0x8b5a32:['wood',2,.012],0x8a8a7a:['cobble',3,.03],0xd9b44a:['hay',1.2,.02],0x7a4a26:['wood',1.2,.01]},
   dust:0xb89a70,
   spawns:[[0,0],[-12,0],[12,0],[0,14],[-14,14],[14,14],[10,-6],[-12,-6],[0,36],[16,-2]],
+  props:[['barrel',-6,8],['barrel',-5,9],['xbarrel',14,-2],['crate',6,-4],['crate',7,-4],['ball',0,6],['pin',10.3,4],['pin',10.7,4.3],['pin',9.9,4.3],['pin',10.3,4.6],['crate',-16,-4]],
   names:{fists:'Gauntlets',bat:'Mace',sword:'Longsword',pistol:'Hand Crossbow',shotgun:'Blunderbuss',rifle:'Repeater Crossbow',rocket:'Hand Cannon',grenade:'Firepots'},
   tracer:{pistol:0x8b5a2b,shotgun:0xffd27a,rifle:0x8b5a2b},
   boom:{rocket:[0xffe2a0,0xff6a1a,0x6b6b6b],grenade:[0xffb347,0xff4500,0x553322]},
@@ -781,6 +785,7 @@ hood:{
   dust:0xb0aaa0,
   preview:{pos:[2,17,27],look:[0,0,-3]},
   spawns:[[-6,0],[6,0],[14,-12],[-18,-6],[-4,9],[12,10],[0,-10],[-16,8],[18,2],[-21,0]],
+  props:[['crate',-6,-8],['crate',-5,-8.2],['xbarrel',0,-7],['barrel',16,8],['ball',12,-12],['pin',-2,12],['pin',-1.6,12.3],['pin',-2.4,12.3],['pin',-2,12.6],['xbarrel',-20,6],['crate',20,-2]],
   names:{fists:'Fists',bat:'Baseball Bat',sword:'Crowbar',pistol:'Pistol',shotgun:'Sawed-Off',rifle:'Uzi',rocket:'RPG',grenade:'Grenades'},
   tracer:{pistol:0xffe08a,shotgun:0xffd27a,rifle:0xffe08a},
   boom:{rocket:[0xfff0a0,0xff6a1a,0x555555],grenade:[0xffe2a0,0xff7a2a,0x5a5a5a]},
@@ -880,7 +885,7 @@ let mapKey='kitchen';
 function loadMap(key){
   if (!THEMES[key]) key='kitchen';
   mapKey=key; THEME=THEMES[key];
-  BOXES.length=0; animated=[]; grassMesh=null;
+  BOXES.length=0; animated=[]; grassMesh=null; clearProps();
   for (const c of [...mapGroup.children]) mapGroup.remove(c);
   THEME.build(); SPAWNS=THEME.spawns;
   const sk=THEME.sky; skyMat.uniforms.top.value.setHex(sk.top); skyMat.uniforms.hor.value.setHex(sk.hor); skyMat.uniforms.bot.value.setHex(sk.bot); skyMat.uniforms.sunCol.value.setHex(sk.sun); skyMat.uniforms.sunDir.value.set(...sk.dir).normalize();
@@ -924,7 +929,7 @@ class Body{
     this.pos=[];this.prev=[];this.acc=[];this.vel=[];this.tgt=[];
     for (let i=0;i<N;i++){ this.pos.push(new V3());this.prev.push(new V3());this.acc.push(new V3());this.vel.push(new V3());this.tgt.push(new V3()); }
     this.fwd=new V3(0,0,1); this.wantFwd=new V3(0,0,1); this.f3=new V3(0,0,1); this.aim=new V3(0,0,1);
-    this.hp=100;this.dead=false;this.deadT=0;this.prot=0;this.falls=0;this.dmg=0;this.hs=0;this.air=0;this.maxAir=0;this.ping=0;this.emote=null;this.emoteT=0;this.bubble=null;this.lastKiller=null;this.outfit=DEF_OUTFIT;this.blocking=false;this.blockStart=-1e9;this.lastBlockEnd=-1e9;this.guard=100;this.guardBroken=0;this.msg='';this.msgT=0;this.kills=0;this.deaths=0;this.lastHitBy=null;this.lastHitT=-1e9;this.lastHitW='';
+    this.hp=100;this.dead=false;this.deadT=0;this.prot=0;this.falls=0;this.dmg=0;this.hs=0;this.air=0;this.maxAir=0;this.ping=0;this.emote=null;this.emoteT=0;this.bubble=null;this.lastKiller=null;this.outfit=DEF_OUTFIT;this.hold=[null,null];this.holdRemote=null;this.holdT=0;this.heldT=0;this.heldBy=null;this.struggle=0;this.blocking=false;this.blockStart=-1e9;this.lastBlockEnd=-1e9;this.guard=100;this.guardBroken=0;this.msg='';this.msgT=0;this.kills=0;this.deaths=0;this.lastHitBy=null;this.lastHitT=-1e9;this.lastHitW='';
     this.loadout={melee:'bat',gun:'shotgun',boom:'rocket'}; this.slot='gun'; this.cds={melee:0,gun:0,boom:0}; this.recoilT=0; this.wKey='shotgun';
     this.ctrl={mx:0,mz:0,jump:false,fire:false,grab:false};
     this.lastFire=false;this.lastJump=false;this.fireEdge=false;this.jumpEdge=false;
@@ -967,7 +972,8 @@ function forces(r){
   const moving=ml>.15; r.moving=moving;
   TMP.set(r.aim.x,0,r.aim.z);
   if (TMP.lengthSq()>1e-4) r.wantFwd.copy(TMP.normalize()); else if (moving) r.wantFwd.set(mx,0,mz).normalize();
-  const g=r.ground>0, hanging=r.grabs.some(q=>q), up=g?1:.45;
+  const held=r.heldT>0, holding=r.hold.some(Boolean);
+  const g=r.ground>0&&!held, hanging=r.grabs.some(q=>q), up=g?1:(held?.25:.45);
   if (g){
     const err=r.groundY+.88-p[PELV].y, ay=clamp(G*.92+err*140-v[PELV].y*12,0,G*3);
     for (const i of UPPER) a[i].y+=ay;
@@ -980,7 +986,7 @@ function forces(r){
   spring(r,LSH,p[NECK].x-sx*.3,0,p[NECK].z-sz*.3,60,6,5);
   spring(r,RHIP,p[PELV].x+sx*.16,0,p[PELV].z+sz*.16,40,5,5);
   spring(r,LHIP,p[PELV].x-sx*.16,0,p[PELV].z-sz*.16,40,5,5);
-  const spd=r.blocking?2.1:3.9, kk=g?9:2.2;
+  const spd=r.blocking?2.1:holding?3.1:3.9, kk=g?9:(held?1:2.2);
   if (g||moving){
     const ax=clamp((mx*spd-v[PELV].x)*kk,-40,40), az=clamp((mz*spd-v[PELV].z)*kk,-40,40);
     for (const i of UPPER){ a[i].x+=ax; a[i].z+=az; }
@@ -1000,7 +1006,7 @@ function forces(r){
   }
   if (r.jumpEdge){
     r.jumpEdge=false;
-    if (g && !hanging && r.jumpCd<=0){
+    if (g && !hanging && !holding && r.jumpCd<=0){
       for (let i=0;i<N;i++){ r.prev[i].y=p[i].y-7.4*DT; r.prev[i].x-=mx*1.2*DT; r.prev[i].z-=mz*1.2*DT; }
       r.jumpCd=.45; r.ground=0; sfx(260,.15,'sine',.05);
     }
@@ -1019,7 +1025,11 @@ function forces(r){
   for (const s of [-1,1]){
     const hand=s<0?LHAND:RHAND, sh=s<0?LSH:RSH, gi=s<0?0:1;
     if (ledge && !r.grabs[gi]) { spring(r,hand,ledge.x+sx*s*.2,ledge.y+.02,ledge.z+sz*s*.2,320,18,7,NECK); continue; }
-    if (c.grab){ spring(r,hand,ch.x+f.x*.75+sx*s*.22,ch.y-.05,ch.z+f.z*.75+sz*s*.22,170,16,7,NECK);
+    if (c.grab){
+      const lift=holding&&c.jump;
+      const tgt=(!holding&&!r.hold[gi])?grabReach(r,ch):null;
+      if (tgt) spring(r,hand,tgt.x+sx*s*.12,tgt.y,tgt.z+sz*s*.12,260,18,7,NECK);
+      else spring(r,hand,ch.x+f.x*(lift?.3:.75)+sx*s*.22,ch.y-.05+(lift?.9:0),ch.z+f.z*(lift?.3:.75)+sz*s*.22,lift?320:170,16,7,NECK);
       if (r.grabs[gi]) for (const i of [NECK,LSH,RSH,FRONT]){ a[i].x-=F.x*.15; a[i].y-=F.y*.15; a[i].z-=F.z*.15; }
       continue; }
     if (w.kind==='melee' && r.blocking){
@@ -1118,15 +1128,103 @@ function collidePair(a,b,both){
 const addVel=(o,i,x,y,z)=>{ const q=o.prev[i]; q.x-=x*DT; q.y-=y*DT; q.z-=z*DT; };
 
 function tryGrab(r){
-  if (!r.ctrl.grab || r.stun>0){ r.grabs[0]=r.grabs[1]=null; return; }
+  if (r.dead || r.stun>0){ dropHolds(r,false); r.grabs[0]=r.grabs[1]=null; return; }
+  if (!r.ctrl.grab){ dropHolds(r,true); r.grabs[0]=r.grabs[1]=null; return; }
   for (let gi=0;gi<2;gi++){
-    if (r.grabs[gi]) continue;
+    if (r.grabs[gi] || r.hold[gi]) continue;
     const ph=r.pos[gi?RHAND:LHAND];
+    // fighters first, then props, then ledges
+    let got=null;
+    for (const o of bodies.values()){
+      if (o===r || o.prot>0 || o.pos[PELV].distanceTo(ph)>2.5 || (r.escaped && r.escaped.id===o.id && now()-r.escaped.t<2500)) continue;
+      for (let j=0;j<N;j++) if (o.pos[j].distanceTo(ph)<RAD[LHAND]+RAD[j]+.1){ got={k:'b',id:o.id,j}; break; }
+      if (got) break;
+    }
+    if (!got) for (const pr of props.values()){
+      if (pr.dead || pr.c.distanceTo(ph)>1.8) continue;
+      for (let j=0;j<pr.pos.length;j++) if (pr.pos[j].distanceTo(ph)<RAD[LHAND]+pr.rad[j]+.1){ got={k:'p',id:pr.id,j}; break; }
+      if (got) break;
+    }
+    if (got){ r.hold[gi]=got; if (!r.hold[1-gi]) r.holdT=0; r.emoteT=0; sfx(330,.08,'sine',.06*volAt(ph)); continue; }
     for (const b of BOXES){
       CP.set(clamp(ph.x,b.min.x,b.max.x),clamp(ph.y,b.min.y,b.max.y),clamp(ph.z,b.min.z,b.max.z));
       if (CP.distanceTo(ph)<RAD[LHAND]+.1){ r.grabs[gi]=ph.clone(); break; }
     }
   }
+}
+
+// while grab is held, hands reach for the nearest fighter or prop in front of us (any height)
+function grabReach(r,ch){
+  let best=null, bd=1.9;
+  const f=r.fwd;
+  const consider=(p)=>{ const dx=p.x-ch.x, dz=p.z-ch.z, d=Math.hypot(dx,dz,(p.y-ch.y)*.6); if (d>=bd) return; if (d>.3 && (dx*f.x+dz*f.z)/(Math.hypot(dx,dz)||1)<.2) return; bd=d; best=p; };
+  for (const o of bodies.values()){ if (o===r || o.prot>0 || o.pos[PELV].distanceTo(ch)>3) continue; for (const j of [FRONT,NECK,PELV,LSH,RSH,HEAD]) consider(o.pos[j]); }
+  for (const pr of props.values()){ if (pr.dead || pr.c.distanceTo(ch)>3) continue; consider(pr.c); }
+  return best;
+}
+function holdTarget(h){ return h.k==='p'?props.get(h.id):bodies.get(h.id); }
+// let go: throw what we're holding (or just drop it)
+function dropHolds(r,doThrow,onlyId){
+  if (onlyId && !doThrow) r.escaped={id:onlyId,t:now()};   // they broke free: no instant re-grab
+  for (let gi=0;gi<2;gi++){
+    const h=r.hold[gi]; if (!h || (onlyId && h.id!==onlyId)) continue;
+    r.hold[gi]=null;
+    tethers=tethers.filter(t=>!(t.H===r && t.T.id===h.id && t.hand===(gi?RHAND:LHAND)));   // cut it now, not next frame
+    if (!doThrow) continue;
+    if (r.hold.some(x=>x && x.id===h.id)) continue;   // the other hand still holds it
+    const T=holdTarget(h); if (!T) continue;
+    const hv=r.vel[gi?RHAND:LHAND].clone(); if (hv.length()>12) hv.setLength(12);
+    const lifted=r.ctrl.jump, v=hv.addScaledVector(r.aim,lifted?9:7).add(new V3(0,lifted?5.5:4,0));
+    throwTarget(T,h.k,v,r.id);
+    sfx(240,.18,'triangle',.08*volAt(r.pos[PELV]));
+  }
+}
+function throwTarget(T,k,v,by){
+  if (!T.local){ send({t:'throw',id:T.id,k,v:[r2(v.x),r2(v.y),r2(v.z)],by}); return; }
+  tethers=tethers.filter(t=>t.T!==T);
+  // the thrower's next pose update may still say "holding" - forget that now
+  const H=by&&bodies.get(by); if (H && H.holdRemote) H.holdRemote=H.holdRemote.map(x=>x&&x.id===T.id?null:x); if (H) H.ignoreHoldOf=T.id, H.ignoreHoldT=now();
+  const s=k==='p'?Math.min(1.6,.8+T.w*.25):1;
+  for (let i=0;i<T.pos.length;i++) addVel(T,i,v.x*s,v.y*s,v.z*s);
+  if (k==='b'){ T.stun=Math.max(T.stun,.9); if (by && by!==T.id){ T.lastHitBy=by; T.lastHitT=now(); T.lastHitW='throw'; } }
+  else if (by) T.lastHitBy=by;
+}
+// tethers: a holder's hand and the held point pull toward each other; each side's owner applies its half
+let tethers=[];
+function buildTethers(){
+  tethers=[];
+  for (const b of bodies.values()) b.heldBy=null;
+  for (const H of bodies.values()){
+    const hs=H.local?H.hold:H.holdRemote; if (!hs) continue;
+    for (let hi=0;hi<2;hi++){
+      const h=hs[hi]; if (!h) continue;
+      const T=holdTarget(h); if (!T || T===H || h.j>=T.pos.length || (h.k==='p'&&T.dead)) continue;
+      tethers.push({H,hand:hi?RHAND:LHAND,T,j:h.j,prop:h.k==='p'});
+      if (h.k==='b') T.heldBy=H;
+    }
+  }
+}
+function applyTethers(){
+  for (const t of tethers){
+    const hp=t.H.pos[t.hand], tp=t.T.pos[t.j], hv=t.H.vel[t.hand], tv=t.T.vel[t.j];
+    const dx=hp.x-tp.x, dy=hp.y-tp.y, dz=hp.z-tp.z;
+    if (t.T.local){
+      const k=t.prop?380:320, c=t.prop?14:16, a=t.T.acc[t.j];
+      a.x+=dx*k-(tv.x-hv.x)*c; a.y+=dy*k-(tv.y-hv.y)*c; a.z+=dz*k-(tv.z-hv.z)*c;
+      if (!t.prop){ t.T.heldT=.2; for (const i of UPPER) if (i!==t.j){ const q=t.T.acc[i]; q.x+=dx*k*.22; q.y+=dy*k*.22; q.z+=dz*k*.22; } }
+    }
+    if (t.H.local){
+      const k=t.prop?90:160, c=10, a=t.H.acc[t.hand];
+      a.x-=dx*k+(hv.x-tv.x)*c; a.y-=dy*k+(hv.y-tv.y)*c; a.z-=dz*k+(hv.z-tv.z)*c;
+    }
+  }
+}
+function breakFree(r){
+  const H=r.heldBy; r.struggle=0; if (!H) return;
+  tethers=tethers.filter(t=>t.T!==r);
+  flashMsg(r,'BROKE FREE!'); sfx(700,.15,'square',.08);
+  for (let i=0;i<N;i++) addVel(r,i,(r.pos[PELV].x-H.pos[PELV].x)*2,2,(r.pos[PELV].z-H.pos[PELV].z)*2);
+  if (H.local) dropHolds(H,false,r.id); else send({t:'free',h:H.id,v:r.id});
 }
 
 function checkMelee(r){
@@ -1151,23 +1249,44 @@ function checkMelee(r){
       return;
     }
   }
+  for (const pr of props.values()){
+    if (pr.dead || pr.c.distanceTo(ph)>2.4) continue;
+    for (let j=0;j<pr.pos.length;j++){
+      const rr=pr.rad[j]+(w.reach?.12:RAD[h])+.05;
+      if (!pts.some(q=>q.distanceToSquared(pr.pos[j])<rr*rr)) continue;
+      const rx=vh.x-pr.vel[j].x, ry=vh.y-pr.vel[j].y, rz=vh.z-pr.vel[j].z, spd=Math.hypot(rx,ry,rz);
+      if (spd<2.5) continue;
+      const imp=new V3(rx/spd, ry/spd+.35, rz/spd).normalize().multiplyScalar(Math.min(spd,14)*.6*w.knock);
+      propHit(pr,j,imp,w.dmg*.6,r.id);
+      r.punchHit=true; sfx(140,.1,'square',.08*volAt(ph)); spark(pr.pos[j]);
+      return;
+    }
+  }
 }
 
 function step(){
   const L=localBodies();
-  const all=[...bodies.values()];
+  const all=[...bodies.values()], LP=localProps(), AP=[...props.values()];
   for (const r of L){ for (let i=0;i<N;i++) r.vel[i].subVectors(r.pos[i],r.prev[i]).divideScalar(DT); forces(r); }
+  for (const pr of LP) propStepForces(pr);
+  applyTethers();
   for (const r of L) integrate(r);
+  for (const pr of LP) if (!pr.dead) propIntegrate(pr);
   for (let it=0;it<ITER;it++){
     for (const r of L) solveCons(r);
+    for (const pr of LP) if (!pr.dead) propSolve(pr);
     if (it===ITER-3){
       for (const r of L) collideWorld(r,false);
+      for (const pr of LP) if (!pr.dead) propWorld(pr,false);
       for (let a=0;a<L.length;a++){
         for (let b=a+1;b<L.length;b++) collidePair(L[a],L[b],true);
         for (const o of all) if (!o.local) collidePair(L[a],o,false);
       }
+      for (const b of all) for (const pr of AP) if (b.local||pr.local) collideBodyProp(b,pr,b.local,pr.local);
+      for (let a=0;a<LP.length;a++) for (let c=a+1;c<LP.length;c++) collidePropProp(LP[a],LP[c]);
     }
   }
+  for (const pr of LP) if (!pr.dead) propWorld(pr,true);
   for (const r of L){
     r.ground-=DT; collideWorld(r,true);
     for (let gi=0;gi<2;gi++) if (r.grabs[gi]){ const h=gi?RHAND:LHAND; r.pos[h].copy(r.grabs[gi]); r.prev[h].copy(r.grabs[gi]); }
@@ -1266,7 +1385,7 @@ function rayBox(o,d,b){
   return tmax<0?-1:Math.max(tmin,0);
 }
 function raycast(o,d,maxT,ignore){
-  let t=maxT, body=null, j=-1;
+  let t=maxT, body=null, j=-1, prop=null;
   for (const b of BOXES){ if (b.bound) continue; const tt=rayBox(o,d,b); if (tt>=0&&tt<t){ t=tt; } }
   for (const bd of bodies.values()){
     if (bd===ignore || bd.dead) continue;
@@ -1277,7 +1396,16 @@ function raycast(o,d,maxT,ignore){
       const th=tca-Math.sqrt(r*r-d2); if (th<t){ t=th; body=bd; j=k; }
     }
   }
-  return {t,body,j};
+  for (const pr of props.values()){
+    if (pr.dead) continue;
+    for (let k=0;k<pr.pos.length;k++){
+      const p=pr.pos[k], ocx=p.x-o.x, ocy=p.y-o.y, ocz=p.z-o.z, tca=ocx*d.x+ocy*d.y+ocz*d.z;
+      if (tca<0||tca>t) continue;
+      const r=pr.rad[k], d2=ocx*ocx+ocy*ocy+ocz*ocz-tca*tca; if (d2>r*r) continue;
+      const th=tca-Math.sqrt(r*r-d2); if (th<t){ t=th; body=null; prop=pr; j=k; }
+    }
+  }
+  return {t,body,j,prop};
 }
 function muzzle(r){ const w=WEAPONS[r.weapon]; return r.pos[RHAND].clone().addScaledVector(r.aim,w.len||.2); }
 
@@ -1290,6 +1418,7 @@ function fire(r){
       const d=r.aim.clone().add(new V3((Math.random()-.5)*2*w.spread,(Math.random()-.5)*2*w.spread,(Math.random()-.5)*2*w.spread)).normalize();
       const res=raycast(m,d,90,r), end=m.clone().addScaledVector(d,res.t);
       if (res.body){ const fo=w.falloff?clamp(1-(res.t-w.falloff[0])/(w.falloff[1]-w.falloff[0])*.7,.3,1):1; dealHit(res.body,res.j,w.dmg*fo*(res.j===HEAD?1.5:1),d.clone().multiplyScalar(w.knock*4),r.id,r.weapon); spark(end); }
+      else if (res.prop){ propHit(res.prop,res.j,d.clone().multiplyScalar(w.knock*5).add(new V3(0,w.knock*.8,0)),w.dmg,r.id); spark(end); }
       tracer(m,end,r.weapon); shots.push(...[m.x,m.y,m.z,end.x,end.y,end.z].map(v=>+v.toFixed(2)));
     }
     send({t:'shot',s:shots,w:r.weapon});
@@ -1363,6 +1492,7 @@ function updateProjs(dt){
           for (let j=0;j<N;j++) if (bd.pos[j].distanceTo(q.p)<RAD[j]+.15){ boom=true; break; }
           if (boom) break;
         }
+        if (!boom) for (const pr of props.values()){ if (pr.dead || pr.c.distanceTo(q.p)>1.5) continue; for (let j=0;j<pr.pos.length;j++) if (pr.pos[j].distanceTo(q.p)<pr.rad[j]+.12){ boom=true; break; } if (boom) break; }
       }
     }
     if (q.k==='grenade' && q.t>=WEAPONS.grenade.fuse) boom=true;
@@ -1373,6 +1503,18 @@ function updateProjs(dt){
     if (boom && q.local){ explode(q.p.clone(),q.k,q.by,q.id); continue; }
     if (boom && !q.local && q.k==='rocket'){ q.v.set(0,0,0); q.mesh.visible=false; }
     if (q.p.y<-50 || q.t>8){ removeProj(q.id); if (q.local) send({t:'pend',id:q.id}); }
+  }
+}
+function blastProps(p,w,by){
+  const R=w.radius;
+  for (const pr of localProps()){
+    if (pr.dead) continue;
+    const d=pr.c.distanceTo(p); if (d>R+.4) continue;
+    const f=Math.max(.1,1-d/R)*(blastBlocked(p,pr.c)?.2:1);
+    TMP.subVectors(pr.c,p).normalize(); const kb=(w.blast||18)*f*1.15;
+    for (let i=0;i<pr.pos.length;i++) addVel(pr,i,TMP.x*kb,TMP.y*kb+5*f,TMP.z*kb);
+    if (by) pr.lastHitBy=by;
+    if (pr.def.hp){ pr.hp-=w.dmg*f; if (pr.hp<=0){ const q=pr; setTimeout(()=>detonateProp(q),130); } }
   }
 }
 function blastBlocked(a,b){
@@ -1389,6 +1531,7 @@ function explode(p,k,by,pid){
 function onBoom(p,k,by){
   boomFx(p, WEAPONS[k].radius, k);
   const w=WEAPONS[k], R=w.radius;
+  blastProps(p,w,by);
   for (const b of localBodies()){
     let dmin=1e9;
     if (b.prot>0 && !b.dead){ for (let i=0;i<N;i++) dmin=Math.min(dmin,b.pos[i].distanceTo(p)); if (dmin<R) hitNotify(b,by,0,false,true); continue; }
@@ -1406,6 +1549,175 @@ function onBoom(p,k,by){
       if (!self) hitNotify(b,by,dd,false);
       if (b.hp<=0) kill(b,by,k);
     }
+  }
+}
+
+/* ===================== props ===================== */
+// Each prop is a small rigid cluster of Verlet points (same engine as the ragdolls).
+// The host (or practice mode) simulates them; everyone else renders the host's copy.
+const corners=(a,r,cr)=>{ const p=[]; for (let i=0;i<8;i++) p.push([i&1?a:-a,i&2?a*r:-a*r,i&4?a:-a,cr]); return p; };
+const PROP_DEFS={
+  crate:  {name:'Crate',mass:1.6,fric:.55,bounce:.05,pts:[...corners(.3,1,.15),[0,0,0,.42]],hp:0},
+  barrel: {name:'Barrel',mass:1.3,fric:.4,bounce:.1,pts:[...corners(.24,1.5,.15),[0,0,0,.4]],hp:0},
+  xbarrel:{name:'Explosive Barrel',mass:1.2,fric:.4,bounce:.1,pts:[...corners(.24,1.5,.15),[0,0,0,.4]],hp:20},
+  ball:   {name:'Ball',mass:.35,fric:.08,bounce:.72,pts:[[0,0,0,.42]],hp:0},
+  pin:    {name:'Bowling Pin',mass:.35,fric:.35,bounce:.25,pts:[[0,-.28,0,.15],[0,.28,0,.11]],hp:0},
+};
+WEAPONS.barrel={cls:'none',name:'Explosive Barrel',kind:'boom',dmg:70,radius:4.4,blast:19};
+const props=new Map(); let propSeq=0;
+const localProps=()=>[...props.values()].filter(p=>p.local);
+const QT=new THREE.Quaternion(), M3=new THREE.Matrix4();
+let beachTex=null;
+function beachBall(){ if (beachTex) return beachTex; const c=document.createElement('canvas'); c.width=256; c.height=128; const g=c.getContext('2d');
+  const cols=['#ff5a5a','#ffffff','#ffd23f','#ffffff','#4aa8ff','#ffffff']; for (let i=0;i<6;i++){ g.fillStyle=cols[i]; g.fillRect(i*256/6,0,256/6+1,128); }
+  beachTex=new THREE.CanvasTexture(c); beachTex.colorSpace=THREE.SRGBColorSpace; return beachTex; }
+let bballTex=null;
+function basketball(){ if (bballTex) return bballTex; const c=document.createElement('canvas'); c.width=256; c.height=128; const g=c.getContext('2d');
+  g.fillStyle='#e8742a'; g.fillRect(0,0,256,128); g.strokeStyle='#2b1a10'; g.lineWidth=3; g.beginPath(); g.moveTo(0,64); g.lineTo(256,64); for (const x of [64,128,192]){ g.moveTo(x,0); g.lineTo(x,128); } g.stroke();
+  bballTex=new THREE.CanvasTexture(c); bballTex.colorSpace=THREE.SRGBColorSpace; return bballTex; }
+function propMesh(kind){
+  const g=new THREE.Group(); const M=(geo,col,o={})=>{ const m=new THREE.Mesh(geo,mat(col,o)); m.castShadow=m.receiveShadow=true; g.add(m); return m; };
+  if (kind==='crate'){ M(new THREE.BoxGeometry(.9,.9,.9),0xc58b4e,{tex:'wood',bump:.01}); const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.9,.9,.9)),new THREE.LineBasicMaterial({color:0x6a4420})); g.add(e);
+    for (const s of [-1,1]){ const br=M(new THREE.BoxGeometry(1.1,.1,.04),0x8a5a2a,{tex:'wood'}); br.position.z=s*.46; br.rotation.z=s*.78; } }
+  else if (kind==='barrel'||kind==='xbarrel'){
+    const x=kind==='xbarrel';
+    M(new THREE.CylinderGeometry(.4,.4,1.04,20),x?0xd62828:0x8b5a32,x?{metal:.3,rough:.4}:{tex:'wood'});
+    for (const y of [-.38,0,.38]) M(new THREE.CylinderGeometry(.41,.41,.06,20),x?(y?0x333333:0xffd23f):0x55595f,{metal:.6,rough:.35}).position.y=y;
+    if (x){ const t=M(new THREE.CircleGeometry(.16,3),0x1d1d1d); t.position.set(0,.18,.405); const t2=t.clone(); t2.position.z=-.405; t2.rotation.y=Math.PI; g.add(t2); }
+  }
+  else if (kind==='ball'){
+    const hoodBall=mapKey==='hood';
+    const m=new THREE.Mesh(new THREE.SphereGeometry(.42,24,16),new THREE.MeshStandardMaterial({map:hoodBall?basketball():beachBall(),roughness:hoodBall?.7:.35}));
+    m.castShadow=true; g.add(m);
+  }
+  else if (kind==='pin'){
+    const pts=[[0,-.45],[.12,-.43],[.17,-.3],[.18,-.12],[.13,.06],[.08,.2],[.1,.32],[.11,.4],[.07,.48],[0,.5]].map(([x,y])=>new THREE.Vector2(x,y));
+    M(new THREE.LatheGeometry(pts,18),0xf8f6f0,{rough:.3});
+    for (const y of [.14,.19]) M(new THREE.CylinderGeometry(.085,.085,.025,16),0xd62828).position.y=y;
+  }
+  scene.add(g); return g;
+}
+class Prop{
+  constructor(id,kind,x,z,y,local){
+    const d=PROP_DEFS[kind]; Object.assign(this,{id,kind,def:d,local,home:[x,z],hp:d.hp,dead:false,deadT:0,lastHitBy:null,seen:now()});
+    const n=d.pts.length, cen=new V3(); for (const q of d.pts) cen.add(new V3(q[0],q[1],q[2])); cen.divideScalar(n);
+    this.rest=d.pts.map(q=>new V3(q[0],q[1],q[2]).sub(cen)); this.rad=d.pts.map(q=>q[3]);
+    this.w=1/(d.mass*(n>1?.5:1));
+    this.pos=[];this.prev=[];this.acc=[];this.vel=[];
+    for (let i=0;i<n;i++){ this.pos.push(new V3());this.prev.push(new V3());this.acc.push(new V3());this.vel.push(new V3()); }
+    this.cons=[]; for (let i=0;i<n;i++) for (let j=i+1;j<n;j++) this.cons.push([i,j,this.rest[i].distanceTo(this.rest[j])]);
+    this.c=new V3(); this.q=new THREE.Quaternion(); this.tc=new V3(); this.tq=new THREE.Quaternion(); this.fresh=true;
+    this.mesh=propMesh(kind);
+    if (y===undefined){ const b=boxUnder(x,z,100); const lo=Math.max(...this.rest.map((r,i)=>-r.y+this.rad[i])); y=(b?b.max.y:0)+lo+.02; }
+    this.place(new V3(x,y,z),new THREE.Quaternion().setFromEuler(new THREE.Euler(0,Math.random()*6.28,0)));
+  }
+  place(c,q){ this.c.copy(c); this.q.copy(q); for (let i=0;i<this.pos.length;i++){ this.pos[i].copy(this.rest[i]).applyQuaternion(q).add(c); this.prev[i].copy(this.pos[i]); } }
+  // derive center + rotation from the points
+  readTransform(){
+    const p=this.pos, n=p.length; this.c.set(0,0,0); for (const v of p) this.c.add(v); this.c.divideScalar(n);
+    if (n>=8){ tA.subVectors(p[1],p[0]).normalize(); tB.subVectors(p[2],p[0]); tB.addScaledVector(tA,-tB.dot(tA)).normalize(); tC.crossVectors(tA,tB); M3.makeBasis(tA,tB,tC); this.q.setFromRotationMatrix(M3); }
+    else if (n===2){ tA.subVectors(p[1],p[0]).normalize(); this.q.setFromUnitVectors(YAX,tA); }
+    else { // a ball rolls: spin around the axis perpendicular to its motion
+      const v=this.vel[0]; const sp=Math.hypot(v.x,v.z); if (sp>.05){ tA.set(v.z,0,-v.x).normalize(); QT.setFromAxisAngle(tA,sp*DT/.42); this.q.premultiply(QT); } }
+  }
+  dispose(){ scene.remove(this.mesh); }
+}
+function spawnMapProps(){
+  if (net.mode==='client') return;
+  for (const [kind,x,z] of (THEME.props||[])){ const id=net.id+':pr'+(++propSeq); props.set(id,new Prop(id,kind,x,z,undefined,true)); }
+}
+function clearProps(){ for (const p of props.values()) p.dispose(); props.clear(); }
+// --- physics (local props only) ---
+function propStepForces(pr){ for (let i=0;i<pr.pos.length;i++){ pr.vel[i].subVectors(pr.pos[i],pr.prev[i]).divideScalar(DT); pr.acc[i].set(0,-G,0); } }
+function propIntegrate(pr){
+  for (let i=0;i<pr.pos.length;i++){ const p=pr.pos[i],q=pr.prev[i];
+    let vx=(p.x-q.x)*.996, vy=(p.y-q.y)*.996, vz=(p.z-q.z)*.996; const l=Math.hypot(vx,vy,vz); if (l>.5){ vx*=.5/l; vy*=.5/l; vz*=.5/l; }
+    q.copy(p); p.x+=vx+pr.acc[i].x*DT*DT; p.y+=vy+pr.acc[i].y*DT*DT; p.z+=vz+pr.acc[i].z*DT*DT; }
+}
+function propSolve(pr){
+  const p=pr.pos;
+  for (const [a,b,rest] of pr.cons){ const pa=p[a],pb=p[b], dx=pb.x-pa.x,dy=pb.y-pa.y,dz=pb.z-pa.z, d=Math.hypot(dx,dy,dz)||1e-6, k=(d-rest)/(d*2);
+    pa.x+=dx*k;pa.y+=dy*k;pa.z+=dz*k; pb.x-=dx*k;pb.y-=dy*k;pb.z-=dz*k; }
+}
+function propWorld(pr,final){
+  const d=pr.def;
+  for (let i=0;i<pr.pos.length;i++){
+    const p=pr.pos[i], rad=pr.rad[i];
+    for (const b of BOXES){
+      if (p.x<b.min.x-rad||p.x>b.max.x+rad||p.y<b.min.y-rad||p.y>b.max.y+rad||p.z<b.min.z-rad||p.z>b.max.z+rad) continue;
+      const cx=clamp(p.x,b.min.x,b.max.x), cy=clamp(p.y,b.min.y,b.max.y), cz=clamp(p.z,b.min.z,b.max.z);
+      let nx=p.x-cx, ny=p.y-cy, nz=p.z-cz, dd=Math.hypot(nx,ny,nz), pen;
+      if (dd<1e-6){ const fc=[p.x-b.min.x,b.max.x-p.x,p.y-b.min.y,b.max.y-p.y,p.z-b.min.z,b.max.z-p.z]; let m=0; for (let k=1;k<6;k++) if (fc[k]<fc[m]) m=k;
+        nx=ny=nz=0; const sg=m%2?1:-1; if (m<2) nx=sg; else if (m<4) ny=sg; else nz=sg; pen=fc[m]+rad; }
+      else { nx/=dd; ny/=dd; nz/=dd; pen=rad-dd; if (pen<=0) continue; }
+      p.x+=nx*pen; p.y+=ny*pen; p.z+=nz*pen;
+      if (final){ const q=pr.prev[i], vx=p.x-q.x, vy=p.y-q.y, vz=p.z-q.z, vn=vx*nx+vy*ny+vz*nz, k=1-d.fric;
+        const nb=vn<0?-vn*d.bounce:vn; q.set(p.x-(nx*nb+(vx-nx*vn)*k), p.y-(ny*nb+(vy-ny*vn)*k), p.z-(nz*nb+(vz-nz*vn)*k)); }
+    }
+  }
+}
+// sphere-vs-sphere between a fighter and a prop; mB/mP say which side may move
+function collideBodyProp(b,pr,mB,mP){
+  if (pr.dead || b.pos[PELV].distanceToSquared(pr.c)>9) return;
+  const wb=mB?1:0, wp=mP?pr.w*.6:0; if (!wb&&!wp) return;
+  for (let i=0;i<N;i++){ const pi=b.pos[i];
+    for (let j=0;j<pr.pos.length;j++){ const pj=pr.pos[j], rr=RAD[i]+pr.rad[j], dx=pj.x-pi.x, dy=pj.y-pi.y, dz=pj.z-pi.z, d2=dx*dx+dy*dy+dz*dz;
+      if (d2>=rr*rr) continue; const d=Math.sqrt(d2)||1e-6, k=(rr-d)/(d*(wb+wp));
+      pi.x-=dx*k*wb; pi.y-=dy*k*wb; pi.z-=dz*k*wb; pj.x+=dx*k*wp; pj.y+=dy*k*wp; pj.z+=dz*k*wp; } }
+}
+function collidePropProp(a,b){
+  if (a.dead||b.dead||a.c.distanceToSquared(b.c)>4) return;
+  for (let i=0;i<a.pos.length;i++) for (let j=0;j<b.pos.length;j++){ const pi=a.pos[i], pj=b.pos[j], rr=a.rad[i]+b.rad[j], dx=pj.x-pi.x, dy=pj.y-pi.y, dz=pj.z-pi.z, d2=dx*dx+dy*dy+dz*dz;
+    if (d2>=rr*rr) continue; const d=Math.sqrt(d2)||1e-6, k=(rr-d)/(d*(a.w+b.w));
+    pi.x-=dx*k*a.w; pi.y-=dy*k*a.w; pi.z-=dz*k*a.w; pj.x+=dx*k*b.w; pj.y+=dy*k*b.w; pj.z+=dz*k*b.w; }
+}
+// --- hits ---
+function propHit(pr,j,imp,dmg,by){
+  if (pr.dead) return;
+  if (!pr.local){ send({t:'ph',id:pr.id,j,i:[r2(imp.x),r2(imp.y),r2(imp.z)],d:Math.round(dmg||0),by}); spark(pr.pos[j]); return; }
+  applyPropHit(pr,j,imp,dmg,by);
+}
+function applyPropHit(pr,j,imp,dmg,by){
+  if (pr.dead) return;
+  const s=Math.min(1.5,pr.w*.75);
+  for (let i=0;i<pr.pos.length;i++){ const m=(i===j?1.4:.8)*s; addVel(pr,i,imp.x*m,imp.y*m,imp.z*m); }
+  if (by) pr.lastHitBy=by;
+  if (pr.def.hp && dmg>0){ pr.hp-=dmg; if (pr.hp<=0) detonateProp(pr); }
+}
+function detonateProp(pr){
+  if (pr.dead) return;
+  pr.dead=true; pr.deadT=12; pr.mesh.visible=false;
+  explode(pr.c.clone(),'barrel',pr.lastHitBy,null);
+}
+function propsNear(p,R){ return [...props.values()].filter(pr=>!pr.dead && pr.c.distanceTo(p)<R+1); }
+// --- per-frame: respawns, rendering, proxies ---
+function updateProps(dt){
+  for (const pr of props.values()){
+    if (pr.local){
+      pr.readTransform();
+      if (pr.dead){ pr.deadT-=dt; if (pr.deadT<=0){ pr.dead=false; pr.hp=pr.def.hp; pr.mesh.visible=true; const b=boxUnder(pr.home[0],pr.home[1],100); pr.place(new V3(pr.home[0],(b?b.max.y:0)+1.2,pr.home[1]),pr.q); } }
+      else if (pr.c.y<-20){ const b=boxUnder(pr.home[0],pr.home[1],100); pr.place(new V3(pr.home[0],(b?b.max.y:0)+1.5,pr.home[1]),pr.q); }
+    } else {
+      if (now()-pr.seen>3000){ pr.dispose(); props.delete(pr.id); continue; }
+      const k=pr.fresh?1:1-Math.exp(-dt*16); pr.fresh=false;
+      const oc=pr.c.clone(); pr.c.lerp(pr.tc,k); pr.q.slerp(pr.tq,k);
+      for (let i=0;i<pr.pos.length;i++){ const np=pr.rest[i].clone().applyQuaternion(pr.q).add(pr.c); pr.vel[i].subVectors(np,pr.pos[i]).divideScalar(Math.max(dt,1e-3)); pr.prev[i].copy(pr.pos[i]); pr.pos[i].copy(np); }
+      pr.mesh.visible=!pr.dead;
+    }
+    pr.mesh.position.copy(pr.c); pr.mesh.quaternion.copy(pr.q);
+  }
+}
+function sendProps(){
+  const a=[]; for (const pr of localProps()) a.push([pr.id,pr.kind,r2(pr.c.x),r2(pr.c.y),r2(pr.c.z),+pr.q.x.toFixed(3),+pr.q.y.toFixed(3),+pr.q.z.toFixed(3),+pr.q.w.toFixed(3),pr.dead?1:0]);
+  if (a.length) send({t:'pr',a});
+}
+function onPropState(m){
+  if (state!=='play') return;
+  for (const [id,kind,x,y,z,qx,qy,qz,qw,dead] of m.a){
+    let pr=props.get(id);
+    if (!pr){ if (!PROP_DEFS[kind]) continue; pr=new Prop(id,kind,x,z,y,false); props.set(id,pr); }
+    if (pr.local) continue;
+    pr.tc.set(x,y,z); pr.tq.set(qx,qy,qz,qw); pr.seen=now(); pr.dead=!!dead;
   }
 }
 
@@ -1836,7 +2148,7 @@ function tryBecomeHost(){
     if (lobbyRoster[0]) dropOwner(lobbyRoster[0].id);   // the old host's fighters + bots (before we take over its id)
     rekeyBodies(oldId,id);
     banner(''); feed('<b>You are now the host</b>'); setHash(net.code);
-    if (state==='play'){ const want=Math.min(match.bots,MAX_PLAYERS-humanCount()); while (bots().length<want) addBot(); }
+    if (state==='play'){ const want=Math.min(match.bots,MAX_PLAYERS-humanCount()); while (bots().length<want) addBot(); for (const pr of [...props.values()]) if (!pr.local){ pr.dispose(); props.delete(pr.id); } spawnMapProps(); }
     broadcastLobby();
   });
   hp.on('error',e=>{
@@ -1869,6 +2181,10 @@ function handle(m){
     case 'bye': dropOwner(m.o); break;
     case 'gone': { const b=bodies.get(m.id); if (b&&!b.local) removeBody(m.id); break; }
     case 'chat': onChat(m.id,m.n,m.c,m.txt); break;
+    case 'pr': onPropState(m); break;
+    case 'ph': { const pr=props.get(m.id); if (pr&&pr.local) applyPropHit(pr,m.j,new V3(...m.i),m.d,m.by); break; }
+    case 'throw': { const T=m.k==='p'?props.get(m.id):bodies.get(m.id); if (T&&T.local) throwTarget(T,m.k,new V3(...m.v),m.by); break; }
+    case 'free': { const H=bodies.get(m.h); if (H&&H.local) dropHolds(H,false,m.v); break; }
   }
 }
 function dropOwner(o){ for (const id of [...bodies.keys()]) if (id.startsWith(o+':')){ const b=bodies.get(id); if (b && state==='play') feed(`<b>${esc(b.name)}</b> left`); removeBody(id); } }
@@ -1878,15 +2194,15 @@ function sendState(){
   const b=[];
   for (const r of localBodies()){
     const e=[r.id,r.name,r.col,Math.max(0,Math.round(r.hp)),r.dead?1:0,r.weapon,r.kills,r.deaths,r2(r.aim.x),r2(r.aim.y),r2(r.aim.z),r.stun>.5?1:0,
-      r.prot>0?1:0,r.bot?0:(net.mode==='host'?0:net.ping),r.falls,Math.round(r.dmg||0),r.hs|0,r2(r.maxAir||0),r.bot?1:0,outfitKey(r.outfit||DEF_OUTFIT)];
+      r.prot>0?1:0,r.bot?0:(net.mode==='host'?0:net.ping),r.falls,Math.round(r.dmg||0),r.hs|0,r2(r.maxAir||0),r.bot?1:0,outfitKey(r.outfit||DEF_OUTFIT),r.hold.map(h=>h?`${h.k}~${h.id}~${h.j}`:'').join(',')];
     for (let i=0;i<N;i++) e.push(r2(r.pos[i].x),r2(r.pos[i].y),r2(r.pos[i].z));
     b.push(e);
   }
   if (b.length) send({t:'st',b});
 }
-const SO=20;
+const SO=21;
 function updateProxy(e){
-  const [id,name,col,hp,dead,wk,kills,deaths,ax,ay,az,stunned,prot,ping,falls,dmg,hs,maxAir,isBot,ok]=e;
+  const [id,name,col,hp,dead,wk,kills,deaths,ax,ay,az,stunned,prot,ping,falls,dmg,hs,maxAir,isBot,ok,hl]=e;
   if (!id || bodies.has(id)&&bodies.get(id).local) return;
   if (state!=='play') return;
   let b=bodies.get(id);
@@ -1894,7 +2210,8 @@ function updateProxy(e){
   for (let i=0;i<N;i++) b.tgt[i].set(e[SO+i*3],e[SO+i*3+1],e[SO+i*3+2]);
   if (b.fresh){ for (let i=0;i<N;i++){ b.pos[i].copy(b.tgt[i]); b.prev[i].copy(b.tgt[i]); } b.fresh=false; }
   Object.assign(b,{name,col,hp,dead:!!dead,wKey:wk,kills,deaths,seen:now(),prot:prot?1:0,ping,falls,dmg,hs,maxAir,isBot:!!isBot});
-  if (ok && ok!==b.outKey){ b.outKey=ok; b.outfit=parseOutfit(ok); } b.stun=stunned?1:0; b.aim.set(ax,ay,az);
+  if (ok && ok!==b.outKey){ b.outKey=ok; b.outfit=parseOutfit(ok); }
+  b.holdRemote=String(hl||',').split(',').map(x=>{ if (!x) return null; const [k,i,j]=x.split('~'); if (b.ignoreHoldOf===i && now()-b.ignoreHoldT<400) return null; return {k,id:i,j:+j}; }); b.stun=stunned?1:0; b.aim.set(ax,ay,az);
 }
 function stepProxies(dt){
   const k=1-Math.exp(-dt*18);
@@ -1957,6 +2274,10 @@ function botThink(b,dt){
     B.blockT=(B.blockT||0)-dt;
     if (w.kind==='melee' && bd<2.4 && B.blockT<-.6 && Math.random()<.025*D.block) B.blockT=.35+Math.random()*.5;
     if (B.blockT>0){ c.block=true; }
+    // grab and throw now and then
+    B.grabT=(B.grabT||0)-dt;
+    if (w.kind==='melee' && bd<1.3 && B.grabT<-2 && Math.random()<.01*D.block) B.grabT=1.1+Math.random()*1.2;
+    if (B.grabT>0){ c.grab=true; c.block=false; if (b.hold.some(Boolean)){ c.jump=B.grabT<.7; if (under){ const ox=me.x-(under.min.x+under.max.x)/2, oz=me.z-(under.min.z+under.max.z)/2, ol=Math.hypot(ox,oz)||1; dx=ox/ol; dz=oz/ol; } } }
     const inRange=w.kind==='melee'?bd<1.7:bd<30;
     B.fireCd-=dt;
     if (inRange && B.react<=0 && B.fireCd<=0){ c.fire=w.auto?true:(B.toggle=!B.toggle); if (!w.auto && !B.toggle) B.fireCd=(w.kind==='melee'?.15:w.cd*(w.cls==='boom'?1.8:.9))*D.fire; }
@@ -2363,6 +2684,7 @@ function genThumbs(){
     try{ thumbs[k]=c.toDataURL('image/jpeg',.82); }catch(e){}
   }
   loadMap(keep); camera.position.copy(oldPos); camera.aspect=oldAsp;
+  if (state==='menu' || (state==='play' && isHost())) spawnMapProps();
   for (const b of hidden) b.view.g.visible=true; for (const m of fx0) m.visible=true;
   renderMaps(); if (!$('mapScreen').classList.contains('hidden')) renderMapGrid();
 }
@@ -2396,8 +2718,8 @@ $('mapGrid').addEventListener('click',e=>{ const c=e.target.closest('.mcard'); i
 function chooseMap(k){
   if (!THEMES[k]) return;
   if (state==='lobby'){ if (!isHost()) return; match.map=k; prefs.map=k; savePrefs(); if (k!==mapKey) loadMap(k); broadcastLobby(); renderMaps(); return; }
-  if (state==='menu'){ prefs.map=k; savePrefs(); if (k!==mapKey){ loadMap(k); for (const b of localBodies()) respawn(b); } renderMaps(); return; }
-  if (state==='play' && isHost() && net.mode==='off'){ match.map=k; loadMap(k); for (const b of localBodies()) respawn(b); }
+  if (state==='menu'){ prefs.map=k; savePrefs(); if (k!==mapKey){ loadMap(k); for (const b of localBodies()) respawn(b); spawnMapProps(); } renderMaps(); return; }
+  if (state==='play' && isHost() && net.mode==='off'){ match.map=k; loadMap(k); for (const b of localBodies()) respawn(b); spawnMapProps(); }
 }
 
 // ---------- lobby ----------
@@ -2406,6 +2728,7 @@ const fmtTime=s=>s?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0
 function enterLobby(){
   clearTimeout(resultsTimer);
   state='lobby'; menuOpen=true; myReady=false; wheelMode=null; renderWheel();
+  clearProps();
   for (const id of [...bodies.keys()]) removeBody(id);
   for (const id of [...projs.keys()]) removeProj(id);
   myBodyId=null; matchEnd=0;
@@ -2465,6 +2788,7 @@ function startMatchHost(){
   startMatch(left);
   const n=Math.min(match.bots,MAX_PLAYERS-humanCount());
   for (let i=0;i<n;i++) addBot();
+  spawnMapProps();
   broadcastLobby();
 }
 function startMatch(left){
@@ -2472,6 +2796,7 @@ function startMatch(left){
   if (match.map!==mapKey) loadMap(match.map);
   for (const id of [...bodies.keys()]) removeBody(id);
   for (const id of [...projs.keys()]) removeProj(id);
+  clearProps();
   state='play'; menuOpen=false; myReady=false; specIdx=0;
   matchEnd=left?now()+left:0;
   myBodyId=net.id+':p';
@@ -2515,6 +2840,7 @@ function showResults(m){
   if (mine){ const S=prefs.stats; S.matches++; S.kills+=mine.kills; S.deaths+=mine.deaths; S.falls+=mine.falls; S.dmg+=mine.dmg; if (win && win.id===myBodyId && res.length>1) S.wins++; savePrefs(); renderMyStats(); }
   for (const id of [...bodies.keys()]) removeBody(id);
   for (const id of [...projs.keys()]) removeProj(id);
+  clearProps();
   myBodyId=null;
   for (const id of ['hud','pause','loadout','lobby']) $(id).classList.add('hidden');
   $('results').classList.remove('hidden');
@@ -2548,6 +2874,7 @@ function leaveGame(){
   Object.assign(net,{mode:'off',id:'local',peer:null,hostConn:null,code:''}); net.conns.clear(); net.roster.clear();
   for (const id of [...bodies.keys()]) removeBody(id);
   for (const id of [...projs.keys()]) removeProj(id);
+  clearProps();
   myBodyId=null; state='menu'; menuOpen=true; setHash('');
   for (const id of ['hud','pause','loadout','lobby','results']) $(id).classList.add('hidden');
   $('menu').classList.remove('hidden');
@@ -2566,7 +2893,8 @@ function updateHud(dt){
   if (me.dead){
     if (isEliminated(me)){ const t=camSubject(); center=`ELIMINATED<small>Spectating ${t&&t!==me?esc(t.name):'…'} · click or ${kb('jump')} to switch</small>`; }
     else { const kl=me.lastKiller&&bodies.get(me.lastKiller); center=`SPLAT!<small>${kl?`Killed by <span style="color:${hex(kl.col)}">${esc(kl.name)}</span> · `:''}Respawning in ${Math.max(0,me.deadT).toFixed(1)}s · ${kb('loadout')} to change loadout</small>`; }
-  } else if (me.msgT>0) center=me.msg;
+  } else if (me.heldBy) center=`GRABBED!<small>Mash ${kb('jump')} or click to break free ${'●'.repeat(Math.min(5,Math.floor(me.struggle)))}${'○'.repeat(Math.max(0,5-Math.floor(me.struggle)))}</small>`;
+  else if (me.msgT>0) center=me.msg;
   else if (me.prot>0) center=`<small>🛡️ Spawn protection ${me.prot.toFixed(1)}s</small>`;
   $('center').innerHTML=center;
   const melee=WEAPONS[me.weapon].kind==='melee';
@@ -2619,6 +2947,7 @@ function demoWorld(){
     b.bot={pref:i%2?'boom':'gun',strafe:1,st:0,react:.5,err:.12,toggle:false,wander:new V3(),fireCd:0,d:BOT_DIFF.normal}; b.outfit=randomOutfit();
     bodies.set(id,b);
   }
+  spawnMapProps();
 }
 
 let acc=0,last=now(),sendT=0,pingT=0,lobbyT=0;
@@ -2628,9 +2957,20 @@ function frame(t){
   for (const r of L){
     const c=r.bot?botThink(r,dt):playerCtrl(r);
     if (!r.bot) playerAim(r);
+    // being held: mash jump/attack to break free (bots wriggle on their own)
+    if (r.heldBy && !r.dead){ if ((c.fire&&!r.lastFire)||(c.jump&&!r.lastJump)) r.struggle+=1; if (r.bot && Math.random()<dt*2.2) r.struggle+=1; if (r.struggle>=5) breakFree(r); }
+    r.struggle=Math.max(0,r.struggle-dt*.7);
+    if (r.heldBy){ c.fire=false; }
     if (c.fire&&!r.lastFire) r.fireEdge=true;
     if (c.jump&&!r.lastJump) r.jumpEdge=true;
     r.lastFire=c.fire; r.lastJump=c.jump; r.ctrl=c;
+    r.heldT=Math.max(0,r.heldT-dt);
+    // holding: give up after 6 s, or if the target got pulled out of reach
+    if (r.hold.some(Boolean)){
+      r.holdT+=dt;
+      if (r.holdT>6) dropHolds(r,false);
+      for (let gi=0;gi<2;gi++){ const h=r.hold[gi]; if (!h) continue; const T=holdTarget(h); if (!T || (h.k==='p'&&T.dead) || T.pos[h.j].distanceTo(r.pos[gi?RHAND:LHAND])>2.4) r.hold[gi]=null; }
+    }
     r.guardBroken-=dt; r.msgT-=dt; r.prot=Math.max(0,r.prot-dt); r.emoteT=Math.max(0,r.emoteT-dt);
     if ((c.mx||c.mz) && r.emote!=='dance') r.emoteT=Math.min(r.emoteT,.0001);
     const canBlock=c.block && WEAPONS[r.weapon].kind==='melee' && !r.dead && r.stun<=0 && r.guardBroken<=0;
@@ -2645,14 +2985,16 @@ function frame(t){
     if (r.dead){ r.deadT-=dt; if (r.deadT<=0 && !isEliminated(r)) respawn(r); }
   }
   stepProxies(dt);
+  buildTethers();
   acc+=dt; let n=0;
   while (acc>=DT && n<6){ step(); acc-=DT; n++; }
   if (n===6) acc=0;
   updateProjs(dt);
+  updateProps(dt);
   updateFx(dt);
   for (const b of bodies.values()) b.view.update(b,dt);
   if (net.mode!=='off'){
-    sendT-=dt; if (sendT<=0){ sendT=.05; if (state==='play') sendState(); }
+    sendT-=dt; if (sendT<=0){ sendT=.05; if (state==='play'){ sendState(); if (net.mode==='host') sendProps(); } }
     if (net.mode==='client'){
       pingT-=dt; if (pingT<=0){ pingT=2; send({t:'ping',ts:now()}); }
       if (!net.reconnecting && net.lastHost && now()-net.lastHost>6500) lostHost('timeout');
@@ -2671,7 +3013,7 @@ function frame(t){
   requestAnimationFrame(frame);
 }
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); if (composer){ composer.setSize(innerWidth,innerHeight); bloomPass.resolution.set(innerWidth,innerHeight); } });
-window.__game={applyHit,onBoom,raycast,camera,V3,bodies,net,loadMap,chooseMap,THEMES,get BOXES(){return BOXES},get SPAWNS(){return SPAWNS},boxUnder,get mapKey(){return mapKey},get state(){return state},
+window.__game={applyHit,onBoom,raycast,throwTarget,get tethers(){return tethers},camera,V3,bodies,props,net,loadMap,chooseMap,THEMES,get BOXES(){return BOXES},get SPAWNS(){return SPAWNS},boxUnder,get mapKey(){return mapKey},get state(){return state},
   addBot,keys,mouse,projs,localPlayer,get match(){return match},set match(v){match=v},endMatch,startMatchHost,prefs,startEmote,sendChat,get lobbyRoster(){return lobbyRoster}};
 applyQuality(prefs.quality); renderGfx(); renderHelp(); renderMyStats();
 loadMap(prefs.map); renderMaps();

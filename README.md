@@ -43,11 +43,19 @@ Every key can be rebound in **⚙ Settings**. These are the defaults:
 | Attack | Left click (hold for the rifle) | RT |
 | Block / parry | Right click or F (melee weapons) | LT |
 | Jump | Space | A |
-| Grab a ledge | Hold E while falling, then hold Space to climb | B |
+| Grab | Hold E near a fighter, prop or ledge. Let go to throw, and hold Space while holding to lift overhead for a bigger throw | B |
+| Break free | Mash Space or click while grabbed | A / RT |
 | Switch weapon | 1 / 2 / 3 or mouse wheel | LB / RB |
 | Loadout | Q | Y |
 | Chat / quick chat / emotes | Enter / T / G | D-pad |
 | Menu | Esc | Start |
+
+## Physics playground
+- **Movable props on every map:** crates, barrels, balls and bowling pins (10–11 per map, themed). Shoot them, punch them, blast them or kick them around. Knocked-out props respawn.
+- **Explosive barrels:** red barrels go off when shot or blasted, and they chain into each other. Kills count for whoever set them off.
+- **Grab and throw:** hold E to grab a fighter or prop with both hands and drag it around. Hold Space to lift it overhead, then let go of E to throw it where you're aiming. You can throw your friends off the map.
+- **Struggle:** if someone grabs you, mash Space or click 5 times to break free. The grabber can't grab you again for a couple of seconds.
+- **Online:** the host owns the props and everyone sees the same ones. Each player applies grabs and throws to their own fighter, so it all stays in sync.
 
 ## Customization
 Click **👕 Customize** on the menu, in the lobby or from the Esc menu. You'll see a live 3D preview that you can drag to spin.
