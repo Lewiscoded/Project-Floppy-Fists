@@ -805,19 +805,27 @@ office:{
 /* ---------- MEDIEVAL ---------- */
 medieval:{
   preview:{pos:[4,17,30],look:[0,0,-3]},
-  name:'Castle Siege', icon:'🏰', tag:'Storm the walls, hold the drawbridge.',
+  name:'Castle Siege', icon:'🏰', tag:'A castle on solid ground: moat, drawbridge, keep and battlements. Hold the gate.',
   sky:{top:0x5d78c0,hor:0xffbf8f,bot:0xa07a70,sun:0xffd090,dir:[.35,.1,-1]}, fog:[0xf3c4a0,55,190], hemi:[0xffe2c8,0x6a5a4a,.75], sun:[0xffc890,2.5], exposure:1.02,
   tex:{0x9b958c:['brick',2.2,.03],0x8a847b:['brick',2.2,.03],0x7fa65a:['grass',5,0],0x8b5a32:['wood',2,.012],0x8a8a7a:['cobble',3,.03],0xd9b44a:['hay',1.2,.02],0x7a4a26:['wood',1.2,.01]},
   dust:0xb89a70,
-  spawns:[[0,0],[-12,0],[12,0],[0,14],[-14,14],[14,14],[10,-6],[-12,-6],[0,36],[16,-2]],
+  spawns:[[0,0],[-12,0],[12,0],[0,14],[-14,14],[14,14],[10,-6],[-12,-6],[0,37],[16,-2],[-14,38],[14,38]],
   props:[['barrel',-6,8],['barrel',-5,9],['xbarrel',14,-2],['crate',6,-4],['crate',7,-4],['ball',0,6],['pin',10.3,4],['pin',10.7,4.3],['pin',9.9,4.3],['pin',10.3,4.6],['crate',-16,-4]],
   names:{fists:'Gauntlets',bat:'Mace',sword:'Longsword',pistol:'Hand Crossbow',shotgun:'Blunderbuss',rifle:'Repeater Crossbow',rocket:'Hand Cannon',grenade:'Firepots'},
   tracer:{pistol:0x8b5a2b,shotgun:0xffd27a,rifle:0x8b5a2b},
   boom:{rocket:[0xffe2a0,0xff6a1a,0x6b6b6b],grenade:[0xffb347,0xff4500,0x553322]},
   build(){
     const stone=0x9b958c, stone2=0x8a847b, wood=0x8b5a32;
-    addBox(-24,-4,-24,24,0,24,0x7fa65a);
-    deco(cone(34,22,9),0x8a6a4a,0,-15,0,{rx:Math.PI,shadow:false});
+    // solid ground: castle grounds, a moat in front of the gate, open field beyond
+    addBox(-70,-2,-70,70,0,24,0x7fa65a); addBox(-70,-2,32,70,0,80,0x7fa65a);
+    addBox(-70,-2,24,70,-.9,32,0x6b5a40,{tex:'cobble',ts:3});
+    { const w=new THREE.Mesh(new THREE.PlaneGeometry(140,8),new THREE.MeshStandardMaterial({color:0x3f86a8,transparent:true,opacity:.72,roughness:.15,metalness:.1,emissive:0x0a2a3a,emissiveIntensity:.4})); w.rotation.x=-R90; w.position.set(0,-.38,28); mapGroup.add(w);
+      animated.push(t=>{ w.material.opacity=.68+Math.sin(t*1.3)*.05; w.position.y=-.38+Math.sin(t*.9)*.03; }); }
+    for (const z of [24,32]) deco(bx(140,.22,.35),stone2,0,.02,z+(z===24?.12:-.12),{cast:false,tex:'brick'});
+    for (const x of [-14,14]){ stairs(x,24,0,1,2,.9,stone2,-.9); stairs(x,32,0,-1,2,.9,stone2,-.9); }
+    // invisible walls: along the outside of the castle walls, and around the field
+    addBox(-32,0,-26,32,30,-24,0,{hidden:true,bound:true}); addBox(-26,0,-26,-24,30,24,0,{hidden:true,bound:true});
+    addBox(30,0,-26,32,30,46,0,{hidden:true,bound:true}); addBox(-32,0,24,-30,30,46,0,{hidden:true,bound:true}); addBox(-32,0,44,32,30,46,0,{hidden:true,bound:true});
     // north + west walls with battlements
     addBox(-24,0,-24,24,4,-21,stone); for (let x=-23;x<=23;x+=2) addBox(x-.4,4,-24,x+.4,4.8,-23.3,stone2);
     addBox(-24,0,-21,-21,4,24,stone); for (let z=-19;z<=23;z+=2) addBox(-24,4,z-.4,-23.3,4.8,z+.4,stone2);
@@ -830,7 +838,7 @@ medieval:{
     // south gate + drawbridge + outer platform
     addBox(-5,0,20,-2.5,5.5,24,stone); addBox(2.5,0,20,5,5.5,24,stone); addBox(-2.5,4.5,20,2.5,5.5,24,stone);
     addBox(-2.2,-.3,24,2.2,0,32,wood,{edges:0x5a3a1a}); for (const x of [-2,2]) deco(cyl(.05,.05,9),0x333333,x,3,28,{rx:-1.1});
-    addBox(-7,-3,32,7,0,40,0x8a8a7a); addBox(-5,0,36,-3.8,1.2,37.2,wood,{edges:0x5a3a1a}); addBox(3,0,34,4.2,1.2,35.2,wood,{edges:0x5a3a1a});
+    flat(-8,33,8,41,0,0xb8b0a4,'cobble',2.5); addBox(-5,0,36,-3.8,1.2,37.2,wood,{edges:0x5a3a1a}); addBox(3,0,34,4.2,1.2,35.2,wood,{edges:0x5a3a1a});
     // broken east wall
     addBox(21,0,-18,24,2,-12,stone); addBox(21,0,6,24,1.2,10,stone);
     // well, hay, stalls, barrels
@@ -839,7 +847,7 @@ medieval:{
     const stall=(x,z,c)=>{ addBox(x-2,0,z-.75,x+2,1,z+.75,wood); for (const sx of [-1.9,1.9]) deco(bx(.12,2.4,.12),wood,x+sx,1.2,z-.6); deco(bx(4.4,.12,2),c,x,2.5,z,{rx:.25}); };
     stall(-12,9,0xd04a4a); stall(12,10,0x4a7ad0);
     for (const [x,z] of [[-18,0],[-17.2,.9],[18,-8],[4,16]]) addBox(x-.45,0,z-.45,x+.45,1,z+.45,0x7a4a26,{edges:0x4a2a10});
-    for (const [x,z] of [[-60,-50],[-20,-80],[40,-70],[80,-30],[-80,10]]) deco(cone(18+Math.random()*10,30,6),0x8c7aa0,x,-12,z,{cast:false,env:.2});
+    for (const [x,z] of [[-60,-50],[-20,-80],[40,-70],[80,-30],[-80,10]]) deco(cone(22+Math.random()*12,34,6),0x8c7aa0,x*1.4,15,z*1.4-20,{cast:false,env:.2});
     // cobblestone paths
     flat(-2,-9,2,20,0,0xb8b0a4,'cobble',2.5); flat(-14,2,14,6,0,0xb8b0a4,'cobble',2.5);
     // torches + banners on the walls
@@ -849,10 +857,18 @@ medieval:{
     for (const [x,y,z] of [[-23,12,-23],[0,10,-12.5]]){ deco(cyl(.06,.06,3),0x5a3a1a,x,y,z); const f=deco(bx(1.6,.9,.05),0xc0392b,x+.85,y+1,z,{cast:false}); animated.push(t=>{ f.rotation.y=Math.sin(t*3+x)*.25; }); }
     // grass tufts (instanced)
     { const gm=new THREE.InstancedMesh(cone(.07,.4,4),mat(0x6f9a46,{rough:.9}),900); const M=new THREE.Matrix4(), q=new THREE.Quaternion(), sc=new V3(); let n=0;
-      for (let i=0;i<4000 && n<900;i++){ const x=(Math.random()-.5)*46, z=(Math.random()-.5)*46; const u=boxUnder(x,z,1); if (!u || u.max.y>.01 || Math.abs(x)<2.2&&z>-9&&z<20 || z>2&&z<6&&Math.abs(x)<14) continue;
+      for (let i=0;i<4000 && n<900;i++){ const x=(Math.random()-.5)*58, z=-23+Math.random()*67; const u=boxUnder(x,z,1); if (!u || u.max.y>.01 || u.max.y<-.01 || Math.abs(x)<2.2&&z>-9&&z<20 || z>2&&z<6&&Math.abs(x)<14) continue;
         q.setFromEuler(new THREE.Euler((Math.random()-.5)*.5,Math.random()*6,(Math.random()-.5)*.5)); const k=.6+Math.random()*.9; sc.set(k,k,k); M.compose(new V3(x,.15*k,z),q,sc); gm.setMatrixAt(n++,M); }
       gm.count=n; gm.receiveShadow=true; mapGroup.add(gm); grassMesh=gm; grassMesh.visible=quality==='high'; }
-    cloudsBelow(18,-10);
+    // countryside around the castle: tree lines, a fence round the field, a little village and rolling hills
+    const tree=(x,z,k)=>{ deco(cyl(.25*k,.35*k,2.4*k,8),0x6b4a33,x,1.2*k,z); deco(cone(1.6*k,3.6*k,9),0x3f7a3a,x,3.6*k,z,{rough:.9}); deco(cone(1.25*k,2.8*k,9),0x4f8a46,x,5*k,z,{rough:.9}); };
+    for (let i=0;i<70;i++){ const a=i*2.39996, r=36+((i*37)%40); const x=Math.cos(a)*r, z=Math.sin(a)*r*.9-6; if (z>24 || (Math.abs(x)<34 && z>-28)) continue; tree(x,z,1+((i*13)%7)/8); }
+    for (let x=-29;x<=29;x+=2.5){ deco(bx(.15,1.1,.15),0x7a5a3a,x,.55,44.6,{cast:false}); }
+    deco(bx(58,.1,.08),0x8b6a42,0,.95,44.6,{cast:false}); deco(bx(58,.1,.08),0x8b6a42,0,.5,44.6,{cast:false});
+    for (let z=-22;z<=44;z+=2.5) deco(bx(.15,1.1,.15),0x7a5a3a,29.6,.55,z,{cast:false});
+    deco(bx(.08,.1,66),0x8b6a42,29.6,.95,11,{cast:false}); deco(bx(.08,.1,66),0x8b6a42,29.6,.5,11,{cast:false});
+    for (const [x,z,c] of [[44,-34,0xe8dcc0],[52,-28,0xd9c7a0],[48,-44,0xe8dcc0],[-46,-38,0xd9c7a0],[-54,-30,0xe8dcc0]]){ deco(bx(5,3.4,4),c,x,1.7,z); deco(cone(4,2.6,4),0x8a3a2a,x,4.7,z,{ry:Math.PI/4,s:[1,1,.8]}); deco(bx(.9,1.6,.1),0x5a3a1a,x,.8,z+2.02); }
+    for (const [x,z,r] of [[-30,-75,40],[35,-85,48],[0,-110,60],[-80,-60,45],[85,-55,50]]){ const h=new THREE.Mesh(new THREE.SphereGeometry(r,24,12,0,Math.PI*2,0,Math.PI/2),mat(0x6f9a4a,{rough:1,env:.2})); h.scale.y=.32; h.position.set(x,-1,z); mapGroup.add(h); }
   },
   meshes:{
     bat:(a)=>{ a(cyl(.035,.035,.6),0x6b4a2a,0,0,.3,R90); a(new THREE.OctahedronGeometry(.17),0x6a6e75,0,0,.66); a(sph(.11),0x55595f,0,0,.66); },

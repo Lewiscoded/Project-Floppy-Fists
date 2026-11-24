@@ -30,7 +30,7 @@ Click **Choose map** on the main menu or in the lobby to open the map screen, wh
 | 🍳 Kitchen Chaos | A big family kitchen at ground level: counters with a sink and stove, a fridge, pantry shelves to climb, an island with bar stools and a dining table. | Oven Mitts, Rolling Pin, Butter Knife, Ketchup Squirter, Pepper Blaster, Sprinkle Gun, Champagne Cannon, Eggs |
 | 🏢 Office Meltdown | A ground-floor open-plan office with street windows: cubicles, a glass meeting room, a ping pong table, a lounge and a manager's loft to get thrown off. | Fists, Keyboard, Metal Ruler, Staple Gun, Fire Extinguisher, Paperclip SMG, Toner Launcher, Coffee Mugs |
 | 🏙️ Block Party | A street-level city block surrounded by buildings: a streetball court, corner store, brownstone stoops, a graffiti wall, string lights and an elevated train track. | Fists, Baseball Bat, Crowbar, Pistol, Sawed-Off, Uzi, RPG, Grenades |
-| 🏰 Castle Siege | A courtyard with walls to climb, a keep, a broken east wall and a drawbridge. | Gauntlets, Mace, Longsword, Hand Crossbow, Blunderbuss, Repeater Crossbow, Hand Cannon, Firepots |
+| 🏰 Castle Siege | A castle on solid ground in the countryside: a courtyard with walls to climb, a keep, a broken east wall, a drawbridge over a wadeable moat and an open field beyond the gate. | Gauntlets, Mace, Longsword, Hand Crossbow, Blunderbuss, Repeater Crossbow, Hand Cannon, Firepots |
 
 Themes only change how weapons look and what they're called. Damage and other stats are the same on every map.
 
