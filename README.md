@@ -64,7 +64,7 @@ Every key can be rebound in **⚙ Settings**. These are the defaults:
 ## Sandbox mode
 Pick **Sandbox** as the mode in the lobby. It works online, and everyone in the room can spawn things.
 - **Weapon wheel:** hold X to pick any of the map's 8 weapons, so you aren't stuck with your loadout.
-- **Spawn menu:** press Z to spawn crates, barrels, explosive barrels, balls, bowling pins and bots. Click to place, R to rotate, and right click to stop. **Remove** deletes whatever you click, **Undo** takes back your last spawn, and **Clear all** wipes everything that's been spawned. There's a limit of 40 spawned things.
+- **Spawn menu:** press Z to open the spawn bar along the bottom of the screen, then spawn crates, barrels, explosive barrels, balls, bowling pins and bots. Click to place, R to rotate, and right click to stop. **Remove** deletes whatever you click, **Undo** takes back your last spawn, and **Clear all** wipes everything that's been spawned. There's a limit of 40 spawned things.
 - **Trampolines:** jump on one and you bounce higher each time. Props bounce too.
 - **Launch pads:** step on one and it fires you (or a prop) about 10 m in the direction of its arrows. Kills from a launch pad count for whoever placed it.
 - **Fans:** blow fighters and props along their path. Line them up with a ledge for some fun.

@@ -143,14 +143,22 @@
   #wwheel .wwi.cur{border-color:rgba(255,210,63,.45)} #wwheel .wwi.on{background:#ffd23f;color:#1d2433;border-color:#fff} #wwheel .wwi.on small{color:#5a4a10}
   #wwheel .wwc{position:absolute;left:-62px;top:-62px;width:124px;height:124px;border-radius:50%;background:rgba(29,36,51,.78);padding:0 8px;text-align:center;line-height:1.05;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Lilita One';font-size:20px;text-shadow:0 2px 6px rgba(0,0,0,.6);pointer-events:none}
   #wwheel .wwc small{font-family:inherit;font-size:11px;opacity:.75}
-  #spawnMenu{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:228px;background:rgba(29,36,51,.93);color:#fff;border-radius:18px;padding:12px;z-index:5;pointer-events:auto}
-  #spawnMenu h3{margin:0 0 6px;font-family:'Lilita One';font-weight:400;font-size:20px;display:flex;justify-content:space-between;align-items:baseline}
-  #spawnMenu h3 small{font-family:inherit;font-size:11px;opacity:.6}
-  #spawnMenu .sbc{font-size:11px;font-weight:800;color:#9aa6bb;text-transform:uppercase;letter-spacing:1px;margin:8px 2px 4px}
-  #spawnMenu .sbg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-  #spawnMenu button{background:rgba(255,255,255,.1);color:#fff;border:2px solid transparent;border-radius:10px;padding:5px 2px;font:700 10.5px inherit;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
-  #spawnMenu button span{font-size:20px} #spawnMenu button:hover{background:rgba(255,255,255,.2)} #spawnMenu button.sel{background:#ffd23f;color:#1d2433;border-color:#fff}
-  #spawnMenu .sbh{font-size:11px;color:#c5cddb;margin-top:9px;line-height:1.4} #spawnMenu kbd{background:#fff;color:#1d2433;border-radius:4px;padding:0 4px;font-size:10px}
+  #spawnMenu{width:max-content;background:rgba(29,36,51,.92);color:#fff;border-radius:18px;padding:8px 10px 10px;pointer-events:auto;max-width:calc(100vw - 24px);box-sizing:border-box;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  #spawnMenu .sbt{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#c5cddb;margin:0 2px 7px;white-space:nowrap}
+  #spawnMenu .sbt b{font-family:'Lilita One',system-ui;font-weight:400;font-size:17px;color:#ffd23f;letter-spacing:.5px}
+  #spawnMenu .sbt .hint{flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis}
+  #spawnMenu .sbt .cnt{color:#9aa6bb}
+  #spawnMenu kbd{background:#fff;color:#1d2433;border-radius:4px;padding:0 5px;font:800 11px system-ui}
+  #spawnMenu .sbrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  #spawnMenu .sbgrp{display:flex;flex-direction:column;gap:4px}
+  #spawnMenu .sbc{font-size:10px;font-weight:800;color:#8b96aa;text-transform:uppercase;letter-spacing:1px;padding-left:2px}
+  #spawnMenu .sbg{display:flex;gap:5px}
+  #spawnMenu button{width:62px;height:58px;box-sizing:border-box;background:rgba(255,255,255,.09);color:#fff;border:2px solid transparent;border-radius:12px;padding:4px 2px 3px;font:700 11px/1.05 system-ui,sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;white-space:nowrap;overflow:hidden}
+  #spawnMenu button span{font-size:22px;line-height:1}
+  #spawnMenu button:hover{background:rgba(255,255,255,.2)}
+  #spawnMenu button.sel{background:#ffd23f;color:#1d2433;border-color:#fff}
+  #spawnMenu .sbgrp.tools button{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  @media (max-width:900px){ #spawnMenu button{width:56px;height:50px;font-size:9.5px} #spawnMenu button span{font-size:18px} #spawnMenu .sbt .hint{display:none} }
   #banner2{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#c73c3c;color:#fff;border-radius:14px;padding:8px 16px;font-weight:800;z-index:30}
   .lgrid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin:12px 0}
   @media (max-width:640px){.lgrid{grid-template-columns:1fr}}
@@ -197,9 +205,9 @@
   <div id="chatBox" class="hidden"><input id="chatIn" maxlength="80" placeholder="Say something… (Enter to send, Esc to cancel)"></div>
   <div id="wheel" class="hidden"></div>
   <div id="wwheel" class="hidden"></div>
-  <div id="spawnMenu" class="hidden"></div>
   <div id="center"></div>
   <div id="bottom">
+    <div id="spawnMenu" class="hidden"></div>
     <div id="slots"></div>
     <div id="guardbar" class="hidden"><div id="guardfill"></div></div>
     <div id="hpbar"><div id="hpfill"></div><span id="hptxt">100</span></div>
@@ -1752,10 +1760,10 @@ const GADGET_DEFS={
   fan:{name:'Fan',len:11,wr:1.7},
 };
 const SPAWN_ITEMS=[
-  ['Props',[['crate','📦','Crate'],['barrel','🛢️','Barrel'],['xbarrel','🧨','Explosive barrel'],['ball','⚽','Ball'],['pin','🎳','Bowling pin']]],
-  ['Gadgets',[['tramp','🤸','Trampoline'],['pad','🚀','Launch pad'],['fan','🌀','Fan']]],
+  ['Props',[['crate','📦','Crate'],['barrel','🛢️','Barrel'],['xbarrel','🧨','TNT barrel'],['ball','⚽','Ball'],['pin','🎳','Pin']]],
+  ['Gadgets',[['tramp','🤸','Trampoline'],['pad','🚀','Launcher'],['fan','🌀','Fan']]],
   ['Fighters',[['bot','🤖','Bot']]],
-  ['Tools',[['remove','🗑️','Remove'],['undo','↩️','Undo'],['clear','🧹','Clear all']]],
+  ['Tools',[['remove','🗑️','Remove'],['undo','↩️','Undo'],['clear','🧹','Clear']]],
 ];
 const MAX_SPAWNED=40;
 const isSandbox=()=>state==='play'&&match.mode==='sb';
@@ -2658,9 +2666,10 @@ let spawnOpen=false, placing=null, placeYaw=0, ghost=null, ghostKind=null;
 const placeP=new V3();
 function renderSpawn(){
   const el=$('spawnMenu'); el.classList.toggle('hidden',!spawnOpen); $('help').style.visibility=spawnOpen?'hidden':''; if (!spawnOpen) return;
-  el.innerHTML=`<h3>Spawn <small>${kb('spawn')} to close</small></h3>`+SPAWN_ITEMS.map(([cat,items])=>`<div class="sbc">${cat}</div><div class="sbg">${items.map(([k,ic,nm])=>
-    `<button data-k="${k}" class="${placing===k?'sel':''}"><span>${ic}</span>${esc(k==='ball'&&mapKey==='hood'?'Basketball':nm)}</button>`).join('')}</div>`).join('')
-    +`<div class="sbh">${placing?(placing==='remove'?'Click a prop, gadget or bot to remove it':`Click to place · <kbd>${kb('rotate')}</kbd> rotate · right click to stop`):'Pick something, then click in the world'}<br>${spawnedCount()}/${MAX_SPAWNED} spawned</div>`;
+  const hint=placing?(placing==='remove'?'Click a prop, gadget or bot to remove it':`Click to place · <kbd>${kb('rotate')}</kbd> rotate · right click to stop`):'Pick something, then click in the world';
+  el.innerHTML=`<div class="sbt"><b>SPAWN</b><span class="hint">${hint}</span><span class="cnt">${spawnedCount()}/${MAX_SPAWNED}</span><kbd>${kb('spawn')}</kbd></div><div class="sbrow">`
+    +SPAWN_ITEMS.map(([cat,items])=>`<div class="sbgrp ${cat==='Tools'?'tools':''}"><div class="sbc">${cat}</div><div class="sbg">${items.map(([k,ic,nm])=>
+      `<button data-k="${k}" class="${placing===k?'sel':''}" title="${esc(nm)}"><span>${ic}</span>${esc(k==='ball'&&mapKey==='hood'?'Hoop ball':nm)}</button>`).join('')}</div></div>`).join('')+`</div>`;
 }
 $('spawnMenu').addEventListener('mousedown',e=>{
   e.preventDefault(); e.stopPropagation();
