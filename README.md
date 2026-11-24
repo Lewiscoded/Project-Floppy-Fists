@@ -27,8 +27,8 @@ Click **Choose map** on the main menu or in the lobby to open the map screen, wh
 
 | Map | Setting | Weapons become |
 |---|---|---|
-| 🍳 Kitchen Chaos | Tiny fighters on a giant counter. Fall in the sink or off the edge. | Oven Mitts, Rolling Pin, Butter Knife, Ketchup Squirter, Pepper Blaster, Sprinkle Gun, Champagne Cannon, Eggs |
-| 🏢 Office Meltdown | A half-built skyscraper floor with cubicles, an open elevator shaft and a steel beam out over the city. | Fists, Keyboard, Metal Ruler, Staple Gun, Fire Extinguisher, Paperclip SMG, Toner Launcher, Coffee Mugs |
+| 🍳 Kitchen Chaos | A big family kitchen at ground level: counters with a sink and stove, a fridge, pantry shelves to climb, an island with bar stools and a dining table. | Oven Mitts, Rolling Pin, Butter Knife, Ketchup Squirter, Pepper Blaster, Sprinkle Gun, Champagne Cannon, Eggs |
+| 🏢 Office Meltdown | A ground-floor open-plan office with street windows: cubicles, a glass meeting room, a ping pong table, a lounge and a manager's loft to get thrown off. | Fists, Keyboard, Metal Ruler, Staple Gun, Fire Extinguisher, Paperclip SMG, Toner Launcher, Coffee Mugs |
 | 🏙️ Block Party | A street-level city block surrounded by buildings: a streetball court, corner store, brownstone stoops, a graffiti wall, string lights and an elevated train track. | Fists, Baseball Bat, Crowbar, Pistol, Sawed-Off, Uzi, RPG, Grenades |
 | 🏰 Castle Siege | A courtyard with walls to climb, a keep, a broken east wall and a drawbridge. | Gauntlets, Mace, Longsword, Hand Crossbow, Blunderbuss, Repeater Crossbow, Hand Cannon, Firepots |
 
