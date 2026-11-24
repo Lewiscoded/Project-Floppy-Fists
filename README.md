@@ -9,6 +9,7 @@ A wobbly ragdoll sandbox brawler built with three.js. Pick a map and a loadout, 
 ### Match modes
 - **Deathmatch:** first to the kill limit (5–50), with an optional time limit.
 - **Last Standing:** everyone gets 1–9 lives, and the last fighter with lives left wins. Eliminated players spectate.
+- **Sandbox:** no score or time limit and every weapon unlocked. Spawn props and gadgets, fly the camera around and mess about. Bots can fight or just stand there as training dummies.
 - **Melee only:** a weapons option that works with either mode. Everyone, bots included, fights with just their melee weapon.
 
 After each match there's a results screen with a podium, awards (most damage, longest flight, most headshots, most ring-outs) and full stats. Your lifetime record (matches, wins, kills, K/D, falls, damage) is saved in your browser.
@@ -49,6 +50,9 @@ Every key can be rebound in **⚙ Settings**. These are the defaults:
 | Loadout | Q | Y |
 | Chat / quick chat / emotes | Enter / T / G | D-pad |
 | Menu | Esc | Start |
+| Weapon wheel (sandbox) | Hold X, point at a weapon, let go | |
+| Spawn menu (sandbox) | Z, pick an item, click to place, R to rotate | |
+| Free camera (sandbox) | C, then WASD + Space/Shift to fly, hold right click to look, wheel for speed | |
 
 ## Physics playground
 - **Movable props on every map:** crates, barrels, balls and bowling pins (10–11 per map, themed). Shoot them, punch them, blast them or kick them around. Knocked-out props respawn.
@@ -56,6 +60,16 @@ Every key can be rebound in **⚙ Settings**. These are the defaults:
 - **Grab and throw:** hold E to grab a fighter or prop with both hands and drag it around. Hold Space to lift it overhead, then let go of E to throw it where you're aiming. You can throw your friends off the map.
 - **Struggle:** if someone grabs you, mash Space or click 5 times to break free. The grabber can't grab you again for a couple of seconds.
 - **Online:** the host owns the props and everyone sees the same ones. Each player applies grabs and throws to their own fighter, so it all stays in sync.
+
+## Sandbox mode
+Pick **Sandbox** as the mode in the lobby. It works online, and everyone in the room can spawn things.
+- **Weapon wheel:** hold X to pick any of the map's 8 weapons, so you aren't stuck with your loadout.
+- **Spawn menu:** press Z to spawn crates, barrels, explosive barrels, balls, bowling pins and bots. Click to place, R to rotate, and right click to stop. **Remove** deletes whatever you click, **Undo** takes back your last spawn, and **Clear all** wipes everything that's been spawned. There's a limit of 40 spawned things.
+- **Trampolines:** jump on one and you bounce higher each time. Props bounce too.
+- **Launch pads:** step on one and it fires you (or a prop) about 10 m in the direction of its arrows. Kills from a launch pad count for whoever placed it.
+- **Fans:** blow fighters and props along their path. Line them up with a ledge for some fun.
+- **Free camera:** press C to fly the camera anywhere. It's handy for building setups and watching the chaos.
+- Respawns take 1.5 s, and Sandbox matches don't count toward your lifetime stats.
 
 ## Customization
 Click **👕 Customize** on the menu, in the lobby or from the Esc menu. You'll see a live 3D preview that you can drag to spin.

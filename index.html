@@ -137,6 +137,20 @@
   #wheel{position:absolute;left:50%;top:58%;transform:translateX(-50%);background:rgba(29,36,51,.92);color:#fff;border-radius:18px;padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;max-width:560px;justify-content:center}
   #wheel span{background:rgba(255,255,255,.12);border-radius:10px;padding:6px 10px;font-weight:800;font-size:14px}
   #wheel span b{color:#ffd23f;margin-right:6px}
+  #wwheel{position:absolute;left:50%;top:50%;width:0;height:0;z-index:6}
+  #wwheel .wwi{position:absolute;left:-58px;top:-44px;width:116px;height:88px;border-radius:50%;background:rgba(29,36,51,.86);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:13px;cursor:pointer;border:3px solid transparent;transition:background .08s,border-color .08s;text-align:center;line-height:1.1}
+  #wwheel .wwi span{font-size:24px} #wwheel .wwi small{font-size:10px;color:#9aa6bb;font-weight:700;margin-top:2px}
+  #wwheel .wwi.cur{border-color:rgba(255,210,63,.45)} #wwheel .wwi.on{background:#ffd23f;color:#1d2433;border-color:#fff} #wwheel .wwi.on small{color:#5a4a10}
+  #wwheel .wwc{position:absolute;left:-62px;top:-62px;width:124px;height:124px;border-radius:50%;background:rgba(29,36,51,.78);padding:0 8px;text-align:center;line-height:1.05;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Lilita One';font-size:20px;text-shadow:0 2px 6px rgba(0,0,0,.6);pointer-events:none}
+  #wwheel .wwc small{font-family:inherit;font-size:11px;opacity:.75}
+  #spawnMenu{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:228px;background:rgba(29,36,51,.93);color:#fff;border-radius:18px;padding:12px;z-index:5;pointer-events:auto}
+  #spawnMenu h3{margin:0 0 6px;font-family:'Lilita One';font-weight:400;font-size:20px;display:flex;justify-content:space-between;align-items:baseline}
+  #spawnMenu h3 small{font-family:inherit;font-size:11px;opacity:.6}
+  #spawnMenu .sbc{font-size:11px;font-weight:800;color:#9aa6bb;text-transform:uppercase;letter-spacing:1px;margin:8px 2px 4px}
+  #spawnMenu .sbg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+  #spawnMenu button{background:rgba(255,255,255,.1);color:#fff;border:2px solid transparent;border-radius:10px;padding:5px 2px;font:700 10.5px inherit;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
+  #spawnMenu button span{font-size:20px} #spawnMenu button:hover{background:rgba(255,255,255,.2)} #spawnMenu button.sel{background:#ffd23f;color:#1d2433;border-color:#fff}
+  #spawnMenu .sbh{font-size:11px;color:#c5cddb;margin-top:9px;line-height:1.4} #spawnMenu kbd{background:#fff;color:#1d2433;border-radius:4px;padding:0 4px;font-size:10px}
   #banner2{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#c73c3c;color:#fff;border-radius:14px;padding:8px 16px;font-weight:800;z-index:30}
   .lgrid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin:12px 0}
   @media (max-width:640px){.lgrid{grid-template-columns:1fr}}
@@ -182,6 +196,8 @@
   <div id="ov"><div id="xhair" class="hidden"><i></i><i></i><i></i><i></i><div class="hm"><b style="transform:rotate(45deg)"></b><b style="transform:rotate(-45deg)"></b></div></div></div>
   <div id="chatBox" class="hidden"><input id="chatIn" maxlength="80" placeholder="Say something… (Enter to send, Esc to cancel)"></div>
   <div id="wheel" class="hidden"></div>
+  <div id="wwheel" class="hidden"></div>
+  <div id="spawnMenu" class="hidden"></div>
   <div id="center"></div>
   <div id="bottom">
     <div id="slots"></div>
@@ -221,7 +237,8 @@
       <tr><td>Block / parry</td><td>Hold right click or <kbd>F</kbd> with a melee weapon · tap it just before a hit lands to parry</td></tr>
       <tr><td>Switch weapon</td><td><kbd>1</kbd> melee · <kbd>2</kbd> gun · <kbd>3</kbd> explosive, or the mouse wheel</td></tr>
       <tr><td>Jump / grab ledge</td><td><kbd>Space</kbd> · hold <kbd>E</kbd> while falling, then hold <kbd>Space</kbd> to climb</td></tr>
-      <tr><td>Loadout / menu</td><td><kbd>Q</kbd> · <kbd>Esc</kbd></td></tr>
+      <tr><td>Sandbox mode</td><td>hold <kbd>${kb('wheel')}</kbd> weapon wheel · <kbd>${kb('spawn')}</kbd> spawn menu (<kbd>${kb('rotate')}</kbd> rotates) · <kbd>${kb('fly')}</kbd> free camera</td></tr>
+    <tr><td>Loadout / menu</td><td><kbd>Q</kbd> · <kbd>Esc</kbd></td></tr>
     </table>
   </div>
 </div>
@@ -1269,6 +1286,7 @@ function step(){
   const all=[...bodies.values()], LP=localProps(), AP=[...props.values()];
   for (const r of L){ for (let i=0;i<N;i++) r.vel[i].subVectors(r.pos[i],r.prev[i]).divideScalar(DT); forces(r); }
   for (const pr of LP) propStepForces(pr);
+  if (gadgets.size) gadgetForces(L,LP);
   applyTethers();
   for (const r of L) integrate(r);
   for (const pr of LP) if (!pr.dead) propIntegrate(pr);
@@ -1289,6 +1307,9 @@ function step(){
   for (const pr of LP) if (!pr.dead) propWorld(pr,true);
   for (const r of L){
     r.ground-=DT; collideWorld(r,true);
+  }
+  if (gadgets.size) gadgetContacts(L,LP);
+  for (const r of L){
     for (let gi=0;gi<2;gi++) if (r.grabs[gi]){ const h=gi?RHAND:LHAND; r.pos[h].copy(r.grabs[gi]); r.prev[h].copy(r.grabs[gi]); }
     checkMelee(r); tryGrab(r);
     r.punchT-=DT; r.jumpCd-=DT; r.stun-=DT;
@@ -1356,7 +1377,7 @@ function applyParried(a,fx,fz){
 function flashMsg(b,t){ b.msg=t; b.msgT=.9; }
 function kill(o,by,wname,fell){
   if (o.dead) return;
-  o.dead=true; o.hp=0; o.deadT=3.5; o.stun=1e9; o.deaths++; o.grabs=[null,null]; o.emoteT=0;
+  o.dead=true; o.hp=0; o.deadT=match.mode==='sb'&&state==='play'?1.5:3.5; o.stun=1e9; o.deaths++; o.grabs=[null,null]; o.emoteT=0;
   if (by===o.id) by=null;
   if (fell) o.falls++;
   o.lastKiller=by;
@@ -1626,7 +1647,7 @@ function spawnMapProps(){
   if (net.mode==='client') return;
   for (const [kind,x,z] of (THEME.props||[])){ const id=net.id+':pr'+(++propSeq); props.set(id,new Prop(id,kind,x,z,undefined,true)); }
 }
-function clearProps(){ for (const p of props.values()) p.dispose(); props.clear(); }
+function clearProps(){ for (const p of props.values()) p.dispose(); props.clear(); clearGadgets(); resetSandboxUI(); }
 // --- physics (local props only) ---
 function propStepForces(pr){ for (let i=0;i<pr.pos.length;i++){ pr.vel[i].subVectors(pr.pos[i],pr.prev[i]).divideScalar(DT); pr.acc[i].set(0,-G,0); } }
 function propIntegrate(pr){
@@ -1695,6 +1716,7 @@ function updateProps(dt){
   for (const pr of props.values()){
     if (pr.local){
       pr.readTransform();
+      if (pr.spawned && (pr.dead || pr.c.y<-20)){ removeThing(pr.id); continue; }
       if (pr.dead){ pr.deadT-=dt; if (pr.deadT<=0){ pr.dead=false; pr.hp=pr.def.hp; pr.mesh.visible=true; const b=boxUnder(pr.home[0],pr.home[1],100); pr.place(new V3(pr.home[0],(b?b.max.y:0)+1.2,pr.home[1]),pr.q); } }
       else if (pr.c.y<-20){ const b=boxUnder(pr.home[0],pr.home[1],100); pr.place(new V3(pr.home[0],(b?b.max.y:0)+1.5,pr.home[1]),pr.q); }
     } else {
@@ -1720,6 +1742,171 @@ function onPropState(m){
     pr.tc.set(x,y,z); pr.tq.set(qx,qy,qz,qw); pr.seen=now(); pr.dead=!!dead;
   }
 }
+
+/* ===================== sandbox: gadgets + spawning ===================== */
+// gadgets are static world toys owned by the host; every peer applies their effects to its own bodies/props
+const gadgets=new Map(); let gadSeq=0, spawnLog=[];
+const GADGET_DEFS={
+  tramp:{name:'Trampoline',r:1.25,h:.5},
+  pad:{name:'Launch Pad',hs:.85,h:.14},
+  fan:{name:'Fan',len:11,wr:1.7},
+};
+const SPAWN_ITEMS=[
+  ['Props',[['crate','📦','Crate'],['barrel','🛢️','Barrel'],['xbarrel','🧨','Explosive barrel'],['ball','⚽','Ball'],['pin','🎳','Bowling pin']]],
+  ['Gadgets',[['tramp','🤸','Trampoline'],['pad','🚀','Launch pad'],['fan','🌀','Fan']]],
+  ['Fighters',[['bot','🤖','Bot']]],
+  ['Tools',[['remove','🗑️','Remove'],['undo','↩️','Undo'],['clear','🧹','Clear all']]],
+];
+const MAX_SPAWNED=40;
+const isSandbox=()=>state==='play'&&match.mode==='sb';
+function gadgetMesh(kind){
+  const g=new THREE.Group(); const M=(geo,col,o={})=>{ const m=new THREE.Mesh(geo,mat(col,o)); m.castShadow=m.receiveShadow=true; g.add(m); return m; };
+  if (kind==='tramp'){
+    const D=GADGET_DEFS.tramp;
+    M(new THREE.TorusGeometry(D.r,.09,10,32),0x2f7de1,{rough:.4}).rotation.x=R90; g.children[0].position.y=D.h;
+    const bed=M(new THREE.CircleGeometry(D.r-.04,32),0x1d2433,{rough:.9}); bed.rotation.x=-R90; bed.position.y=D.h-.03; g.userData.bed=bed;
+    for (let i=0;i<6;i++){ const a=i/6*Math.PI*2; const l=M(new THREE.CylinderGeometry(.045,.045,D.h,8),0x9aa3b2,{metal:.6,rough:.3}); l.position.set(Math.cos(a)*(D.r-.05),D.h/2,Math.sin(a)*(D.r-.05)); }
+  } else if (kind==='pad'){
+    const D=GADGET_DEFS.pad;
+    M(new THREE.BoxGeometry(D.hs*2,D.h,D.hs*2),0x3a3f4b,{metal:.4,rough:.4}).position.y=D.h/2;
+    const glow=new THREE.MeshStandardMaterial({color:0xffb020,emissive:0xff9a00,emissiveIntensity:1.4,roughness:.5});
+    for (let i=0;i<3;i++){ const s=new THREE.Shape(); s.moveTo(-.45,0); s.lineTo(0,.32); s.lineTo(.45,0); s.lineTo(.45,.14); s.lineTo(0,.46); s.lineTo(-.45,.14); s.closePath();
+      const m=new THREE.Mesh(new THREE.ShapeGeometry(s),glow); m.rotation.x=-R90; m.position.set(0,D.h+.005,.45-i*.42); g.add(m); }
+    g.userData.glow=glow;
+  } else if (kind==='fan'){
+    M(new THREE.BoxGeometry(.7,.12,.7),0x4b5160,{metal:.5,rough:.4}).position.y=.06;
+    M(new THREE.CylinderGeometry(.07,.07,.75,10),0x9aa3b2,{metal:.7,rough:.3}).position.y=.45;
+    const ring=M(new THREE.TorusGeometry(.62,.06,10,28),0x2fb5a8,{rough:.4}); ring.position.y=1.05;
+    const hub=new THREE.Group(); hub.position.set(0,1.05,.04); g.add(hub);
+    const bl=mat(0xf2f4f8,{rough:.35});
+    for (let i=0;i<4;i++){ const b=new THREE.Mesh(new THREE.BoxGeometry(.18,.5,.03),bl); b.position.y=.27; const piv=new THREE.Group(); piv.rotation.z=i*R90; b.rotation.y=.4; piv.add(b); hub.add(piv); }
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(.09,12,8),mat(0x2fb5a8)); hub.add(cap);
+    g.userData.hub=hub;
+    // wind streaks
+    const sm=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.22,depthWrite:false});
+    g.userData.streaks=[];
+    for (let i=0;i<7;i++){ const s=new THREE.Mesh(new THREE.BoxGeometry(.03,.03,.9),sm); s.userData.o=[(Math.random()-.5)*1.6,(Math.random()-.5)*1.2+1.05,Math.random()*GADGET_DEFS.fan.len]; g.add(s); g.userData.streaks.push(s); }
+  } else if (kind==='bot'){
+    M(new THREE.CapsuleGeometry(.32,.9,4,10),0xb57cff).position.y=.8; M(new THREE.SphereGeometry(.26,12,8),0xb57cff).position.y=1.65;
+  } else if (kind==='remove'){
+    const m=new THREE.Mesh(new THREE.RingGeometry(.55,.75,28),new THREE.MeshBasicMaterial({color:0xff4040,transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false})); m.rotation.x=-R90; m.position.y=.04; g.add(m);
+  }
+  scene.add(g); return g;
+}
+function addGadget(id,kind,x,y,z,yaw,by){
+  if (gadgets.has(id) || !GADGET_DEFS[kind]) return;
+  const mesh=gadgetMesh(kind); mesh.position.set(x,y,z); mesh.rotation.y=yaw;
+  const G0={id,kind,x,y,z,yaw,by,mesh,dir:new V3(Math.sin(yaw),0,Math.cos(yaw)),cool:new Map(),box:null};
+  if (kind==='fan'){ const b={min:new V3(x-.4,y,z-.4),max:new V3(x+.4,y+1.25,z+.4),bound:false,gadget:id}; BOXES.push(b); G0.box=b; }
+  gadgets.set(id,G0);
+}
+function removeGadget(id){
+  const g=gadgets.get(id); if (!g) return;
+  scene.remove(g.mesh); if (g.box){ const i=BOXES.indexOf(g.box); if (i>=0) BOXES.splice(i,1); }
+  gadgets.delete(id);
+}
+function clearGadgets(){ for (const id of [...gadgets.keys()]) removeGadget(id); spawnLog=[]; }
+function sendGadgets(){ if (net.mode==='host') send({t:'gad',a:[...gadgets.values()].map(g=>[g.id,g.kind,r2(g.x),r2(g.y),r2(g.z),+g.yaw.toFixed(3),g.by])}); }
+function onGadgets(m){
+  if (state!=='play') return;
+  const keep=new Set(m.a.map(e=>e[0]));
+  for (const id of [...gadgets.keys()]) if (!keep.has(id)) removeGadget(id);
+  for (const [id,kind,x,y,z,yaw,by] of m.a) addGadget(id,kind,x,y,z,yaw,by);
+}
+// --- effects (called from the physics step) ---
+function gadgetForces(L,LP){
+  for (const g of gadgets.values()){
+    if (g.kind!=='fan') continue;
+    const D=GADGET_DEFS.fan, ox=g.x+g.dir.x*.3, oy=g.y+1.05, oz=g.z+g.dir.z*.3;
+    const push=(p,a,s)=>{ const rx=p.x-ox, ry=p.y-oy, rz=p.z-oz, al=rx*g.dir.x+rz*g.dir.z; if (al<0||al>D.len) return;
+      const px=rx-g.dir.x*al, pz=rz-g.dir.z*al; if (px*px+pz*pz+ry*ry*.6>D.wr*D.wr) return;
+      const f=58*s*(1-al/D.len*.75); a.x+=g.dir.x*f; a.z+=g.dir.z*f; a.y+=f*.32; };
+    for (const r of L) for (let i=0;i<N;i++) push(r.pos[i],r.acc[i],1);
+    for (const pr of LP) if (!pr.dead) for (let i=0;i<pr.pos.length;i++) push(pr.pos[i],pr.acc[i],Math.min(1.5,pr.w*.6));
+  }
+}
+function gadgetContacts(L,LP){
+  const t=now();
+  for (const g of gadgets.values()){
+    if (g.kind==='tramp'){
+      const D=GADGET_DEFS.tramp, top=g.y+D.h;
+      const surf=(p,q,rad)=>{ const dx=p.x-g.x, dz=p.z-g.z, hd=Math.hypot(dx,dz); if (hd>D.r+rad || p.y>top+rad || p.y<g.y-.05) return 0;
+        if (p.y>top-.4 && hd<D.r){ p.y=top+rad; return 1; }
+        const k=(D.r+rad)/(hd||1e-3); p.x=g.x+dx*k; p.z=g.z+dz*k; return 0; };
+      for (const r of L){
+        let hit=false, vy=0;
+        for (let i=0;i<N;i++){ const vyi=(r.pos[i].y-r.prev[i].y)/DT; if (surf(r.pos[i],r.prev[i],RAD[i])){ hit=true; vy=Math.min(vy,vyi); if (i===LFOOT||i===RFOOT){ r.ground=.12; r.groundY=top; } } }
+        if (hit && vy<-1.5 && t-(g.cool.get(r.id)||0)>220){
+          g.cool.set(r.id,t); const up=clamp(-vy*1.12,10,21);
+          for (let i=0;i<N;i++){ const cur=(r.pos[i].y-r.prev[i].y)/DT; addVel(r,i,0,up-cur,0); }
+          sfx(180+up*14,.12,'sine',.07*volAt(r.pos[PELV])); g.squish=1;
+        }
+      }
+      for (const pr of LP){ if (pr.dead) continue;
+        for (let i=0;i<pr.pos.length;i++){ const p=pr.pos[i], q=pr.prev[i], vy=(p.y-q.y)/DT; if (surf(p,q,pr.rad[i]) && vy<-1){ const up=clamp(-vy*1.1,7,18); q.y=p.y-up*DT; g.squish=1; } } }
+    } else if (g.kind==='pad'){
+      const D=GADGET_DEFS.pad, top=g.y+D.h;
+      const inside=p=>{ const dx=p.x-g.x, dz=p.z-g.z; const ax=dx*Math.cos(g.yaw)-dz*Math.sin(g.yaw), az=dx*Math.sin(g.yaw)+dz*Math.cos(g.yaw); return Math.abs(ax)<D.hs+.1 && Math.abs(az)<D.hs+.1 && p.y>g.y-.1 && p.y<top+.55; };
+      for (const r of L){
+        if (r.dead || t-(g.cool.get(r.id)||0)<900) continue;
+        if (!(inside(r.pos[LFOOT])||inside(r.pos[RFOOT])||inside(r.pos[PELV]))) continue;
+        g.cool.set(r.id,t); g.flash=1;
+        for (let i=0;i<N;i++){ const v=r.vel[i]; addVel(r,i,g.dir.x*16-v.x*.7,13-v.y,g.dir.z*16-v.z*.7); }
+        r.stun=Math.max(r.stun,.45);
+        if (g.by && g.by!==r.id){ r.lastHitBy=g.by; r.lastHitT=t; r.lastHitW='Launch Pad'; }
+        sfx(320,.25,'sawtooth',.08*volAt(r.pos[PELV])); sfx(640,.2,'triangle',.06*volAt(r.pos[PELV]));
+      }
+      for (const pr of LP){
+        if (pr.dead || t-(g.cool.get(pr.id)||0)<900 || !inside(pr.c)) continue;
+        g.cool.set(pr.id,t); g.flash=1;
+        for (let i=0;i<pr.pos.length;i++){ const v=pr.vel[i]; addVel(pr,i,g.dir.x*14-v.x*.7,11-v.y,g.dir.z*14-v.z*.7); }
+        if (g.by) pr.lastHitBy=g.by;
+      }
+    }
+  }
+}
+function animateGadgets(dt){
+  const tt=now()/1000;
+  for (const g of gadgets.values()){
+    const u=g.mesh.userData;
+    if (g.kind==='fan'){ u.hub.rotation.z-=dt*22; for (const s of u.streaks){ const o=s.userData.o; o[2]=(o[2]+dt*9)%GADGET_DEFS.fan.len; s.position.set(o[0],o[1],.4+o[2]); s.material.opacity=.22*(1-o[2]/GADGET_DEFS.fan.len); } }
+    if (g.kind==='pad'){ g.flash=Math.max(0,(g.flash||0)-dt*2.5); u.glow.emissiveIntensity=1.1+Math.sin(tt*5)*.35+(g.flash||0)*3; }
+    if (g.kind==='tramp'){ g.squish=Math.max(0,(g.squish||0)-dt*4); u.bed.position.y=GADGET_DEFS.tramp.h-.03-g.squish*.18; }
+  }
+}
+// --- spawning (the host does it; others ask) ---
+function spawnedCount(){ return [...props.values()].filter(p=>p.spawned).length+gadgets.size; }
+function sandboxReq(m){
+  m.by=myBodyId;
+  if (net.mode==='client') send({...m,t:'sbx'}); else doSandbox(m);
+}
+function doSandbox(m){
+  if (!isSandbox() || net.mode==='client') return;
+  const {what,by}=m;
+  if (what==='undo'){ for (let i=spawnLog.length-1;i>=0;i--){ const e=spawnLog[i]; if (e.by!==by) continue; spawnLog.splice(i,1); if (removeThing(e.id)) return; } return; }
+  if (what==='clear'){ for (const pr of [...props.values()]) if (pr.spawned) removeThing(pr.id); for (const id of [...gadgets.keys()]) removeGadget(id); spawnLog=[]; sendGadgets(); return; }
+  if (what==='rm'){ removeThing(m.id); return; }
+  const x=+m.x||0, y=+m.y||0, z=+m.z||0, yaw=+m.yaw||0;
+  if (what==='bot'){
+    if (playerCount()>=MAX_PLAYERS){ sbNotice(by,'Room is full (5 fighters max)'); return; }
+    const before=new Set(bodies.keys()); addBot(); const b=[...bodies.values()].find(o=>!before.has(o.id)); if (!b) return;
+    b.reset(x,z); b.prot=0; b.sbBot=true; spawnLog.push({id:b.id,by}); return;
+  }
+  if (spawnedCount()>=MAX_SPAWNED){ sbNotice(by,`Spawn limit reached (${MAX_SPAWNED}) · use Undo or Clear`); return; }
+  if (PROP_DEFS[what] && what!=='throw'){
+    const id=net.id+':pr'+(++propSeq), pr=new Prop(id,what,x,z,y+1,true); pr.spawned=true; pr.q.setFromEuler(new THREE.Euler(0,yaw,0)); pr.place(pr.c,pr.q);
+    props.set(id,pr); spawnLog.push({id,by}); return;
+  }
+  if (GADGET_DEFS[what]){ const id=net.id+':g'+(++gadSeq); addGadget(id,what,x,y,z,yaw,by); spawnLog.push({id,by}); sendGadgets(); }
+}
+function removeThing(id){
+  if (gadgets.has(id)){ removeGadget(id); sendGadgets(); return true; }
+  const pr=props.get(id); if (pr){ pr.dispose(); props.delete(id); tethers=tethers.filter(t=>t.T!==pr); for (const b of bodies.values()) b.hold=b.hold.map(h=>h&&h.id===id?null:h); send({t:'prgone',id}); return true; }
+  const b=bodies.get(id); if (b && b.bot){ removeBody(id); return true; }
+  return false;
+}
+function sbNotice(by,txt){ if (by===myBodyId) toast(txt); else send({t:'sbmsg',to:by,txt}); }
+function toast(txt){ const me=localPlayer(); if (me) flashMsg(me,`<small>${esc(txt)}</small>`), me.msgT=2.2; }
 
 /* ===================== FX ===================== */
 const fx=[];
@@ -2182,6 +2369,10 @@ function handle(m){
     case 'gone': { const b=bodies.get(m.id); if (b&&!b.local) removeBody(m.id); break; }
     case 'chat': onChat(m.id,m.n,m.c,m.txt); break;
     case 'pr': onPropState(m); break;
+    case 'gad': onGadgets(m); break;
+    case 'sbx': if (net.mode==='host') doSandbox(m); break;
+    case 'prgone': { const pr=props.get(m.id); if (pr && !pr.local){ pr.dispose(); props.delete(m.id); } break; }
+    case 'sbmsg': if (m.to===myBodyId) toast(m.txt); break;
     case 'ph': { const pr=props.get(m.id); if (pr&&pr.local) applyPropHit(pr,m.j,new V3(...m.i),m.d,m.by); break; }
     case 'throw': { const T=m.k==='p'?props.get(m.id):bodies.get(m.id); if (T&&T.local) throwTarget(T,m.k,new V3(...m.v),m.by); break; }
     case 'free': { const H=bodies.get(m.h); if (H&&H.local) dropHolds(H,false,m.v); break; }
@@ -2243,6 +2434,7 @@ function removeBot(){ const b=bots().pop(); if (b) removeBody(b.id); }
 function botThink(b,dt){
   const c={mx:0,mz:0,jump:false,fire:false,grab:false}, B=b.bot, me=b.pos[PELV], D=B.d||BOT_DIFF.normal;
   if (b.dead||b.stun>0) return c;
+  if (match.mode==='sb' && match.botAI==='dummy' && state==='play') return c;
   const under=boxUnder(me.x,me.z,me.y);
   if ((!under && me.y<-.1 && me.y>-8) || b.grabs.some(q=>q)){
     let sp=SPAWNS[0], sd=1e9; for (const q of SPAWNS){ const d=Math.hypot(q[0]-me.x,q[1]-me.z); if (d<sd){ sd=d; sp=q; } }
@@ -2296,8 +2488,9 @@ function botThink(b,dt){
 /* ===================== prefs & settings ===================== */
 let state='menu';
 const saved=(()=>{ try{ return JSON.parse(localStorage.getItem('pff')||'{}'); }catch(e){ return {}; } })();
-const ACTIONS=[['up','Move up','KeyW'],['down','Move down','KeyS'],['left','Move left','KeyA'],['right','Move right','KeyD'],['jump','Jump','Space'],['block','Block / parry','KeyF'],['grab','Grab ledge','KeyE'],
-  ['slot1','Melee weapon','Digit1'],['slot2','Gun','Digit2'],['slot3','Explosive','Digit3'],['loadout','Loadout','KeyQ'],['chat','Type chat','Enter'],['quick','Quick chat','KeyT'],['emote','Emotes','KeyG']];
+const ACTIONS=[['up','Move up','KeyW'],['down','Move down','KeyS'],['left','Move left','KeyA'],['right','Move right','KeyD'],['jump','Jump','Space'],['block','Block / parry','KeyF'],['grab','Grab / throw','KeyE'],
+  ['slot1','Melee weapon','Digit1'],['slot2','Gun','Digit2'],['slot3','Explosive','Digit3'],['loadout','Loadout','KeyQ'],['chat','Type chat','Enter'],['quick','Quick chat','KeyT'],['emote','Emotes','KeyG'],
+  ['wheel','Weapon wheel (sandbox)','KeyX'],['spawn','Spawn menu (sandbox)','KeyZ'],['fly','Free camera (sandbox)','KeyC'],['rotate','Rotate spawn (sandbox)','KeyR']];
 const DEF_BINDS=Object.fromEntries(ACTIONS.map(a=>[a[0],a[2]]));
 const prefs={name:saved.name||'Player'+Math.floor(Math.random()*90+10),col:saved.col??COLORS[0],loadout:Object.assign({melee:'bat',gun:'shotgun',boom:'rocket'},saved.loadout||{}),
   map:THEMES[saved.map]?saved.map:'kitchen',quality:saved.quality==='low'?'low':'high',
@@ -2308,7 +2501,7 @@ const prefs={name:saved.name||'Player'+Math.floor(Math.random()*90+10),col:saved
 function savePrefs(){ try{ localStorage.setItem('pff',JSON.stringify(prefs)); }catch(e){} }
 const applyVolume=()=>{ VOLUME=prefs.set.master*prefs.set.fx; };
 applyVolume();
-let match=Object.assign({mode:'dm',killLimit:10,timeLimit:300,lives:3,bots:2,diff:'normal',weapons:'all',map:prefs.map},prefs.match||{});
+let match=Object.assign({mode:'dm',killLimit:10,timeLimit:300,lives:3,bots:2,diff:'normal',weapons:'all',botAI:'fight',map:prefs.map},prefs.match||{});
 let matchEnd=0, lobbyRoster=[], myReady=false, resultsTimer=null;
 const matchLeft=()=>state==='play'&&matchEnd?Math.max(0,matchEnd-now()):0;
 function setMatchClock(left){ if (!match.timeLimit){ matchEnd=0; return; } const want=now()+left; if (!matchEnd || Math.abs(want-matchEnd)>1500) matchEnd=want; }
@@ -2333,6 +2526,8 @@ addEventListener('keydown',e=>{
   const me=localPlayer();
   if (e.code==='Escape'){
     if (wheelMode){ wheelMode=null; renderWheel(); return; }
+    if (wwOpen){ closeWW(false); return; }
+    if (spawnOpen){ toggleSpawn(); return; }
     if (!$('settings').classList.contains('hidden')){ closeSettings(); return; }
     if (!$('tutorial').classList.contains('hidden')){ closeTutorial(); return; }
     if (!$('custom').classList.contains('hidden')){ closeCustom(); return; }
@@ -2344,23 +2539,31 @@ addEventListener('keydown',e=>{
   if (me && me.dead && isEliminated(me) && (e.code==='Space'||a==='jump')){ specIdx++; return; }
   if (a==='loadout'){ if ($('loadout').classList.contains('hidden')) openLoadout(); else closeLoadout(); return; }
   if (menuOpen) return;
+  if (isSandbox()){
+    if (a==='wheel'){ if (!e.repeat) openWW(); return; }
+    if (a==='spawn'){ toggleSpawn(); return; }
+    if (a==='fly'){ toggleFly(); return; }
+    if (a==='rotate' && placing){ placeYaw+=Math.PI/4; return; }
+  } else if (['wheel','spawn','fly'].includes(a) && me){ flashMsg(me,'<small>Sandbox mode only</small>'); }
   if (a==='chat'){ e.preventDefault(); openChat(); return; }
   if (a==='quick'){ wheelMode=wheelMode==='quick'?null:'quick'; renderWheel(); return; }
   if (a==='emote'){ wheelMode=wheelMode==='emote'?null:'emote'; renderWheel(); return; }
   if (me){ if (a==='slot1') me.slot='melee'; if (a==='slot2') me.slot='gun'; if (a==='slot3') me.slot='boom'; }
 });
-addEventListener('keyup',e=>keys.delete(e.code));
+addEventListener('keyup',e=>{ keys.delete(e.code); if (wwOpen && actionFor(e.code)==='wheel') closeWW(true); });
 addEventListener('blur',()=>{ keys.clear(); mouse.down=false; mouse.right=false; });
 addEventListener('mousemove',e=>{ mouse.nx=e.clientX/innerWidth*2-1; mouse.ny=-(e.clientY/innerHeight)*2+1; mouse.x=e.clientX; mouse.y=e.clientY; pad.active=false; });
 renderer.domElement.addEventListener('mousedown',e=>{
   initAudio(); pad.active=false;
   const me=localPlayer();
   if (me && me.dead && isEliminated(me)){ specIdx++; return; }
+  if (wwOpen){ closeWW(true); return; }
+  if (spawnOpen && placing){ if (e.button===0){ placeAtCursor(); return; } if (e.button===2 && !fly.on){ placing=null; renderSpawn(); return; } }
   if (e.button===0) mouse.down=true; if (e.button===2) mouse.right=true;
 });
 addEventListener('mouseup',e=>{ if (e.button===0) mouse.down=false; if (e.button===2) mouse.right=false; });
 renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
-addEventListener('wheel',e=>{ const me=localPlayer(); if (!me||menuOpen) return; const i=SLOT_ORDER.indexOf(me.slot); me.slot=SLOT_ORDER[(i+(e.deltaY>0?1:2))%3]; },{passive:true});
+addEventListener('wheel',e=>{ const me=localPlayer(); if (!me||menuOpen||fly.on) return; const i=SLOT_ORDER.indexOf(me.slot); me.slot=SLOT_ORDER[(i+(e.deltaY>0?1:2))%3]; },{passive:true});
 const kd=a=>keys.has(prefs.binds[a]);
 function readPad(){ const gps=navigator.getGamepads?navigator.getGamepads():[]; for (const g of gps) if (g && g.connected!==false) return g; return null; }
 const padBtn=(g,i)=>!!(g.buttons[i]&&(g.buttons[i].pressed||g.buttons[i].value>.35));
@@ -2385,10 +2588,10 @@ function playerCtrl(r){
     }
     pad.prev=g.buttons.map((x,i)=>padBtn(g,i));
   }
-  if (menuOpen) return c;
+  if (menuOpen || fly.on) return c;
   if (pc && pad.active) return pc;
   c.mx=(kd('right')||k('ArrowRight')?1:0)-(kd('left')||k('ArrowLeft')?1:0); c.mz=(kd('down')||k('ArrowDown')?1:0)-(kd('up')||k('ArrowUp')?1:0);
-  c.jump=kd('jump'); c.fire=mouse.down; c.block=mouse.right||kd('block'); c.grab=kd('grab')||k('ShiftLeft');
+  c.jump=kd('jump'); c.fire=mouse.down&&!wwOpen; c.block=mouse.right||kd('block'); c.grab=kd('grab')||k('ShiftLeft');
   return c;
 }
 const k=c=>keys.has(c);
@@ -2422,6 +2625,113 @@ function playerAim(r){
   if (A.y>.6){ const h=Math.hypot(A.x,A.z)||1e-3; const k=Math.sqrt(1-.36)/h; A.set(A.x*k,.6,A.z*k); }   // no aiming straight at the sky
   r.aim.copy(A);
 }
+
+/* ===================== sandbox UI: weapon wheel, spawn menu, free camera ===================== */
+const WW_ORDER=['fists','bat','sword','pistol','shotgun','rifle','rocket','grenade'];
+const SB_ICON={fists:'👊',bat:'🏏',sword:'🗡️',pistol:'🔫',shotgun:'💥',rifle:'🔫',rocket:'🚀',grenade:'💣'};
+let wwOpen=false, wwHover=-1;
+function openWW(){ if (!isSandbox() || wwOpen) return; wwOpen=true; wwHover=-1; renderWW(); }
+function renderWW(){
+  const el=$('wwheel'); el.classList.toggle('hidden',!wwOpen); if (!wwOpen) return;
+  const me=localPlayer(), R=150;
+  el.innerHTML=WW_ORDER.map((k,i)=>{ const a=i/WW_ORDER.length*Math.PI*2-Math.PI/2, x=Math.cos(a)*R, y=Math.sin(a)*R; const cl=WEAPONS[k].cls;
+    const cur=me && me.loadout[cl]===k;
+    return `<div class="wwi ${i===wwHover?'on':''} ${cur?'cur':''}" data-i="${i}" style="transform:translate(${x}px,${y}px)"><span>${SB_ICON[k]}</span><b>${esc(wName(k))}</b><small>${{melee:'Melee',gun:'Gun',boom:'Explosive'}[cl]}</small></div>`; }).join('')
+    +`<div class="wwc">${wwHover>=0?esc(wName(WW_ORDER[wwHover])):'Pick a weapon'}<small>release ${kb('wheel')} or click</small></div>`;
+}
+function wwMove(){
+  if (!wwOpen) return;
+  const dx=mouse.x-innerWidth/2, dy=mouse.y-innerHeight/2; let h=-1;
+  if (Math.hypot(dx,dy)>45){ let a=Math.atan2(dy,dx)+Math.PI/2; if (a<0) a+=Math.PI*2; h=Math.round(a/(Math.PI*2)*WW_ORDER.length)%WW_ORDER.length; }
+  if (h!==wwHover){ wwHover=h; renderWW(); }
+}
+function closeWW(pick){
+  if (!wwOpen) return; wwOpen=false;
+  const me=localPlayer();
+  if (pick && wwHover>=0 && me){ const k=WW_ORDER[wwHover], cl=WEAPONS[k].cls; me.loadout[cl]=k; me.slot=cl; me.cds[cl]=Math.min(me.cds[cl]||0,.2); flashMsg(me,`${SB_ICON[k]} ${esc(wName(k))}`); sfx(660,.06,'triangle',.06); }
+  renderWW();
+}
+$('wwheel').addEventListener('mousedown',e=>{ e.preventDefault(); const it=e.target.closest('.wwi'); if (it) wwHover=+it.dataset.i; closeWW(true); });
+
+// ---------- spawn menu + placement ----------
+let spawnOpen=false, placing=null, placeYaw=0, ghost=null, ghostKind=null;
+const placeP=new V3();
+function renderSpawn(){
+  const el=$('spawnMenu'); el.classList.toggle('hidden',!spawnOpen); $('help').style.visibility=spawnOpen?'hidden':''; if (!spawnOpen) return;
+  el.innerHTML=`<h3>Spawn <small>${kb('spawn')} to close</small></h3>`+SPAWN_ITEMS.map(([cat,items])=>`<div class="sbc">${cat}</div><div class="sbg">${items.map(([k,ic,nm])=>
+    `<button data-k="${k}" class="${placing===k?'sel':''}"><span>${ic}</span>${esc(k==='ball'&&mapKey==='hood'?'Basketball':nm)}</button>`).join('')}</div>`).join('')
+    +`<div class="sbh">${placing?(placing==='remove'?'Click a prop, gadget or bot to remove it':`Click to place · <kbd>${kb('rotate')}</kbd> rotate · right click to stop`):'Pick something, then click in the world'}<br>${spawnedCount()}/${MAX_SPAWNED} spawned</div>`;
+}
+$('spawnMenu').addEventListener('mousedown',e=>{
+  e.preventDefault(); e.stopPropagation();
+  const b=e.target.closest('button'); if (!b) return; const k=b.dataset.k;
+  if (k==='undo'||k==='clear'){ sandboxReq({what:k}); sfx(400,.06,'sine',.05); setTimeout(renderSpawn,120); return; }
+  placing=placing===k?null:k; renderSpawn(); sfx(600,.05,'sine',.05);
+});
+function toggleSpawn(){ if (!isSandbox()) return; spawnOpen=!spawnOpen; if (!spawnOpen) placing=null; renderSpawn(); }
+function cursorWorld(out){
+  const o=camera.position.clone(), d=new V3(mouse.nx,mouse.ny,.5).unproject(camera).sub(o).normalize();
+  if (!isFinite(d.x)) return null;
+  const res=raycast(o,d,250,null);
+  if (res.t<250){ out.copy(o).addScaledVector(d,res.t); return res; }
+  if (d.y<-1e-4){ out.copy(o).addScaledVector(d,-o.y/d.y); return {t:-o.y/d.y}; }
+  return null;
+}
+function removeTargetAt(P){
+  let best=null, bd=1.6;
+  for (const g of gadgets.values()){ const d=Math.hypot(g.x-P.x,g.z-P.z)+Math.max(0,Math.abs(P.y-g.y)-1.4); if (d<bd){ bd=d; best=g.id; } }
+  for (const pr of props.values()){ if (pr.dead) continue; const d=pr.c.distanceTo(P)-.3; if (d<bd){ bd=d; best=pr.id; } }
+  for (const b of bodies.values()){ if (!b.bot && !b.isBot) continue; const d=b.pos[PELV].distanceTo(P)-.4; if (d<bd){ bd=d; best=b.id; } }
+  return best;
+}
+function placeAtCursor(){
+  if (!placing || !cursorWorld(placeP)) return;
+  if (placing==='remove'){ const id=removeTargetAt(placeP); if (id){ sandboxReq({what:'rm',id}); sfx(260,.08,'square',.05); } return; }
+  const b=boxUnder(placeP.x,placeP.z,placeP.y+.3), y=b?b.max.y:0;
+  sandboxReq({what:placing,x:r2(placeP.x),y:r2(Math.max(y,placeP.y-.05)),z:r2(placeP.z),yaw:+placeYaw.toFixed(3)});
+  sfx(880,.05,'triangle',.06); setTimeout(renderSpawn,150);
+}
+function updateGhost(){
+  const want=spawnOpen&&placing&&!['undo','clear'].includes(placing)?placing:null;
+  if (want!==ghostKind){
+    if (ghost){ scene.remove(ghost); ghost=null; }
+    ghostKind=want;
+    if (want){
+      ghost=PROP_DEFS[want]?propMesh(want):gadgetMesh(want);
+      ghost.traverse(o=>{ if (o.material){ o.material=o.material.clone(); o.material.transparent=true; o.material.opacity=Math.min(o.material.opacity,.45); o.material.depthWrite=false; } o.castShadow=false; });
+    }
+  }
+  if (!ghost) return;
+  const ok=cursorWorld(placeP); ghost.visible=!!ok; if (!ok) return;
+  if (PROP_DEFS[ghostKind]) ghost.position.set(placeP.x,placeP.y+.6,placeP.z);
+  else { const b=boxUnder(placeP.x,placeP.z,placeP.y+.3); ghost.position.set(placeP.x,b?Math.max(b.max.y,placeP.y-.05):placeP.y,placeP.z); }
+  ghost.rotation.y=placeYaw;
+}
+
+// ---------- free camera ----------
+const fly={on:false,pos:new V3(),yaw:0,pitch:-.5,speed:12};
+function toggleFly(){
+  if (!isSandbox() && !fly.on) return;
+  fly.on=!fly.on;
+  if (fly.on){ fly.pos.copy(camera.position); const d=new V3(); camera.getWorldDirection(d); fly.yaw=Math.atan2(d.x,d.z); fly.pitch=Math.asin(clamp(d.y,-1,1)); }
+  sfx(fly.on?700:500,.07,'sine',.06);
+}
+function flyDir(){ return new V3(Math.sin(fly.yaw)*Math.cos(fly.pitch),Math.sin(fly.pitch),Math.cos(fly.yaw)*Math.cos(fly.pitch)); }
+function updateFly(dt){
+  const f=flyDir(), fh=new V3(Math.sin(fly.yaw),0,Math.cos(fly.yaw)), rt=new V3(-fh.z,0,fh.x);
+  const m=new V3();
+  if (kd('up')||k('ArrowUp')) m.add(f); if (kd('down')||k('ArrowDown')) m.sub(f);
+  if (kd('right')||k('ArrowRight')) m.add(rt); if (kd('left')||k('ArrowLeft')) m.sub(rt);
+  if (kd('jump')) m.y+=1; if (k('ShiftLeft')||k('ControlLeft')) m.y-=1;
+  if (m.lengthSq()>0) fly.pos.addScaledVector(m.normalize(),fly.speed*dt);
+  fly.pos.y=clamp(fly.pos.y,-10,90);
+  camera.position.copy(fly.pos); camera.lookAt(fly.pos.clone().add(f));
+  const fp=fly.pos.clone().addScaledVector(f,14); fp.y=Math.max(0,Math.min(fp.y,fly.pos.y));
+  sun.position.set(fp.x+9,fp.y+22,fp.z+8); sun.target.position.copy(fp);
+}
+addEventListener('mousemove',e=>{ if (fly.on && mouse.right){ fly.yaw-=e.movementX*.005; fly.pitch=clamp(fly.pitch-e.movementY*.005,-1.45,1.45); } wwMove(); });
+addEventListener('wheel',e=>{ if (fly.on) fly.speed=clamp(fly.speed*(e.deltaY>0?.85:1.18),3,60); },{passive:true});
+function resetSandboxUI(){ wwOpen=false; spawnOpen=false; placing=null; fly.on=false; renderWW(); renderSpawn(); updateGhost(); }
 
 /* ===================== chat, quick chat, emotes ===================== */
 function openChat(){ $('chatBox').classList.remove('hidden'); const i=$('chatIn'); i.value=''; i.focus(); menuOpen=true; }
@@ -2639,7 +2949,7 @@ function renderHelp(){
     <tr><td>Attack</td><td>Left click (hold for the rifle)</td></tr>
     <tr><td>Block / parry</td><td>Hold right click or <kbd>${kb('block')}</kbd> with a melee weapon · tap it just before a hit lands to parry</td></tr>
     <tr><td>Switch weapon</td><td><kbd>${kb('slot1')}</kbd> melee · <kbd>${kb('slot2')}</kbd> gun · <kbd>${kb('slot3')}</kbd> explosive, or the mouse wheel</td></tr>
-    <tr><td>Jump / grab ledge</td><td><kbd>${kb('jump')}</kbd> · hold <kbd>${kb('grab')}</kbd> while falling, then hold <kbd>${kb('jump')}</kbd> to climb</td></tr>
+    <tr><td>Jump / grab</td><td><kbd>${kb('jump')}</kbd> · hold <kbd>${kb('grab')}</kbd> to grab a fighter, prop or ledge, let go to throw (hold <kbd>${kb('jump')}</kbd> to lift first)</td></tr>
     <tr><td>Chat / emotes</td><td><kbd>${kb('chat')}</kbd> chat · <kbd>${kb('quick')}</kbd> quick chat · <kbd>${kb('emote')}</kbd> emotes</td></tr>
     <tr><td>Loadout / menu</td><td><kbd>${kb('loadout')}</kbd> · <kbd>Esc</kbd> · all keys can be changed in ⚙ Settings</td></tr>`;
   $('help').textContent=`${kb('up')}${kb('left')}${kb('down')}${kb('right')} move · Mouse aim · Click attack · Right click/${kb('block')} block · ${kb('jump')} jump · ${kb('grab')} grab · ${kb('loadout')} loadout · ${kb('chat')} chat · ${kb('quick')} quick chat · ${kb('emote')} emotes · Esc menu`;
@@ -2723,7 +3033,7 @@ function chooseMap(k){
 }
 
 // ---------- lobby ----------
-const MODES={dm:'Deathmatch',lms:'Last Standing'};
+const MODES={dm:'Deathmatch',lms:'Last Standing',sb:'Sandbox'};
 const fmtTime=s=>s?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:'Off';
 function enterLobby(){
   clearTimeout(resultsTimer);
@@ -2750,11 +3060,14 @@ function renderLobby(){
   const seg=(k,opts)=>`<span class="seg">${opts.map(([v,l])=>`<button data-k="${k}" data-v="${v}" class="${match[k]===v?'sel':''}">${l}</button>`).join('')}</span>`;
   const num=(k,txt)=>`<span class="num"><button data-k="${k}" data-d="-1">–</button><b>${txt}</b><button data-k="${k}" data-d="1">+</button></span>`;
   $('matchSet').className=host?'':'ro';
-  $('matchSet').innerHTML=`<div class="ms">Mode${seg('mode',[['dm','Deathmatch'],['lms','Last Standing']])}</div>`
-    +(match.mode==='dm'?`<div class="ms">Kill limit${num('killLimit',match.killLimit)}</div>`:`<div class="ms">Lives${num('lives',match.lives)}</div>`)
-    +`<div class="ms">Time limit${num('timeLimit',fmtTime(match.timeLimit))}</div>`
-    +`<div class="ms">Weapons${seg('weapons',[['all','All'],['melee','Melee only']])}</div>`
+  const sb=match.mode==='sb';
+  $('matchSet').innerHTML=`<div class="ms">Mode${seg('mode',[['dm','Deathmatch'],['lms','Last Standing'],['sb','Sandbox']])}</div>`
+    +(sb?`<div class="ms" style="font-size:12px;color:#6b7486;font-weight:700">No score or time limit · every weapon · spawn props and gadgets</div>`
+       :(match.mode==='dm'?`<div class="ms">Kill limit${num('killLimit',match.killLimit)}</div>`:`<div class="ms">Lives${num('lives',match.lives)}</div>`)
+        +`<div class="ms">Time limit${num('timeLimit',fmtTime(match.timeLimit))}</div>`
+        +`<div class="ms">Weapons${seg('weapons',[['all','All'],['melee','Melee only']])}</div>`)
     +`<div class="ms">Bots${num('bots',match.bots)}</div>`
+    +(sb?`<div class="ms">Bots act as${seg('botAI',[['fight','Fighters'],['dummy','Dummies']])}</div>`:'')
     +`<div class="ms">Bot skill${seg('diff',[['easy','Easy'],['normal','Normal'],['hard','Hard']])}</div>`;
   renderMaps();
   const clients=roster.filter(r=>!r.host), readyN=clients.filter(r=>r.ready).length;
@@ -2783,7 +3096,7 @@ function startMatchHost(){
   if (!isHost()) return;
   match.map=mapKey;
   for (const r of net.roster.values()) r.ready=false;
-  const left=match.timeLimit*1000;
+  const left=match.mode==='sb'?0:match.timeLimit*1000;
   send({t:'start',match,left});
   startMatch(left);
   const n=Math.min(match.bots,MAX_PLAYERS-humanCount());
@@ -2806,14 +3119,14 @@ function startMatch(left){
   bodies.set(myBodyId,me);
   for (const id of ['menu','lobby','results','loadout','pause']) $(id).classList.add('hidden');
   $('hud').classList.remove('hidden'); $('matchInfo').classList.remove('hidden');
-  feed(`<b>${MODES[match.mode]}</b>${match.weapons==='melee'?' · <b>Melee only</b>':''} on ${esc(THEME.name)} · fight!`); sfx(520,.2,'triangle',.1); setTimeout(()=>sfx(780,.3,'triangle',.1),160);
+  feed(match.mode==='sb'?`<b>Sandbox</b> on ${esc(THEME.name)} · <b>${kb('wheel')}</b> weapon wheel · <b>${kb('spawn')}</b> spawn menu · <b>${kb('fly')}</b> free camera`:`<b>${MODES[match.mode]}</b>${match.weapons==='melee'?' · <b>Melee only</b>':''} on ${esc(THEME.name)} · fight!`); sfx(520,.2,'triangle',.1); setTimeout(()=>sfx(780,.3,'triangle',.1),160);
   renderHelp();
   if (!prefs.tutDone) openTutorial();
 }
-const meleeOnly=()=>state==='play'&&match.weapons==='melee';
+const meleeOnly=()=>state==='play'&&match.weapons==='melee'&&match.mode!=='sb';
 const isEliminated=b=>state==='play'&&match.mode==='lms'&&b.deaths>=match.lives;
 function hostMatchCheck(){
-  if (!isHost() || state!=='play') return;
+  if (!isHost() || state!=='play' || match.mode==='sb') return;
   const all=[...bodies.values()];
   if (!all.length) return;
   let over=matchEnd && now()>=matchEnd;
@@ -2837,7 +3150,7 @@ function showResults(m){
   const res=m.res, win=res[0];
   // lifetime stats
   const mine=res.find(r=>r.id===myBodyId);
-  if (mine){ const S=prefs.stats; S.matches++; S.kills+=mine.kills; S.deaths+=mine.deaths; S.falls+=mine.falls; S.dmg+=mine.dmg; if (win && win.id===myBodyId && res.length>1) S.wins++; savePrefs(); renderMyStats(); }
+  if (mine && m.mode!=='sb'){ const S=prefs.stats; S.matches++; S.kills+=mine.kills; S.deaths+=mine.deaths; S.falls+=mine.falls; S.dmg+=mine.dmg; if (win && win.id===myBodyId && res.length>1) S.wins++; savePrefs(); renderMyStats(); }
   for (const id of [...bodies.keys()]) removeBody(id);
   for (const id of [...projs.keys()]) removeProj(id);
   clearProps();
@@ -2895,6 +3208,7 @@ function updateHud(dt){
     else { const kl=me.lastKiller&&bodies.get(me.lastKiller); center=`SPLAT!<small>${kl?`Killed by <span style="color:${hex(kl.col)}">${esc(kl.name)}</span> · `:''}Respawning in ${Math.max(0,me.deadT).toFixed(1)}s · ${kb('loadout')} to change loadout</small>`; }
   } else if (me.heldBy) center=`GRABBED!<small>Mash ${kb('jump')} or click to break free ${'●'.repeat(Math.min(5,Math.floor(me.struggle)))}${'○'.repeat(Math.max(0,5-Math.floor(me.struggle)))}</small>`;
   else if (me.msgT>0) center=me.msg;
+  else if (fly.on) center=`<small>🎥 Free camera · ${kb('up')}${kb('left')}${kb('down')}${kb('right')} fly · ${kb('jump')} / Shift up and down · hold right click to look · wheel speed · ${kb('fly')} back</small>`;
   else if (me.prot>0) center=`<small>🛡️ Spawn protection ${me.prot.toFixed(1)}s</small>`;
   $('center').innerHTML=center;
   const melee=WEAPONS[me.weapon].kind==='melee';
@@ -2902,8 +3216,8 @@ function updateHud(dt){
   $('guardfill').style.width=me.guard+'%'; $('guardfill').style.background=me.guardBroken>0?'#ff5a5a':'#7fc4ff';
   // match info
   const tl=matchEnd?fmtTime(Math.max(0,(matchEnd-now())/1000)):'';
-  const room=(match.weapons==='melee'?' · Melee only':'')+(net.mode!=='off'?` · Room ${net.code}`:'');
-  $('matchInfo').innerHTML=match.mode==='dm'?`Deathmatch · first to ${match.killLimit}${tl?`<b>${tl}</b>`:''}${room}`:`Last Standing · ${'❤'.repeat(Math.max(0,match.lives-me.deaths))||'out'}${tl?`<b>${tl}</b>`:''}${room}`;
+  const room=(match.weapons==='melee'&&match.mode!=='sb'?' · Melee only':'')+(net.mode!=='off'?` · Room ${net.code}`:'');
+  $('matchInfo').innerHTML=match.mode==='sb'?`Sandbox · ${kb('wheel')} weapons · ${kb('spawn')} spawn · ${kb('fly')} free cam${room}`:match.mode==='dm'?`Deathmatch · first to ${match.killLimit}${tl?`<b>${tl}</b>`:''}${room}`:`Last Standing · ${'❤'.repeat(Math.max(0,match.lives-me.deaths))||'out'}${tl?`<b>${tl}</b>`:''}${room}`;
   hudT-=dt; if (hudT>0) return; hudT=.3;
   const list=[...bodies.values()].sort((a,b)=>b.kills-a.kills||a.deaths-b.deaths);
   const online=net.mode!=='off';
@@ -2924,6 +3238,7 @@ function camSubject(){
   return alive[((specIdx%alive.length)+alive.length)%alive.length];
 }
 function updateCamera(dt){
+  if (fly.on){ if (!isSandbox()) fly.on=false; else { updateFly(dt); return; } }
   const subj=camSubject();
   let t;
   if (subj){ t=subj.pos[PELV].clone(); t.y=Math.max(t.y,-6); }
@@ -2991,6 +3306,7 @@ function frame(t){
   if (n===6) acc=0;
   updateProjs(dt);
   updateProps(dt);
+  animateGadgets(dt); updateGhost();
   updateFx(dt);
   for (const b of bodies.values()) b.view.update(b,dt);
   if (net.mode!=='off'){
@@ -2998,7 +3314,7 @@ function frame(t){
     if (net.mode==='client'){
       pingT-=dt; if (pingT<=0){ pingT=2; send({t:'ping',ts:now()}); }
       if (!net.reconnecting && net.lastHost && now()-net.lastHost>6500) lostHost('timeout');
-    } else { lobbyT-=dt; if (lobbyT<=0){ lobbyT=2; broadcastLobby(); } }
+    } else { lobbyT-=dt; if (lobbyT<=0){ lobbyT=2; broadcastLobby(); if (state==='play' && gadgets.size) sendGadgets(); } }
   }
   hostMatchCheck();
   if (state==='play') updateHud(dt);
@@ -3013,7 +3329,7 @@ function frame(t){
   requestAnimationFrame(frame);
 }
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); if (composer){ composer.setSize(innerWidth,innerHeight); bloomPass.resolution.set(innerWidth,innerHeight); } });
-window.__game={applyHit,onBoom,raycast,throwTarget,get tethers(){return tethers},camera,V3,bodies,props,net,loadMap,chooseMap,THEMES,get BOXES(){return BOXES},get SPAWNS(){return SPAWNS},boxUnder,get mapKey(){return mapKey},get state(){return state},
+window.__game={gadgets,doSandbox,sandboxReq,fly,toggleFly,openWW,closeWW,toggleSpawn,placeAtCursor,get wwOpen(){return wwOpen},set placing(v){placing=v},get placing(){return placing},cursorWorld,isSandbox,applyHit,onBoom,raycast,throwTarget,get tethers(){return tethers},camera,V3,bodies,props,net,loadMap,chooseMap,THEMES,get BOXES(){return BOXES},get SPAWNS(){return SPAWNS},boxUnder,get mapKey(){return mapKey},get state(){return state},
   addBot,keys,mouse,projs,localPlayer,get match(){return match},set match(v){match=v},endMatch,startMatchHost,prefs,startEmote,sendChat,get lobbyRoster(){return lobbyRoster}};
 applyQuality(prefs.quality); renderGfx(); renderHelp(); renderMyStats();
 loadMap(prefs.map); renderMaps();
