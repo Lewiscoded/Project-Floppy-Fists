@@ -11,6 +11,8 @@ import { addBot } from './bots.js';
 import { MAX_PLAYERS } from './constants.js';
 import { projs, removeProj } from './projectiles.js';
 import { clearProps, spawnMapProps } from './props.js';
+import { clearStatus } from './status.js';
+import { CLASS_KEYS, cleanEquip, cleanLoadout, freshCooldowns } from './weapons.js';
 import { demoWorld } from '../main.js';
 import { removeBody } from '../net/messages.js';
 import { banner, broadcastLobby, humanCount, isHost, net, send, setHash } from '../net/network.js';
@@ -51,8 +53,9 @@ export function startMatch(left) {
   game.myBodyId = net.id + ':p';
   const sp = SPAWNS[Math.floor(Math.random() * SPAWNS.length)];
   const me = new Body(game.myBodyId, prefs.name, prefs.col, true, sp[0], sp[1]);
-  me.loadout = { ...prefs.loadout };
-  me.slot = 'gun';
+  me.loadout = cleanLoadout(prefs.loadout);
+  me.equip = cleanEquip(prefs.equip);
+  me.slot = me.equip.includes('gun') ? 'gun' : me.equip[0];
   me.prot = 2.5;
   me.outfit = { ...prefs.outfit };
   bodies.set(game.myBodyId, me);
@@ -72,6 +75,35 @@ export function startMatch(left) {
 
 export const meleeOnly = () =>
   game.state === 'play' && game.match.weapons === 'melee' && game.match.mode !== 'sb';
+
+// ---------- weapon slots ----------
+// In sandbox you can use every class (keys 1-7). In a normal match you carry the 3 classes you
+// equipped on the loadout screen (keys 1-3). Melee-only matches leave just melee.
+
+/** The classes this fighter can switch between right now, in slot order. */
+export function slotsFor(f) {
+  if (game.state === 'play' && game.match.mode === 'sb') return CLASS_KEYS;
+  if (meleeOnly()) return ['melee'];
+  return f.equip;
+}
+
+/** If the class in hand isn't allowed (e.g. loadout changed), switch to the first one that is. */
+export function ensureSlot(f) {
+  const s = slotsFor(f);
+  if (!s.includes(f.slot)) f.slot = s[0];
+}
+
+/** Pick slot number n (0-based). */
+export function selectSlot(f, n) {
+  const s = slotsFor(f);
+  if (s[n]) f.slot = s[n];
+}
+
+/** Next / previous slot (mouse wheel, gamepad bumpers). */
+export function cycleSlot(f, dir) {
+  const s = slotsFor(f);
+  f.slot = s[(s.indexOf(f.slot) + dir + s.length) % s.length];
+}
 
 export const isEliminated = (b) =>
   game.state === 'play' && game.match.mode === 'lms' && b.deaths >= game.match.lives;
@@ -215,7 +247,10 @@ export function respawn(fighter) {
   fighter.hp = 100;
   fighter.dead = false;
   fighter.lastHitBy = null;
-  fighter.cds = { melee: 0, gun: 0, boom: 0 };
+  fighter.cds = freshCooldowns();
+  fighter.spinT = 0;
+  clearStatus(fighter);
+  fighter.size = 1;
   fighter.guard = 100;
   fighter.guardBroken = 0;
   fighter.prot = 2;

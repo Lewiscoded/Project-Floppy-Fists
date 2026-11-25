@@ -25,8 +25,8 @@ import {
   restLen,
 } from '../game/constants.js';
 import { DEF_OUTFIT, outfitKey } from '../game/outfits.js';
-import { WEAPONS } from '../game/weapons.js';
-import { YAX, ZAX, puff } from './fx.js';
+import { WEAPONS, isAimed } from '../game/weapons.js';
+import { YAX, ZAX, puff, streak } from './fx.js';
 import { R90, boxGeo, cone, cylinderGeo, sphereGeo } from './materials.js';
 import { scene } from './renderer.js';
 import { THEME } from '../world/world.js';
@@ -51,6 +51,16 @@ const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }
   black = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
 
 const starMat = new THREE.MeshStandardMaterial({ color: 0xffe14a, emissive: 0x664d00 });
+
+const iceMat = new THREE.MeshPhysicalMaterial({
+    color: 0xaeeaff,
+    transparent: true,
+    opacity: 0.45,
+    roughness: 0.05,
+    clearcoat: 1,
+    depthWrite: false,
+  }),
+  creamMat = new THREE.MeshStandardMaterial({ color: 0xfffaf0, roughness: 0.6 });
 
 export const tA = new V3(),
   tB = new V3(),
@@ -99,8 +109,107 @@ function weaponMesh(key) {
     add(new THREE.BoxGeometry(0.05, 0.16, 0.06), 0x22252b, 0, -0.03, 0.15);
   } else if (key === 'grenade') {
     add(new THREE.SphereGeometry(0.12, 12, 10), 0x3e5a2a, 0, 0, 0.05);
-  }
+  } else if (NEW_WEAPON_LOOKS[key]) NEW_WEAPON_LOOKS[key](add, g);
   return g;
+}
+
+/**
+ * Held models for the newer weapons. add(geometry, color, x, y, z, rotX) puts a part in the hand
+ * (+z points along the weapon). A child with userData.spin spins (minigun); one with userData.ext
+ * shoots forward when punching (boxing glove).
+ */
+const NEW_WEAPON_LOOKS = {
+  sledge: (add) => {
+    add(new THREE.CylinderGeometry(0.035, 0.04, 1.0, 8), 0x8a5a32, 0, 0, 0.4, R90);
+    add(new THREE.BoxGeometry(0.42, 0.22, 0.22), 0x5a5f66, 0, 0, 0.9);
+  },
+  minigun: (add, g) => {
+    add(new THREE.BoxGeometry(0.18, 0.18, 0.45), 0x30343a, 0, 0, 0.05);
+    add(new THREE.BoxGeometry(0.05, 0.16, 0.08), 0x22252b, 0, -0.15, 0.05);
+    const spin = new THREE.Group();
+    spin.userData.spin = true;
+    spin.position.z = 0.55;
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const b = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.022, 0.022, 0.6, 6),
+        new THREE.MeshStandardMaterial({ color: 0x4a4f57, metalness: 0.6, roughness: 0.3 })
+      );
+      b.rotation.x = R90;
+      b.position.set(Math.cos(a) * 0.06, Math.sin(a) * 0.06, 0);
+      spin.add(b);
+    }
+    g.add(spin);
+  },
+  cluster: (add) => {
+    add(new THREE.SphereGeometry(0.15, 12, 10), 0x2e2e33, 0, 0, 0.05);
+    add(new THREE.SphereGeometry(0.05, 8, 6), 0xd04a2a, 0.12, 0.05, 0.05);
+    add(new THREE.SphereGeometry(0.05, 8, 6), 0xd04a2a, -0.12, 0.05, 0.05);
+  },
+  grapple: (add) => {
+    add(new THREE.BoxGeometry(0.08, 0.12, 0.38), 0x6a4a2a, 0, 0, 0.12);
+    add(new THREE.CylinderGeometry(0.045, 0.045, 0.1, 8), 0xb9c0c8, 0, 0, 0.35, R90);
+    add(new THREE.ConeGeometry(0.06, 0.12, 6), 0x8a9098, 0, 0, 0.45, R90);
+  },
+  gravglove: (add) => {
+    add(new THREE.SphereGeometry(0.16, 14, 10), 0x7b4bd6, 0, 0, 0.05).scale.set(1, 0.8, 1.2);
+    add(new THREE.TorusGeometry(0.14, 0.03, 8, 18), 0xc9a0ff, 0, 0, 0.17);
+  },
+  blower: (add) => {
+    add(new THREE.BoxGeometry(0.2, 0.22, 0.3), 0xe8762a, 0, 0.05, 0);
+    add(new THREE.CylinderGeometry(0.05, 0.065, 0.6, 10), 0x3a3d42, 0, 0.02, 0.42, R90);
+  },
+  banana: (add) => {
+    add(new THREE.CylinderGeometry(0.035, 0.04, 0.3, 8), 0xf2d43a, 0, 0.05, 0.05, 0.5);
+  },
+  springtrap: (add) => {
+    add(new THREE.CylinderGeometry(0.15, 0.15, 0.05, 12), 0x6a6f78, 0, 0, 0.05, R90);
+    add(new THREE.CylinderGeometry(0.13, 0.13, 0.03, 12), 0xd94040, 0, 0, 0.09, R90);
+  },
+  mine: (add) => {
+    add(new THREE.CylinderGeometry(0.13, 0.14, 0.06, 12), 0x30343a, 0, 0, 0.05, R90);
+    add(new THREE.SphereGeometry(0.035, 8, 6), 0xff2a2a, 0, 0, 0.1);
+  },
+  flame: (add) => {
+    add(new THREE.CylinderGeometry(0.08, 0.08, 0.4, 12), 0xc0392b, 0, 0.1, 0, R90);
+    add(new THREE.BoxGeometry(0.07, 0.09, 0.5), 0x3a3d42, 0, -0.02, 0.25);
+    add(new THREE.SphereGeometry(0.035, 8, 6), 0xffa030, 0, -0.02, 0.52);
+  },
+  freeze: (add) => rayGun(add, 0x7fe6ff),
+  shrink: (add) => rayGun(add, 0xff6ef0),
+  slap: (add) => {
+    add(new THREE.SphereGeometry(0.17, 14, 10), 0xfafafa, 0, 0, 0.08).scale.set(1.2, 0.55, 1.3);
+    add(new THREE.SphereGeometry(0.06, 8, 6), 0xfafafa, 0.17, 0, 0.04);
+  },
+  pie: (add) => {
+    add(new THREE.CylinderGeometry(0.11, 0.13, 0.5, 12), 0x4aa8ff, 0, 0, 0.15, R90);
+    add(new THREE.CylinderGeometry(0.16, 0.13, 0.06, 14), 0xc8863a, 0, 0, 0.43, R90);
+  },
+  boxglove: (add, g) => {
+    add(new THREE.BoxGeometry(0.09, 0.12, 0.18), 0x3a3d42, 0, 0, 0);
+    const ext = new THREE.Group();
+    ext.userData.ext = true;
+    const spring = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.03, 0.03, 1, 6).translate(0, 0.5, 0).rotateX(R90),
+      new THREE.MeshStandardMaterial({ color: 0xb9c0c8, metalness: 0.6, roughness: 0.3 })
+    );
+    const glove = new THREE.Mesh(
+      new THREE.SphereGeometry(0.18, 14, 10),
+      new THREE.MeshStandardMaterial({ color: 0xd62828, roughness: 0.35 })
+    );
+    glove.scale.set(1, 0.9, 1.15);
+    ext.add(spring, glove);
+    ext.userData.spring = spring;
+    ext.userData.glove = glove;
+    ext.position.z = 0.08;
+    g.add(ext);
+  },
+};
+
+function rayGun(add, col) {
+  add(new THREE.BoxGeometry(0.09, 0.13, 0.3), 0xf2f2f2, 0, 0, 0.08);
+  for (let i = 0; i < 3; i++) add(new THREE.TorusGeometry(0.07, 0.018, 6, 14), col, 0, 0.01, 0.26 + i * 0.08);
+  add(new THREE.SphereGeometry(0.05, 10, 8), col, 0, 0.01, 0.5);
 }
 
 const eyeGeo = new THREE.SphereGeometry(0.088, 16, 12),
@@ -387,6 +496,17 @@ export class RagView {
       s.position.set(Math.cos(a) * 0.32, 0, Math.sin(a) * 0.32);
       this.stars.add(s);
     }
+    // status effects: an ice block (freeze ray), cream on the face (pie), and flames (drawn as particles)
+    this.ice = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), iceMat);
+    this.ice.visible = false;
+    this.g.add(this.ice);
+    this.cream = new THREE.Mesh(new THREE.SphereGeometry(0.2, 14, 10), creamMat);
+    this.cream.scale.set(1.25, 1.05, 0.55);
+    this.cream.position.set(0, 0.02, 0.24);
+    this.cream.visible = false;
+    this.head.add(this.cream);
+    this.burnT = 0;
+    this.size = 1;
     this.cv = document.createElement('canvas');
     this.cv.width = 256;
     this.cv.height = 80;
@@ -571,6 +691,7 @@ export class RagView {
       }
     }
     this.prevVy = v.y;
+    this.updateStatus(fighter, dt);
     const wk = fighter.weapon;
     if (wk !== this.wKey) {
       if (this.wMesh) this.g.remove(this.wMesh);
@@ -582,10 +703,67 @@ export class RagView {
       this.wMesh.position.copy(p[RHAND]);
       const w = WEAPONS[wk];
       if (w.kind === 'melee') tA.subVectors(p[RHAND], p[RELB]).normalize().lerp(YAX, 0.35).normalize();
-      else if (w.kind === 'grenade') tA.copy(fighter.fwd);
+      else if (!isAimed(w))
+        tA.copy(fighter.fwd); // thrown things are held up by the shoulder
       else tA.copy(fighter.aim);
       this.wMesh.quaternion.setFromUnitVectors(ZAX, tA);
+      this.wMesh.scale.setScalar(this.size);
       this.wMesh.visible = !(fighter.dead && w.kind !== 'melee');
+      for (const c of this.wMesh.children) {
+        if (c.userData.spin && fighter.spinT > 0) c.rotation.z += dt * 40 * (fighter.spinT / w.spin);
+        if (c.userData.ext) {
+          // boxing glove: the spring shoots out while punching
+          const out = fighter.punchT > 0.1 ? (w.reach || 1) - 0.1 : 0.12;
+          c.userData.len = (c.userData.len ?? 0.12) + (out - (c.userData.len ?? 0.12)) * Math.min(1, dt * 30);
+          c.userData.spring.scale.z = c.userData.len;
+          c.userData.glove.position.z = c.userData.len + 0.1;
+        }
+      }
+    }
+  }
+  /** Draw status effects (see game/status.js) and the shrink ray's scale. */
+  updateStatus(fighter, dt) {
+    const p = fighter.pos,
+      fx = fighter.fx;
+    // shrink: scale every body part (the ragdoll itself is shrunk by physics)
+    const z = fighter.size;
+    if (z !== this.size) {
+      this.size = z;
+      for (const m of [this.torso, this.hips, this.head, ...this.hands, ...this.segs.map((s) => s.m)])
+        m.scale.setScalar(z);
+      for (const f of this.feet) f.scale.set(z, 0.7 * z, 1.5 * z);
+    }
+    // frozen: an ice block around the whole body
+    this.ice.visible = fx.freeze > 0 && !fighter.dead;
+    if (this.ice.visible) {
+      tA.set(1e9, 1e9, 1e9);
+      tB.set(-1e9, -1e9, -1e9);
+      for (const q of p) {
+        tA.min(q);
+        tB.max(q);
+      }
+      this.ice.position.addVectors(tA, tB).multiplyScalar(0.5);
+      this.ice.scale.subVectors(tB, tA).addScalar(0.55 * z);
+    }
+    // pie: cream on the face
+    this.cream.visible = fx.pie > 0 && !fighter.dead;
+    // burning: flames rising off random body parts
+    if (fx.burn > 0 && !fighter.dead) {
+      this.burnT -= dt;
+      if (this.burnT <= 0) {
+        this.burnT = 0.03;
+        const q = p[(Math.random() * p.length) | 0];
+        const col = Math.random() < 0.5 ? 0xff6a1a : 0xffc23a;
+        streak(
+          q,
+          TMP.set((Math.random() - 0.5) * 0.6, 2.6, (Math.random() - 0.5) * 0.6),
+          0.38 * z,
+          col,
+          0.5,
+          true,
+          1.2
+        );
+      }
     }
   }
   dispose() {

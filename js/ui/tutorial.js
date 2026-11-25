@@ -15,7 +15,7 @@ export function openTutorial() {
     ],
     [
       '💥 Attack',
-      `Left click to attack. Switch weapons with ${keyLabel('slot1')} / ${keyLabel('slot2')} / ${keyLabel('slot3')} or the mouse wheel.`,
+      `Left click to attack. You carry 3 weapon classes: switch with ${keyLabel('slot1')} / ${keyLabel('slot2')} / ${keyLabel('slot3')} or the mouse wheel, and pick them with ${keyLabel('loadout')}.`,
     ],
     [
       '🛡️ Block & parry',

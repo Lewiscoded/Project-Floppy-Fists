@@ -21,7 +21,7 @@ import {
 } from '../audio/sfx.js';
 
 // things that should click: real buttons plus clickable cards and swatches
-const CLICKABLE = 'button, .mcard, .wcard, .sw, .cswatch, .wwi';
+const CLICKABLE = 'button, .mcard, .wcard, .ltab, .sw, .cswatch, .wwi';
 // options you pick from a set: these "pop" instead of "tok"
 const OPTION = '.seg button, .copt button, .wcard, .sw, .cswatch, .mcard, #spawnMenu button';
 

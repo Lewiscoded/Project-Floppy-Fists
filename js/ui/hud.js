@@ -5,8 +5,8 @@ import { game } from '../core/state.js';
 import { keyLabel } from '../core/prefs.js';
 import { $, clamp, escapeHtml, now, toCssHex } from '../core/util.js';
 import { bodies, localPlayer } from '../game/bodies.js';
-import { isEliminated, meleeOnly } from '../game/match.js';
-import { SLOT_ORDER, WEAPONS } from '../game/weapons.js';
+import { isEliminated, slotsFor } from '../game/match.js';
+import { CLASSES, WEAPONS } from '../game/weapons.js';
 import { net } from '../net/network.js';
 import { camSubject } from '../render/camera.js';
 import { fly } from '../sandbox/sandbox-ui.js';
@@ -28,12 +28,16 @@ export function updateHud(dt) {
         : me.hp > 25
           ? '#ffd23f'
           : '#ff5a5a';
-  $('slots').innerHTML = SLOT_ORDER.filter((s) => !meleeOnly() || s === 'melee')
-    .map((s) => {
-      const i = SLOT_ORDER.indexOf(s);
-      const w = WEAPONS[me.loadout[s]];
-      const cd = me.cds[s] > 0 ? clamp(me.cds[s] / w.cd, 0, 1) : 0;
-      return `<div class="slot ${me.slot === s ? 'sel' : ''}"><small>${keyLabel('slot' + (i + 1))}</small>${wName(me.loadout[s])}<div class="cd" style="width:${cd * 100}%"></div></div>`;
+  // weapon slots: your 3 equipped classes (all 7 in sandbox). The bar shows cooldown, or minigun spin-up.
+  const slots = slotsFor(me);
+  $('slots').classList.toggle('many', slots.length > 3);
+  $('slots').innerHTML = slots
+    .map((s, i) => {
+      const w = WEAPONS[me.loadout[s]],
+        icon = CLASSES.find((c) => c.key === s).icon;
+      const spin = w.spin && me.slot === s && me.spinT < w.spin ? me.spinT / w.spin : 0;
+      const cd = spin || (me.cds[s] > 0 ? clamp(me.cds[s] / w.cd, 0, 1) : 0);
+      return `<div class="slot ${me.slot === s ? 'sel' : ''}"><small>${keyLabel('slot' + (i + 1))}</small><i>${icon}</i><em>${wName(me.loadout[s])}</em><div class="cd ${spin ? 'spin' : ''}" style="width:${cd * 100}%"></div></div>`;
     })
     .join('');
   let center = '';
@@ -51,6 +55,10 @@ export function updateHud(dt) {
   else if (fly.on)
     center = `<small>🎥 Free camera · ${keyLabel('up')}${keyLabel('left')}${keyLabel('down')}${keyLabel('right')} fly · ${keyLabel('jump')} / Shift up and down · hold right click to look · wheel speed · ${keyLabel('fly')} back</small>`;
   else if (me.prot > 0) center = `<small>🛡️ Spawn protection ${me.prot.toFixed(1)}s</small>`;
+  else if (me.fx.freeze > 0) center = `FROZEN!<small>❄️ thawing in ${me.fx.freeze.toFixed(1)}s</small>`;
+  else if (me.fx.burn > 0) center = `<small>🔥 You're on fire!</small>`;
+  else if (me.fx.shrink > 0)
+    center = `<small>🔬 Tiny for ${me.fx.shrink.toFixed(1)}s · hits knock you farther</small>`;
   $('center').innerHTML = center;
   const melee = WEAPONS[me.weapon].kind === 'melee';
   $('guardbar').classList.toggle('hidden', !melee || (me.guard >= 100 && !me.blocking));

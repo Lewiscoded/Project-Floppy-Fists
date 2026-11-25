@@ -37,7 +37,7 @@ import './ui/input.js';
 import './sandbox/sandbox-ui.js';
 import './ui/chat.js';
 import './ui/overlay.js';
-import './ui/menu.js';
+import { openLoadout } from './ui/menu.js';
 import './ui/customize.js';
 import './ui/settings.js';
 import './ui/tutorial.js';
@@ -57,15 +57,17 @@ import { game } from './core/state.js';
 import { prefs } from './core/prefs.js';
 import { $, V3, now } from './core/util.js';
 import { Body, bodies, localBodies, localPlayer } from './game/bodies.js';
-import { BOT_DIFF, BOT_NAMES, addBot, botThink } from './game/bots.js';
+import { BOT_DIFF, BOT_NAMES, addBot, botThink, randomEquip, randomLoadout } from './game/bots.js';
 import { applyHit, raycast, weaponUpdate } from './game/combat.js';
+import { updateStatus } from './game/status.js';
 import { COLORS, DT, LHAND, RHAND } from './game/constants.js';
 import { breakFree, buildTethers, dropHolds, holdTarget, throwTarget } from './game/grab.js';
 import {
   endMatch,
   hostMatchCheck,
   isEliminated,
-  meleeOnly,
+  ensureSlot,
+  slotsFor,
   renderMyStats,
   respawn,
   startMatchHost,
@@ -117,13 +119,10 @@ export function demoWorld() {
     const id = 'demo:b' + i,
       sp = SPAWNS[i];
     const b = new Body(id, BOT_NAMES[i], COLORS[i], true, sp[0], sp[1]);
-    b.loadout = {
-      melee: 'bat',
-      gun: ['pistol', 'shotgun', 'rifle'][i % 3],
-      boom: i % 2 ? 'rocket' : 'grenade',
-    };
+    b.loadout = randomLoadout();
+    b.equip = randomEquip();
     b.bot = {
-      pref: i % 2 ? 'boom' : 'gun',
+      pref: b.equip[1],
       strafe: 1,
       st: 0,
       react: 0.5,
@@ -201,13 +200,14 @@ function frame(t) {
       r.air += dt;
       if (r.air > r.maxAir && r.air < 30) r.maxAir = r.air;
     }
-    if (meleeOnly() && r.slot !== 'melee') r.slot = 'melee';
+    ensureSlot(r);
     weaponUpdate(r, dt);
     if (r.dead) {
       r.deadT -= dt;
       if (r.deadT <= 0 && !isEliminated(r)) respawn(r);
     }
   }
+  for (const b of bodies.values()) updateStatus(b, dt);
   stepProxies(dt);
   buildTethers();
   physicsAccumulator += dt;
@@ -282,6 +282,10 @@ addEventListener('resize', () => {
 });
 
 window.__game = {
+  WEAPONS,
+  weaponUpdate,
+  slotsFor,
+  openLoadout,
   gadgets,
   doSandbox,
   sandboxReq,

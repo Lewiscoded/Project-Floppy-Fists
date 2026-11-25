@@ -305,22 +305,126 @@
 }
 
 /* ---------- loadout ---------- */
-#lcols {
+/* note line under the title (turns into a shaking warning when you try to carry a 4th class) */
+.lnote {
+  margin: -4px 0 12px;
+  color: var(--muted);
+}
+.lnote .warn {
+  color: var(--red);
+}
+.lnote.shake {
+  animation: note-shake 0.35s;
+}
+@keyframes note-shake {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+/* the 3 equipped slots */
+#lequip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.lslot {
+  background: var(--yellow);
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--pop-sm);
+  padding: 6px 10px;
+  font-family: var(--font-title);
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+.lslot.empty {
+  background: #fff;
+  color: var(--muted);
+  border-style: dashed;
+}
+.lslot small {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-right: 6px;
+}
+.lslot i {
+  font-style: normal;
+  margin-right: 5px;
+}
+.lslot span {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+/* class list on the left, that class's weapons on the right */
+#lbody {
+  display: grid;
+  grid-template-columns: 270px 1fr;
   gap: 14px;
   margin-bottom: 16px;
 }
-@media (max-width: 640px) {
-  #lcols {
+@media (max-width: 700px) {
+  #lbody,
+  #lequip {
     grid-template-columns: 1fr;
   }
 }
-.lcol h3 {
-  margin-bottom: 8px;
+#ltabs {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
-.lcol h3 small {
-  margin-left: 6px;
+.ltab {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #fff;
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  cursor: pointer;
+  box-shadow: var(--pop-sm);
+}
+.ltab.sel {
+  background: var(--cyan);
+}
+.ltab > i {
+  font-style: normal;
+  font-size: 22px;
+}
+.ltab > div {
+  flex: 1;
+  min-width: 0;
+}
+.ltab b {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 19px;
+  letter-spacing: 0.5px;
+  display: block;
+  line-height: 1;
+}
+.ltab span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.ltab .leq {
+  padding: 3px 9px;
+  font-size: 14px;
+}
+.ltab .leq.on {
+  background: var(--green);
+}
+#lcols {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  align-content: start;
 }
 .wcard {
   background: #fff;

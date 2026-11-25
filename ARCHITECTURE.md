@@ -29,9 +29,12 @@ js/
     bodies.js         Body class = one fighter
     physics.js        Muscles, verlet integration, collisions, step()
     grab.js           Grab / lift / throw / break free
-    weapons.js        Weapon stats
-    combat.js         Attacking, melee, hitscan, damage, kills
-    projectiles.js    Rockets, grenades, explosions
+    weapons.js        Weapon stats, the 7 classes, loadout helpers (data only, no imports)
+    combat.js         Attacking, melee, hitscan, damage (applyHit), kills
+    weapon-kinds.js   Cone weapons, beams, grappling hook, sledgehammer shockwave, weapon visuals (wfx)
+    traps.js          Banana peels, spring traps, sticky mines: arming, triggering, 3-per-player limit
+    status.js         Burning, frozen, shrunk, pied: timers, effects, syncing over the network
+    projectiles.js    Rockets, grenades, cluster bombs, pies, traps in flight, explosions
     props.js          Crates, barrels, balls, pins (host-owned physics)
     bots.js           Bot AI
     match.js          Match start / win checks / results / respawn
@@ -72,13 +75,15 @@ js/
 
 ## Ragdolls
 
-A fighter is **16 particles** (head, neck, shoulders, chest, pelvis, hips, elbows, hands, knees, feet) joined by **stick constraints** (`CONS` in `game/constants.js`). Velocity is implied by `pos - prev` (verlet). "Muscles" are springs (`spring()` in `game/physics.js`) that pull particles toward a standing / walking / aiming pose. Getting hit adds stun, which weakens the muscles, and that's where the floppiness comes from.
+A fighter is **16 particles** (head, neck, shoulders, chest, pelvis, hips, elbows, hands, knees, feet) joined by **stick constraints** (`CONS` in `game/constants.js`). Velocity is implied by `pos - prev` (verlet). "Muscles" are springs (`spring()` in `game/physics.js`) that pull particles toward a standing / walking / aiming pose. Getting hit adds stun, which weakens the muscles, and that's where the floppiness comes from. `fighter.size` scales the whole ragdoll (shrink ray), and a frozen fighter's particles are locked into one rigid shape (`holdFrozenShape()` in `game/status.js`).
 
 ## Online play
 
 - PeerJS gives a WebRTC connection between browsers. The **host relays every message**, so clients only talk to the host.
 - Each player **simulates their own fighter** and streams its pose. Everyone else shows a smoothed **proxy** of it.
 - Hits are applied by the **owner** of the fighter being hit (the attacker sends a `hit` message), so nobody can be in two places at once.
+- Projectiles and traps belong to whoever threw them: that player's game decides when they explode or trigger. Purely visual weapon effects (flames, wind, the slam shockwave) go out as `wfx` messages.
+- Status effects (burning, frozen, shrunk, pied) ride along in the pose stream as letters (`statusCode()` in `game/status.js`).
 - The host owns props and Sandbox gadgets. Other players send requests (`sbx`) and the host broadcasts the results.
 - If the host leaves, the next player takes over the room (host migration in `net/network.js`).
 
@@ -100,7 +105,16 @@ Three window listeners are installed from `main.js` on purpose so they run after
 
 **Ship an update:** bump `GAME_VERSION` in `js/core/about.js` and add a line at the top of `CHANGELOG`. It shows up on the Info screen and the main menu.
 
-**Tweak a weapon:** edit its numbers in `js/game/weapons.js`. Themed names per map are in each map file's `names`.
+**Tweak a weapon:** edit its numbers in `js/game/weapons.js` (the comment at the top explains every field). Themed names per map are in each map file's `names`.
+
+**Add a weapon:**
+1. Add it to `WEAPONS` in `js/game/weapons.js`, list it in its class's `types` in `CLASSES`, and give it an icon in `WEAPON_ICONS`.
+2. Pick a `kind`. Existing kinds (melee, hitscan, rocket, lob, trap, cone, beam, grapple) need nothing else. A new kind goes in `FIRE_KINDS` in `js/game/weapon-kinds.js`.
+3. Optional: a held model in `NEW_WEAPON_LOOKS` (`js/render/fighter-visuals.js`), a themed name in each map's `names`, a sound in `gunSfx()` (`combat.js`).
+
+**Weapon classes and slots:** a fighter has `loadout` (chosen weapon per class), `equip` (the 3 classes carried) and `slot` (class in hand). `slotsFor()` in `js/game/match.js` decides which classes you can switch between: all 7 in Sandbox, melee in melee-only matches, otherwise your 3.
+
+**Status effects:** `applyHit` reads a weapon's `status: [effect, seconds]` and calls `applyStatus()`. The fighter's owner runs the effect in `js/game/status.js`, its letter goes out in the pose stream, and `RagView.updateStatus()` draws it for everyone. To add one: add a letter in `LETTERS`, its gameplay in `updateStatus()`, and its look in `updateStatus()` in fighter-visuals.
 
 **Add a map:**
 1. Copy `js/world/maps/kitchen.js` to a new file and change the key, name, spawns, props, names and `build()`.

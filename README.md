@@ -43,12 +43,12 @@ Every key can be rebound in **⚙ Settings**. These are the defaults:
 |---|---|---|
 | Move | WASD (or arrows) | Left stick |
 | Aim | Mouse | Right stick (with optional aim assist) |
-| Attack | Left click (hold for the rifle) | RT |
+| Attack | Left click (hold for the rifle, minigun, leaf blower and flamethrower) | RT |
 | Block / parry | Right click or F (melee weapons) | LT |
 | Jump | Space | A |
 | Grab | Hold E near a fighter, prop or ledge. Let go to throw, and hold Space while holding to lift overhead for a bigger throw | B |
 | Break free | Mash Space or click while grabbed | A / RT |
-| Switch weapon | 1 / 2 / 3 or mouse wheel | LB / RB |
+| Switch weapon | 1 / 2 / 3 or mouse wheel (1–7 in Sandbox) | LB / RB |
 | Loadout | Q | Y |
 | Chat / quick chat / emotes | Enter / T / G | D-pad |
 | Menu | Esc | Start |
@@ -65,7 +65,7 @@ Every key can be rebound in **⚙ Settings**. These are the defaults:
 
 ## Sandbox mode
 Pick **Sandbox** as the mode in the lobby. It works online, and everyone in the room can spawn things.
-- **Weapon wheel:** hold X to pick any of the map's 8 weapons, so you aren't stuck with your loadout.
+- **Weapon wheel:** hold X to pick any of the 23 weapons, so you aren't stuck with your loadout. All 7 classes are unlocked on keys 1–7.
 - **Spawn menu:** press Z to open the spawn bar along the bottom of the screen, then spawn crates, barrels, explosive barrels, balls, bowling pins and bots. Click to place, R to rotate, and right click to stop. **Remove** deletes whatever you click, **Undo** takes back your last spawn, and **Clear all** wipes everything that's been spawned. There's a limit of 40 spawned things.
 - **Trampolines:** jump on one and you bounce higher each time. Props bounce too.
 - **Launch pads:** step on one and it fires you (or a prop) about 10 m in the direction of its arrows. Kills from a launch pad count for whoever placed it.
@@ -92,11 +92,18 @@ Outfits sync to everyone online, and bots wear random outfits.
 - A first-time tutorial (you can reopen it from Settings)
 
 ## Weapon classes
+## Weapons
+There are 7 classes. In a normal match you **carry 3 of them** (keys 1–3), chosen on the loadout screen (Q). In Sandbox you get all 7.
+
 | Class | Types (default names) |
 |---|---|
-| Melee | Fists, Bat, Sword |
-| Guns | Pistol, Shotgun, Rifle (full auto) |
-| Explosives | Rocket Launcher, Grenades |
+| Melee | Fists, Bat, Sword, Sledgehammer (overhead slam with a shockwave) |
+| Guns | Pistol, Shotgun, Rifle (full auto), Minigun (hold to spin up) |
+| Explosives | Rocket Launcher, Grenades, Cluster Bomb (pops into 6 bomblets) |
+| Gadgets | Grappling Hook (zip to walls, yank fighters and props), Gravity Glove (fling everything in front of you), Leaf Blower (no damage, lots of wind) |
+| Traps | Banana Peel (forced backflip), Spring Trap (launch), Sticky Mine (sticks to walls and ceilings). 3 down at once per player |
+| Elemental | Flamethrower (sets people on fire), Freeze Ray (turns them into a sliding ice block), Shrink Ray (tiny and light for 8 s) |
+| Silly | Slap Glove (barely hurts, huge knockback), Pie Launcher (cream covers their screen), Boxing Glove (spring-loaded long reach) |
 
 **Blocking:** with any melee weapon out, hold block to take 75% less damage and knockback from melee hits in front of you. You move slower while blocking, and each blocked hit drains your guard bar. If it runs out, your guard breaks and you're stunned. **Parrying:** start blocking within 0.22s of a hit landing and you take no damage, while the attacker is staggered and knocked back. Spamming block doesn't work, because the parry window only opens if you haven't blocked in the last 0.35s.
 

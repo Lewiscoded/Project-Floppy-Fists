@@ -457,7 +457,8 @@ export function collidePropProp(a, fighter) {
 }
 
 // --- hits ---
-export function propHit(prop, j, imp, dmg, by) {
+/** Hit a prop (quiet = no spark, for weapons that hit many times a second). */
+export function propHit(prop, j, imp, dmg, by, quiet) {
   if (prop.dead) return;
   if (!prop.local) {
     send({
@@ -468,7 +469,7 @@ export function propHit(prop, j, imp, dmg, by) {
       d: Math.round(dmg || 0),
       by,
     });
-    spark(prop.pos[j]);
+    if (!quiet) spark(prop.pos[j]);
     return;
   }
   applyPropHit(prop, j, imp, dmg, by);

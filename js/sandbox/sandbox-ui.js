@@ -9,7 +9,7 @@ import { bodies, localPlayer } from '../game/bodies.js';
 import { flashMsg, raycast } from '../game/combat.js';
 import { PELV } from '../game/constants.js';
 import { PROP_DEFS, propMesh, props } from '../game/props.js';
-import { WEAPONS } from '../game/weapons.js';
+import { CLASSES, WEAPONS, WEAPON_ICONS } from '../game/weapons.js';
 import { camera, scene, sun } from '../render/renderer.js';
 import {
   MAX_SPAWNED,
@@ -23,18 +23,9 @@ import {
 import { isActionDown, isKeyDown, mouse } from '../ui/input.js';
 import { boxUnder, mapKey, wName } from '../world/world.js';
 
-const WW_ORDER = ['fists', 'bat', 'sword', 'pistol', 'shotgun', 'rifle', 'rocket', 'grenade'];
-
-const SB_ICON = {
-  fists: '👊',
-  bat: '🏏',
-  sword: '🗡️',
-  pistol: '🔫',
-  shotgun: '💥',
-  rifle: '🔫',
-  rocket: '🚀',
-  grenade: '💣',
-};
+// every weapon, grouped by class, going clockwise from the top
+const WW_ORDER = CLASSES.flatMap((c) => c.types);
+const WW_RADIUS = 215;
 
 export let wwOpen = false,
   wwHover = -1;
@@ -51,7 +42,8 @@ function renderWW() {
   el.classList.toggle('hidden', !wwOpen);
   if (!wwOpen) return;
   const me = localPlayer(),
-    R = 150;
+    R = WW_RADIUS;
+  const className = (k) => CLASSES.find((c) => c.key === WEAPONS[k].cls).name;
   el.innerHTML =
     WW_ORDER.map((k, i) => {
       const a = (i / WW_ORDER.length) * Math.PI * 2 - Math.PI / 2,
@@ -59,9 +51,13 @@ function renderWW() {
         y = Math.sin(a) * R;
       const cl = WEAPONS[k].cls;
       const cur = me && me.loadout[cl] === k;
-      return `<div class="wwi ${i === wwHover ? 'on' : ''} ${cur ? 'cur' : ''}" data-i="${i}" style="transform:translate(${x}px,${y}px)"><span>${SB_ICON[k]}</span><b>${escapeHtml(wName(k))}</b><small>${{ melee: 'Melee', gun: 'Gun', boom: 'Explosive' }[cl]}</small></div>`;
+      return `<div class="wwi c-${cl} ${i === wwHover ? 'on' : ''} ${cur ? 'cur' : ''}" data-i="${i}" style="transform:translate(${x}px,${y}px)"><span>${WEAPON_ICONS[k]}</span></div>`;
     }).join('') +
-    `<div class="wwc">${wwHover >= 0 ? escapeHtml(wName(WW_ORDER[wwHover])) : 'Pick a weapon'}<small>release ${keyLabel('wheel')} or click</small></div>`;
+    `<div class="wwc">${
+      wwHover >= 0
+        ? `${escapeHtml(wName(WW_ORDER[wwHover]))}<small>${className(WW_ORDER[wwHover])}</small>`
+        : 'Pick a weapon'
+    }<small>release ${keyLabel('wheel')} or click</small></div>`;
 }
 
 function wwMove() {
@@ -90,7 +86,7 @@ export function closeWW(pick) {
     me.loadout[cl] = k;
     me.slot = cl;
     me.cds[cl] = Math.min(me.cds[cl] || 0, 0.2);
-    flashMsg(me, `${SB_ICON[k]} ${escapeHtml(wName(k))}`);
+    flashMsg(me, `${WEAPON_ICONS[k]} ${escapeHtml(wName(k))}`);
     sfx(660, 0.06, 'triangle', 0.06);
   }
   renderWW();

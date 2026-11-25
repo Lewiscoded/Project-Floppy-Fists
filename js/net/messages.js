@@ -12,6 +12,8 @@ import { DEF_OUTFIT, outfitKey, parseOutfit } from '../game/outfits.js';
 import { computeFacing } from '../game/physics.js';
 import { onBoom, removeProj, spawnProj } from '../game/projectiles.js';
 import { applyPropHit, onPropState, props } from '../game/props.js';
+import { readStatusCode, statusCode } from '../game/status.js';
+import { weaponFx } from '../game/weapon-kinds.js';
 import { net, send } from './network.js';
 import { muzzleFlash, tracer } from '../render/fx.js';
 import { doSandbox, onGadgets, toast } from '../sandbox/gadgets.js';
@@ -38,6 +40,9 @@ export function handle(m) {
         tracer(new V3(m.s[i], m.s[i + 1], m.s[i + 2]), new V3(m.s[i + 3], m.s[i + 4], m.s[i + 5]), m.w);
       gunSfx(m.w, new V3(m.s[0], m.s[1], m.s[2]));
       muzzleFlash(new V3(m.s[0], m.s[1], m.s[2]), m.w);
+      break;
+    case 'wfx':
+      weaponFx(m.k, new V3(...m.p), m.d && new V3(...m.d));
       break;
     case 'proj':
       spawnProj(m.id, m.k, m.by, m.p, m.v, false);
@@ -154,6 +159,7 @@ export function sendState() {
       r.bot ? 1 : 0,
       outfitKey(r.outfit || DEF_OUTFIT),
       r.hold.map((h) => (h ? `${h.k}~${h.id}~${h.j}` : '')).join(','),
+      statusCode(r),
     ];
     for (let i = 0; i < N; i++) e.push(round2(r.pos[i].x), round2(r.pos[i].y), round2(r.pos[i].z));
     b.push(e);
@@ -161,7 +167,7 @@ export function sendState() {
   if (b.length) send({ t: 'st', b });
 }
 
-const STATE_POSE_OFFSET = 21;
+const STATE_POSE_OFFSET = 22;
 
 /** Apply a received pose to the local copy (proxy) of another player's fighter. */
 function updateProxy(e) {
@@ -187,6 +193,7 @@ function updateProxy(e) {
     isBot,
     ok,
     hl,
+    fx,
   ] = e;
   if (!id || (bodies.has(id) && bodies.get(id).local)) return;
   if (game.state !== 'play') return;
@@ -247,6 +254,7 @@ function updateProxy(e) {
     });
   b.stun = stunned ? 1 : 0;
   b.aim.set(ax, ay, az);
+  readStatusCode(b, fx);
 }
 
 export function stepProxies(dt) {

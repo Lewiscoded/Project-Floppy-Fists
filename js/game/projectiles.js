@@ -1,17 +1,26 @@
 /**
- * Rockets and grenades in flight, and explosions (damage falloff, knockback, wall blocking).
+ * Everything thrown or launched: rockets, grenades, cluster bombs (and their bomblets), pies and traps,
+ * plus explosions (damage falloff, knockback, wall blocking).
+ *
+ * How each kind flies:
+ *   rocket            straight, explodes on contact
+ *   grenade, cluster  arc and bounce, explode when the fuse runs out (cluster then scatters bomblets)
+ *   pie               arc, splats on whatever it hits (cream in the face, see status.js)
+ *   traps             arc, stick where they land, then traps.js decides when they go off
  */
 import * as THREE from 'three';
 import { game } from '../core/state.js';
 import { sfx, volAt } from '../audio/sfx.js';
 import { V3, now } from '../core/util.js';
 import { TMP, bodies, localBodies } from './bodies.js';
-import { hitNotify, kill, rayBox } from './combat.js';
-import { FRONT, G, N, PELV, RAD } from './constants.js';
+import { dealHit, hitNotify, kill, rayBox } from './combat.js';
+import { FRONT, G, HEAD, N, PELV, RAD } from './constants.js';
 import { addVel } from './physics.js';
 import { detonateProp, localProps, props } from './props.js';
+import { TRAP_LIFE, checkTrap, isTrap } from './traps.js';
+import { weaponFx } from './weapon-kinds.js';
 import { WEAPONS } from './weapons.js';
-import { send } from '../net/network.js';
+import { net, send } from '../net/network.js';
 import { ZAX, boomFx, glow, puff } from '../render/fx.js';
 import { scene } from '../render/renderer.js';
 import { dmgDir } from '../ui/overlay.js';
@@ -29,9 +38,46 @@ const noseGeo = new THREE.ConeGeometry(0.09, 0.2, 10),
 const nadeGeo = new THREE.SphereGeometry(0.14, 12, 10),
   nadeMat = new THREE.MeshStandardMaterial({ color: 0x3e5a2a, roughness: 0.5 });
 
+/** Meshes for the newer projectiles. Each gets add(geo, color, x, y, z, rotX) like the map themes use. */
+const PROJ_LOOKS = {
+  cluster: (add) => {
+    add(new THREE.SphereGeometry(0.17, 12, 10), 0x2e2e33, 0, 0, 0);
+    for (let i = 0; i < 4; i++)
+      add(
+        new THREE.SphereGeometry(0.07, 8, 6),
+        0xd04a2a,
+        Math.cos(i * 1.57) * 0.15,
+        0.05,
+        Math.sin(i * 1.57) * 0.15
+      );
+  },
+  bomblet: (add) => add(new THREE.SphereGeometry(0.08, 8, 6), 0xd04a2a, 0, 0, 0),
+  pie: (add) => {
+    add(new THREE.CylinderGeometry(0.2, 0.16, 0.08, 14), 0xc8863a, 0, 0, 0);
+    add(new THREE.SphereGeometry(0.17, 12, 8), 0xfffaf0, 0, 0.04, 0).scale.set(1, 0.45, 1);
+  },
+  banana: (add) => {
+    for (let i = 0; i < 3; i++) {
+      const m = add(new THREE.BoxGeometry(0.07, 0.03, 0.3), 0xf2d43a, 0, 0.02, 0);
+      m.rotation.y = (i / 3) * Math.PI * 2;
+      m.position.set(Math.sin(m.rotation.y) * 0.12, 0.02, Math.cos(m.rotation.y) * 0.12);
+    }
+    add(new THREE.SphereGeometry(0.06, 8, 6), 0x7a5a1a, 0, 0.04, 0);
+  },
+  springtrap: (add) => {
+    add(new THREE.CylinderGeometry(0.32, 0.34, 0.06, 16), 0x6a6f78, 0, 0.0, 0);
+    add(new THREE.TorusGeometry(0.2, 0.03, 6, 14), 0xb9c0c8, 0, 0.07, 0, Math.PI / 2);
+    add(new THREE.CylinderGeometry(0.28, 0.28, 0.04, 16), 0xd94040, 0, 0.12, 0);
+  },
+  mine: (add) => {
+    add(new THREE.CylinderGeometry(0.2, 0.22, 0.09, 14), 0x30343a, 0, 0, 0);
+    add(new THREE.SphereGeometry(0.05, 8, 6), 0xff2a2a, 0, 0.06, 0).userData.blink = true;
+  },
+};
+
 export function spawnProj(id, k, by, p, v, local) {
   const mesh = new THREE.Group();
-  const tp = THEME && THEME.proj[k];
+  const tp = (THEME && THEME.proj[k]) || PROJ_LOOKS[k];
   if (tp)
     tp((geo, col, x, y, z, rx) => {
       const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: col, roughness: 0.5 }));
@@ -61,12 +107,16 @@ export function spawnProj(id, k, by, p, v, local) {
     local,
     mesh,
     trail: 0,
+    stuck: false, // traps: landed and stuck in place
+    armT: 0, // traps: seconds since landing
+    fuse: k === 'bomblet' ? 0.5 + Math.random() * 0.5 : (WEAPONS[k] && WEAPONS[k].fuse) || 0,
   });
 }
 
 export function removeProj(id) {
   const q = projs.get(id);
   if (q) {
+    if (q.k === 'pie') weaponFx('splat', q.p);
     scene.remove(q.mesh);
     projs.delete(id);
   }
@@ -92,14 +142,23 @@ export function updateProjs(dt) {
     const n = 3,
       h = dt / n;
     let boom = false;
-    for (let s = 0; s < n && !boom; s++) {
-      if (q.k === 'grenade') q.v.y -= G * h;
+    const trap = isTrap(q.k);
+    if (trap && q.stuck) q.armT += dt;
+    for (let s = 0; s < n && !boom && !q.stuck; s++) {
+      if (q.k !== 'rocket') q.v.y -= G * h * (q.k === 'pie' ? 0.55 : 1);
       const old = q.p.clone();
       q.p.addScaledVector(q.v, h);
       const b = insideBox(q.p, 0.12);
       if (b) {
-        if (q.k === 'rocket') boom = true;
-        else {
+        if (q.k === 'rocket' || q.k === 'pie') boom = true;
+        else if (trap) {
+          // traps stick to whatever they touch
+          q.p.copy(old);
+          q.v.set(0, 0, 0);
+          q.stuck = true;
+          q.mesh.rotation.set(0, Math.random() * 6.28, 0);
+          sfx(q.k === 'mine' ? 900 : 260, 0.06, 'square', 0.04 * volAt(q.p));
+        } else {
           q.p.copy(old);
           const fc = [
             Math.abs(old.x - (b.min.x - 0.12)),
@@ -117,13 +176,14 @@ export function updateProjs(dt) {
           if (Math.abs(q.v[ax]) > 1.5) sfx(500, 0.04, 'square', 0.03 * volAt(q.p));
         }
       }
-      if (q.k === 'rocket' && q.local) {
+      if ((q.k === 'rocket' || q.k === 'pie') && q.local) {
         for (const bd of bodies.values()) {
           if ((bd.id === q.by && q.t < 0.25) || bd.dead) continue;
           if (bd.pos[PELV].distanceTo(q.p) > 2.5) continue;
           for (let j = 0; j < N; j++)
-            if (bd.pos[j].distanceTo(q.p) < RAD[j] + 0.15) {
+            if (bd.pos[j].distanceTo(q.p) < RAD[j] * bd.size + 0.15) {
               boom = true;
+              if (q.k === 'pie') q.hitBody = bd;
               break;
             }
           if (boom) break;
@@ -140,7 +200,7 @@ export function updateProjs(dt) {
           }
       }
     }
-    if (q.k === 'grenade' && q.t >= WEAPONS.grenade.fuse) boom = true;
+    if (q.fuse && q.t >= q.fuse) boom = true;
     q.mesh.position.copy(q.p);
     if (q.k === 'rocket') {
       TMP.copy(q.v).normalize();
@@ -151,16 +211,25 @@ export function updateProjs(dt) {
         puff(q.p, 0.16, 0xd8d8d8, 0.7);
         glow(q.p, 0.35, 0xffb04a, 0.08, 0.2);
       }
+    } else if (trap) {
+      if (q.k === 'mine')
+        q.mesh.traverse((m) => m.userData.blink && (m.visible = q.stuck && (q.t * 3) % 1 < 0.5));
+      if (!q.stuck) q.mesh.rotation.x += dt * 6;
     } else q.mesh.rotation.x += dt * 8;
+    if (boom && q.local && q.k === 'pie') {
+      splatPie(q);
+      continue;
+    }
     if (boom && q.local) {
       explode(q.p.clone(), q.k, q.by, q.id);
       continue;
     }
-    if (boom && !q.local && q.k === 'rocket') {
+    if (trap && q.local && checkTrap(q)) continue;
+    if (boom && !q.local && (q.k === 'rocket' || q.k === 'pie')) {
       q.v.set(0, 0, 0);
       q.mesh.visible = false;
     }
-    if (q.p.y < -50 || q.t > 8) {
+    if (q.p.y < -50 || q.t > (trap ? TRAP_LIFE : 8)) {
       removeProj(q.id);
       if (q.local) send({ t: 'pend', id: q.id });
     }
@@ -201,11 +270,37 @@ function blastBlocked(a, b) {
   return false;
 }
 
+/** A pie hit something: cream the fighter it hit (if any) and splat. */
+function splatPie(q) {
+  const b = q.hitBody;
+  if (b) dealHit(b, HEAD, WEAPONS.pie.dmg, q.v.clone().multiplyScalar(0.25), q.by, 'pie');
+  removeProj(q.id);
+  send({ t: 'pend', id: q.id });
+}
+
 /** Explosion at a point: damage and knockback with distance falloff, blocked by walls. */
 export function explode(p, k, by, pid) {
   removeProj(pid);
   send({ t: 'boom', p: p.toArray().map((v) => +v.toFixed(2)), k, by, pid });
   onBoom(p, k, by);
+  if (k === 'cluster') scatterBomblets(p, by);
+}
+
+/** A cluster bomb splits into little bombs that bounce away and pop a moment later. */
+function scatterBomblets(p, by) {
+  const n = WEAPONS.cluster.bomblets;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + Math.random() * 0.5;
+    const v = new V3(
+      Math.cos(a) * (4 + Math.random() * 3),
+      5 + Math.random() * 3,
+      Math.sin(a) * (4 + Math.random() * 3)
+    );
+    const at = p.clone().add(new V3(0, 0.3, 0));
+    const id = net.id + '#' + ++game.projSeq;
+    spawnProj(id, 'bomblet', by, at, v, true);
+    send({ t: 'proj', id, k: 'bomblet', by, p: at.toArray(), v: v.toArray() });
+  }
 }
 
 export function onBoom(p, k, by) {

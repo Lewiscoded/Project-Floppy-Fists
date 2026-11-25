@@ -6,6 +6,7 @@ import { game } from './state.js';
 import { now } from './util.js';
 import { COLORS } from '../game/constants.js';
 import { DEF_OUTFIT } from '../game/outfits.js';
+import { cleanEquip, cleanLoadout } from '../game/weapons.js';
 import { THEMES } from '../world/maps/index.js';
 
 game.state = 'menu';
@@ -26,9 +27,13 @@ export const ACTIONS = [
   ['jump', 'Jump', 'Space'],
   ['block', 'Block / parry', 'KeyF'],
   ['grab', 'Grab / throw', 'KeyE'],
-  ['slot1', 'Melee weapon', 'Digit1'],
-  ['slot2', 'Gun', 'Digit2'],
-  ['slot3', 'Explosive', 'Digit3'],
+  ['slot1', 'Weapon slot 1', 'Digit1'],
+  ['slot2', 'Weapon slot 2', 'Digit2'],
+  ['slot3', 'Weapon slot 3', 'Digit3'],
+  ['slot4', 'Weapon slot 4 (sandbox)', 'Digit4'],
+  ['slot5', 'Weapon slot 5 (sandbox)', 'Digit5'],
+  ['slot6', 'Weapon slot 6 (sandbox)', 'Digit6'],
+  ['slot7', 'Weapon slot 7 (sandbox)', 'Digit7'],
   ['loadout', 'Loadout', 'KeyQ'],
   ['chat', 'Type chat', 'Enter'],
   ['quick', 'Quick chat', 'KeyT'],
@@ -44,7 +49,8 @@ export const DEF_BINDS = Object.fromEntries(ACTIONS.map((a) => [a[0], a[2]]));
 export const prefs = {
   name: saved.name || 'Player' + Math.floor(Math.random() * 90 + 10),
   col: saved.col ?? COLORS[0],
-  loadout: Object.assign({ melee: 'bat', gun: 'shotgun', boom: 'rocket' }, saved.loadout || {}),
+  loadout: cleanLoadout(saved.loadout), // chosen weapon for each of the 7 classes
+  equip: cleanEquip(saved.equip), // the 3 classes you carry into normal matches
   map: THEMES[saved.map] ? saved.map : 'kitchen',
   quality: saved.quality === 'low' ? 'low' : 'high',
   set: Object.assign(

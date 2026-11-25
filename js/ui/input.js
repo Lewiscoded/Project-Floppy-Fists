@@ -8,9 +8,8 @@ import { $, V3 } from '../core/util.js';
 import { TMP2, bodies, localPlayer } from '../game/bodies.js';
 import { flashMsg, raycast } from '../game/combat.js';
 import { FRONT, LSH, RSH } from '../game/constants.js';
-import { isEliminated } from '../game/match.js';
+import { cycleSlot, isEliminated, selectSlot } from '../game/match.js';
 import { startEmote } from '../game/physics.js';
-import { SLOT_ORDER } from '../game/weapons.js';
 import { camera, renderer } from '../render/renderer.js';
 import { isSandbox } from '../sandbox/gadgets.js';
 import {
@@ -173,11 +172,7 @@ addEventListener('keydown', (e) => {
     renderWheel();
     return;
   }
-  if (me) {
-    if (a === 'slot1') me.slot = 'melee';
-    if (a === 'slot2') me.slot = 'gun';
-    if (a === 'slot3') me.slot = 'boom';
-  }
+  if (me && /^slot\d$/.test(a)) selectSlot(me, +a[4] - 1);
 });
 
 addEventListener('keyup', (e) => {
@@ -238,8 +233,7 @@ addEventListener(
   (e) => {
     const me = localPlayer();
     if (!me || game.menuOpen || fly.on) return;
-    const i = SLOT_ORDER.indexOf(me.slot);
-    me.slot = SLOT_ORDER[(i + (e.deltaY > 0 ? 1 : 2)) % 3];
+    cycleSlot(me, e.deltaY > 0 ? 1 : -1);
   },
   { passive: true }
 );
@@ -284,8 +278,8 @@ export function playerCtrl(r) {
       };
       if (Math.hypot(rx, ry) > 0.35) gamepad.aim.set(rx, 0, ry).normalize();
       else if (Math.hypot(lx, ly) > 0.4) gamepad.aim.set(lx, 0, ly).normalize();
-      if (edge(5)) r.slot = SLOT_ORDER[(SLOT_ORDER.indexOf(r.slot) + 1) % 3];
-      if (edge(4)) r.slot = SLOT_ORDER[(SLOT_ORDER.indexOf(r.slot) + 2) % 3];
+      if (edge(5)) cycleSlot(r, 1);
+      if (edge(4)) cycleSlot(r, -1);
       if (edge(3)) openLoadout();
       if (edge(12)) sendChat('Nice!');
       if (edge(15)) sendChat('gg');

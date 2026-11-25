@@ -5,6 +5,7 @@ import { game } from '../core/state.js';
 import { V3, now } from '../core/util.js';
 import { N, REST } from './constants.js';
 import { DEF_OUTFIT } from './outfits.js';
+import { DEFAULT_EQUIP, DEFAULT_LOADOUT, freshCooldowns } from './weapons.js';
 import { RagView } from '../render/fighter-visuals.js';
 import { boxUnder } from '../world/world.js';
 
@@ -68,9 +69,14 @@ export class Body {
     this.lastHitBy = null;
     this.lastHitT = -1e9;
     this.lastHitW = '';
-    this.loadout = { melee: 'bat', gun: 'shotgun', boom: 'rocket' };
-    this.slot = 'gun';
-    this.cds = { melee: 0, gun: 0, boom: 0 };
+    this.loadout = { ...DEFAULT_LOADOUT }; // chosen weapon for every class
+    this.equip = [...DEFAULT_EQUIP]; // the classes carried this match (all of them in sandbox)
+    this.slot = 'gun'; // the class in hand
+    this.cds = freshCooldowns();
+    this.spinT = 0; // minigun spin-up
+    this.fx = { burn: 0, freeze: 0, shrink: 0, pie: 0 }; // status effects, see status.js
+    this.size = 1; // ragdoll scale (shrink ray)
+    this.frozenPose = null;
     this.recoilT = 0;
     this.wKey = 'shotgun';
     this.ctrl = { mx: 0, mz: 0, jump: false, fire: false, grab: false };

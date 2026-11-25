@@ -1,15 +1,19 @@
 /**
  * Attacks and damage: firing weapons, melee swings with block/parry, hitscan raycasts, applying hits,
  * kills and kill credit, plus floating messages over fighters.
+ * Newer weapon kinds (cone, beam, grapple) fire from weapon-kinds.js; traps live in traps.js.
  */
 import { game } from '../core/state.js';
 import { noise, sfx, volAt } from '../audio/sfx.js';
 import { V3, clamp, escapeHtml, now, round2, toCssHex } from '../core/util.js';
 import { TMP, bodies } from './bodies.js';
-import { HEAD, LELB, LHAND, N, PELV, RAD, RELB, RHAND } from './constants.js';
+import { HEAD, LELB, LFOOT, LHAND, N, PELV, RAD, RELB, RFOOT, RHAND } from './constants.js';
 import { addVel } from './physics.js';
 import { spawnProj } from './projectiles.js';
 import { propHit, props } from './props.js';
+import { SHRUNK_KNOCK, applyStatus } from './status.js';
+import { limitTraps } from './traps.js';
+import { FIRE_KINDS, hitWord, shockwave, spinUp } from './weapon-kinds.js';
 import { WEAPONS } from './weapons.js';
 import { net, send } from '../net/network.js';
 import { muzzleFlash, puff, spark, tracer } from '../render/fx.js';
@@ -30,9 +34,9 @@ export function checkMelee(fighter) {
   }
   for (const o of bodies.values()) {
     if (o === fighter || o.dead) continue;
-    if (o.pos[PELV].distanceTo(ph) > 3) continue;
+    if (o.pos[PELV].distanceTo(ph) > 3 + (w.reach || 0)) continue;
     for (let j = 0; j < N; j++) {
-      const rr = RAD[j] + (w.reach ? 0.12 : RAD[h]) + 0.05;
+      const rr = RAD[j] * o.size + (w.reach ? 0.12 : RAD[h]) + 0.05;
       if (!pts.some((q) => q.distanceToSquared(o.pos[j]) < rr * rr)) continue;
       const rx = vh.x - o.vel[j].x,
         ry = vh.y - o.vel[j].y,
@@ -47,6 +51,8 @@ export function checkMelee(fighter) {
       fighter.punchHit = true;
       sfx(fighter.weapon === 'fists' ? 170 : 110, 0.14, 'square', 0.12 * volAt(ph));
       spark(o.pos[j]);
+      hitWord(w, o.pos[HEAD]);
+      if (w.pound) shockwave(fighter, o.pos[j], o);
       return;
     }
   }
@@ -67,12 +73,22 @@ export function checkMelee(fighter) {
       fighter.punchHit = true;
       sfx(140, 0.1, 'square', 0.08 * volAt(ph));
       spark(pr.pos[j]);
+      if (w.pound) shockwave(fighter, pr.pos[j]);
       return;
+    }
+  }
+  // sledgehammer hitting the floor
+  if (w.pound) {
+    const low = pts.reduce((a, q) => (q.y < a.y ? q : a));
+    if (low.y < fighter.groundY + 0.3 && Math.hypot(vh.x, vh.y, vh.z) > 3) {
+      fighter.punchHit = true;
+      shockwave(fighter, new V3(low.x, fighter.groundY + 0.05, low.z));
     }
   }
 }
 
-function dealHit(o, j, dmg, imp, by, wname) {
+/** Hit a fighter: directly if we own it, otherwise ask its owner with a 'hit' message. */
+export function dealHit(o, j, dmg, imp, by, wname) {
   if (o.local) applyHit(o, j, dmg, imp, by, wname);
   else
     send({
@@ -89,6 +105,7 @@ function dealHit(o, j, dmg, imp, by, wname) {
 // the victim's owner reports real damage back to the attacker (for hitmarkers + stats)
 export function hitNotify(v, by, dmg, hs, blocked) {
   if (!by || by === v.id) return;
+  if (!blocked && dmg < 0.5) return; // pushes with no damage (leaf blower) don't flash hitmarkers
   const p = v.pos[HEAD],
     m = {
       t: 'hm',
@@ -155,10 +172,14 @@ export function applyHit(other, j, dmg, imp, by, wname) {
       }
     }
   }
-  for (let i = 0; i < N; i++) {
-    const m = i === j ? 1.6 : 0.5;
-    addVel(other, i, imp.x * m, imp.y * m, imp.z * m);
-  }
+  if (other.size < 0.9) imp = imp.clone().multiplyScalar(SHRUNK_KNOCK); // shrunk fighters are light
+  if (w && w.slip) slip(other, imp);
+  else
+    for (let i = 0; i < N; i++) {
+      // most of the push goes into the part that was hit, unless the weapon pushes the whole body
+      const m = w && w.uniform ? 1 : i === j ? 1.6 : 0.5;
+      addVel(other, i, imp.x * m, imp.y * m, imp.z * m);
+    }
   if (other.dead) return;
   if (by && by !== other.id) {
     other.lastHitBy = by;
@@ -167,12 +188,21 @@ export function applyHit(other, j, dmg, imp, by, wname) {
   }
   other.hp -= dmg;
   other.stun = Math.max(other.stun, imp.length() > 6 ? 0.7 : w && w.kind === 'melee' ? 0.18 : 0.05);
-  if (other.id === game.myBodyId) {
+  if (w && w.stun) other.stun = Math.max(other.stun, w.stun);
+  if (w && w.status) applyStatus(other, w.status[0], w.status[1]);
+  if (other.id === game.myBodyId && dmg > 0) {
     game.hurtFlash = 0.35;
     dmgDir(by, null);
   }
   hitNotify(other, by, dmg, j === HEAD);
   if (other.hp <= 0) kill(other, by, wname);
+}
+
+/** Banana peel: feet shoot forward, head goes back. A guaranteed pratfall. */
+function slip(f, imp) {
+  for (const i of [LFOOT, RFOOT]) addVel(f, i, imp.x * 1.8, imp.y * 1.4, imp.z * 1.8);
+  addVel(f, HEAD, -imp.x * 0.7, -2, -imp.z * 0.7);
+  addVel(f, PELV, imp.x * 0.4, imp.y * 0.6, imp.z * 0.4);
 }
 
 export function applyParried(a, fx, fz) {
@@ -228,14 +258,16 @@ export function onKill(vid, vname, vcol, by, wname) {
 /** Which comic word set fits a kill: melee, gun, boom, throw or fall. */
 function burstKind(by, wname) {
   const w = WEAPONS[wname];
-  if (w)
-    return w.cls === 'boom' || w.kind === 'boom'
-      ? 'boom'
-      : w.cls === 'gun'
-        ? 'gun'
-        : w.cls === 'melee'
-          ? 'melee'
-          : 'throw';
+  if (w) {
+    if (w.word) return w.word;
+    if (w.cls === 'boom' || w.kind === 'boom' || wname === 'mine') return 'boom';
+    if (w.cls === 'elem') return wname; // flame, freeze, shrink each have their own words
+    if (w.cls === 'gun' || w.kind === 'beam') return 'gun';
+    if (w.cls === 'melee') return 'melee';
+    if (w.cls === 'silly') return 'silly';
+    if (w.cls === 'gadget' || w.cls === 'trap') return 'throw';
+    return 'throw';
+  }
   if (!by) return 'fall';
   return /pad|throw/i.test(wname || '') ? 'throw' : 'melee';
 }
@@ -285,7 +317,7 @@ export function raycast(o, d, maxT, ignore) {
         ocz = p.z - o.z,
         tca = ocx * d.x + ocy * d.y + ocz * d.z;
       if (tca < 0 || tca > t) continue;
-      const r = RAD[k] + 0.06,
+      const r = RAD[k] * bd.size + 0.06,
         d2 = ocx * ocx + ocy * ocy + ocz * ocz - tca * tca;
       if (d2 > r * r) continue;
       const th = tca - Math.sqrt(r * r - d2);
@@ -320,7 +352,8 @@ export function raycast(o, d, maxT, ignore) {
   return { t, body, j, prop };
 }
 
-function muzzle(fighter) {
+/** Where shots come out: the tip of the weapon in the right hand. */
+export function muzzle(fighter) {
   const w = WEAPONS[fighter.weapon];
   return fighter.pos[RHAND].clone().addScaledVector(fighter.aim, w.len || 0.2);
 }
@@ -398,20 +431,10 @@ function fire(fighter) {
     sfx(140, 0.3, 'sawtooth', 0.06 * volAt(m));
     muzzleFlash(m, 'rocket');
     puff(m, 0.3, 0xdddddd, 0.6);
-  } else if (w.kind === 'grenade') {
-    fighter.punchT = 0.3;
-    const p = fighter.pos[RHAND].clone()
-      .addScaledVector(fighter.aim, 0.35)
-      .add(new V3(0, 0.25, 0));
-    const v = fighter.aim
-      .clone()
-      .multiplyScalar(12)
-      .add(new V3(0, 4.5, 0))
-      .addScaledVector(fighter.vel[PELV], 0.5);
-    const id = net.id + '#' + ++game.projSeq;
-    spawnProj(id, 'grenade', fighter.id, p, v, true);
-    send({ t: 'proj', id, k: 'grenade', by: fighter.id, p: p.toArray(), v: v.toArray() });
-    sfx(300, 0.12, 'sine', 0.06);
+  } else if (w.kind === 'lob' || w.kind === 'trap') {
+    throwProjectile(fighter, w);
+  } else if (FIRE_KINDS[w.kind]) {
+    FIRE_KINDS[w.kind](fighter, w);
   }
   if (w.recoil) {
     for (let i = 0; i < N; i++)
@@ -426,12 +449,65 @@ function fire(fighter) {
   }
 }
 
+/**
+ * Throw or launch a projectile: grenades and cluster bombs are lobbed, pies are launched, traps are tossed
+ * a short way in front of you. projectiles.js flies them; traps.js arms the traps.
+ */
+function throwProjectile(fighter, w) {
+  const k = fighter.weapon;
+  if (w.kind === 'trap') limitTraps(fighter.id);
+  if (!w.aimed) fighter.punchT = 0.3; // overhand throw animation
+  const p = w.aimed
+    ? muzzle(fighter)
+    : fighter.pos[RHAND].clone()
+        .addScaledVector(fighter.aim, 0.35)
+        .add(new V3(0, 0.25, 0));
+  const v =
+    w.kind === 'trap'
+      ? fighter.aim
+          .clone()
+          .setY(0)
+          .normalize()
+          .multiplyScalar(6)
+          .add(new V3(0, 3.5, 0))
+      : w.aimed
+        ? fighter.aim
+            .clone()
+            .multiplyScalar(w.speed)
+            .add(new V3(0, 2.5, 0))
+        : fighter.aim
+            .clone()
+            .multiplyScalar(12)
+            .add(new V3(0, 4.5, 0));
+  v.addScaledVector(fighter.vel[PELV], 0.4);
+  const id = net.id + '#' + ++game.projSeq;
+  spawnProj(id, k, fighter.id, p, v, true);
+  send({ t: 'proj', id, k, by: fighter.id, p: p.toArray(), v: v.toArray() });
+  if (w.aimed) {
+    sfx(220, 0.12, 'sine', 0.1 * volAt(p));
+    noise(0.12, 0.12 * volAt(p), 900);
+  } else sfx(300, 0.12, 'sine', 0.06);
+}
+
 export function gunSfx(k, p) {
   const v = volAt(p);
   if (k === 'shotgun') {
     noise(0.3, 0.35 * v, 1400);
   } else if (k === 'rifle') {
     noise(0.07, 0.18 * v, 2500);
+  } else if (k === 'minigun') {
+    noise(0.05, 0.15 * v, 2800);
+    sfx(140, 0.04, 'square', 0.03 * v);
+  } else if (k === 'freeze') {
+    sfx(1800, 0.35, 'sine', 0.08 * v);
+    sfx(2600, 0.25, 'triangle', 0.05 * v);
+    noise(0.3, 0.06 * v, 6000);
+  } else if (k === 'shrink') {
+    sfx(1200, 0.3, 'sine', 0.08 * v);
+    sfx(300, 0.35, 'sine', 0.08 * v);
+  } else if (k === 'grapple') {
+    sfx(700, 0.08, 'square', 0.06 * v);
+    noise(0.2, 0.1 * v, 1800);
   } else {
     noise(0.1, 0.22 * v, 2000);
     sfx(900, 0.05, 'square', 0.04 * v);
@@ -445,6 +521,8 @@ export function weaponUpdate(fighter, dt) {
   fighter.fireEdge = false;
   if (fighter.dead || fighter.stun > 0 || fighter.ctrl.grab || fighter.blocking) return;
   const w = WEAPONS[fighter.weapon];
+  if (!w.spin) fighter.spinT = 0;
+  else if (!spinUp(fighter, w, dt)) return; // the minigun has to spin up first
   if (!(w.auto ? fighter.ctrl.fire : edge) || fighter.cds[fighter.slot] > 0) return;
   fighter.cds[fighter.slot] = w.cd;
   fighter.prot = 0;

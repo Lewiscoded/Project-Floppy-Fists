@@ -5,9 +5,9 @@ import { game } from '../core/state.js';
 import { V3, clamp } from '../core/util.js';
 import { Body, TMP2, bodies } from './bodies.js';
 import { COLORS, FRONT, LSH, MAX_PLAYERS, PELV, RSH } from './constants.js';
-import { meleeOnly } from './match.js';
+import { meleeOnly, slotsFor } from './match.js';
 import { randomOutfit } from './outfits.js';
-import { WEAPONS } from './weapons.js';
+import { CLASSES, WEAPONS } from './weapons.js';
 import { removeBody } from '../net/messages.js';
 import { bots, net, playerCount } from '../net/network.js';
 import { SPAWNS, boxUnder } from '../world/world.js';
@@ -22,6 +22,50 @@ export const BOT_DIFF = {
 
 let botSeq = 0;
 
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+/** A random weapon for every class. */
+export function randomLoadout() {
+  return Object.fromEntries(CLASSES.map((c) => [c.key, pick(c.types)]));
+}
+
+/** Bots always carry melee plus two other random classes. */
+export function randomEquip() {
+  const others = CLASSES.map((c) => c.key).filter((k) => k !== 'melee');
+  const a = pick(others);
+  return ['melee', a, pick(others.filter((k) => k !== a))];
+}
+
+/** Farthest distance a bot will attack from with this weapon. */
+function attackRange(w) {
+  if (w.kind === 'melee') return 1.7 + (w.reach || 0) * 0.6;
+  if (w.kind === 'cone') return w.cone.range * 0.9;
+  if (w.kind === 'trap') return 5;
+  if (w.kind === 'grapple') return w.maxDist * 0.8;
+  return 30;
+}
+
+/** Choose which carried class to use against a target this far away. */
+function chooseSlot(fighter, dist) {
+  const slots = slotsFor(fighter);
+  if (meleeOnly()) return 'melee';
+  if (dist < 2.3 && slots.includes('melee') && !fighter.bot.noMelee) return 'melee';
+  let best = slots[0],
+    score = 1e9;
+  for (const k of slots) {
+    const w = WEAPONS[fighter.loadout[k]];
+    if (!w || w.kind === 'melee') continue;
+    let sc = Math.abs(dist - w.range);
+    if (dist > attackRange(w)) sc += 50;
+    if (k === fighter.bot.pref) sc -= 2; // each bot has a favourite
+    if (sc < score) {
+      score = sc;
+      best = k;
+    }
+  }
+  return best;
+}
+
 export function addBot() {
   if (game.state !== 'play' || net.mode === 'client' || playerCount() >= MAX_PLAYERS) return;
   const id = net.id + ':b' + ++botSeq,
@@ -29,14 +73,11 @@ export function addBot() {
   const used = new Set([...bodies.values()].map((b) => b.col));
   const col = COLORS.find((c) => !used.has(c)) ?? COLORS[botSeq % COLORS.length];
   const b = new Body(id, BOT_NAMES[botSeq % BOT_NAMES.length] + ' (bot)', col, true, sp[0], sp[1]);
-  b.loadout = {
-    melee: ['fists', 'bat', 'sword'][Math.floor(Math.random() * 3)],
-    gun: ['pistol', 'shotgun', 'rifle'][Math.floor(Math.random() * 3)],
-    boom: ['rocket', 'grenade'][Math.floor(Math.random() * 2)],
-  };
+  b.loadout = randomLoadout();
+  b.equip = randomEquip();
   const d = BOT_DIFF[game.match.diff] || BOT_DIFF.normal;
   b.bot = {
-    pref: Math.random() < 0.25 ? 'boom' : 'gun',
+    pref: null, // set below to one of the bot's carried classes
     strafe: 1,
     st: 0,
     react: 0.8 * d.react,
@@ -46,6 +87,7 @@ export function addBot() {
     fireCd: 0,
     d,
   };
+  b.bot.pref = pick(b.equip.slice(1));
   b.prot = 2;
   b.outfit = randomOutfit();
   bodies.set(id, b);
@@ -102,8 +144,12 @@ export function botThink(fighter, dt) {
     dx = B.wander.x - me.x;
     dz = B.wander.z - me.z;
   } else {
-    const want = meleeOnly() || bd < 2.3 ? 'melee' : B.pref === 'boom' && bd > 5 && bd < 24 ? 'boom' : 'gun';
-    if (fighter.slot !== want) fighter.slot = want;
+    // re-think the weapon every second or two, not every frame
+    B.pickT = (B.pickT || 0) - dt;
+    if (B.pickT <= 0 || (bd < 2.3 && fighter.slot !== 'melee')) {
+      B.pickT = 1 + Math.random() * 1.5;
+      fighter.slot = chooseSlot(fighter, bd);
+    }
     const w = WEAPONS[fighter.weapon],
       tp = best.pos[FRONT].clone();
     if (w.kind === 'rocket') tp.y -= 0.9;
@@ -113,7 +159,8 @@ export function botThink(fighter, dt) {
     aim.normalize();
     aim.x += (Math.random() - 0.5) * B.err * 2;
     aim.z += (Math.random() - 0.5) * B.err * 2;
-    if (w.kind === 'grenade') aim.y = 0.35 * clamp(dist / 12, 0.2, 1.2);
+    if (w.kind === 'lob' && !w.aimed) aim.y = 0.35 * clamp(dist / 12, 0.2, 1.2);
+    else if (w.aimed && w.kind === 'lob') aim.y += 0.1 * clamp(dist / 10, 0, 1.5);
     fighter.aim.copy(aim.normalize());
     dx = best.pos[PELV].x - me.x;
     dz = best.pos[PELV].z - me.z;
@@ -125,7 +172,7 @@ export function botThink(fighter, dt) {
       B.st = 1.2 + Math.random() * 2;
       B.strafe = Math.random() < 0.5 ? -1 : 1;
     }
-    const keep = w.kind === 'melee' ? 0 : w.kind === 'hitscan' ? (fighter.weapon === 'shotgun' ? 4 : 7) : 9;
+    const keep = w.range || 0; // how far away to stand
     let fwd = keep === 0 ? 1 : clamp((bd - keep) / 3, -1, 1);
     const sxx = -dz * B.strafe,
       szz = dx * B.strafe,
@@ -161,7 +208,7 @@ export function botThink(fighter, dt) {
         }
       }
     }
-    const inRange = w.kind === 'melee' ? bd < 1.7 : bd < 30;
+    const inRange = bd < attackRange(w);
     B.fireCd -= dt;
     if (inRange && B.react <= 0 && B.fireCd <= 0) {
       c.fire = w.auto ? true : (B.toggle = !B.toggle);

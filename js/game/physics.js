@@ -42,7 +42,8 @@ import {
   propWorld,
   props,
 } from './props.js';
-import { WEAPONS } from './weapons.js';
+import { holdFrozenShape } from './status.js';
+import { WEAPONS, isAimed } from './weapons.js';
 import { gadgetContacts, gadgetForces, gadgets } from '../sandbox/gadgets.js';
 import { BOXES } from '../world/world.js';
 
@@ -103,21 +104,22 @@ function forces(fighter) {
   const g = fighter.ground > 0 && !held,
     hanging = fighter.grabs.some((q) => q),
     up = g ? 1 : held ? 0.25 : 0.45;
+  const z = fighter.size; // 1 normally, smaller when shrunk: every body measurement below scales with it
   if (g) {
-    const err = fighter.groundY + 0.88 - p[PELV].y,
+    const err = fighter.groundY + 0.88 * z - p[PELV].y,
       ay = clamp(G * 0.92 + err * 140 - v[PELV].y * 12, 0, G * 3);
     for (const i of UPPER) a[i].y += ay;
   }
-  spring(fighter, HEAD, p[PELV].x, p[PELV].y + 0.9, p[PELV].z, 160 * up, 12);
+  spring(fighter, HEAD, p[PELV].x, p[PELV].y + 0.9 * z, p[PELV].z, 160 * up, 12);
   a[PELV].x -= F.x;
   a[PELV].z -= F.z;
-  spring(fighter, NECK, p[PELV].x, p[PELV].y + 0.54, p[PELV].z, 110 * up, 10);
+  spring(fighter, NECK, p[PELV].x, p[PELV].y + 0.54 * z, p[PELV].z, 110 * up, 10);
   a[PELV].x -= F.x;
   a[PELV].z -= F.z;
   const d = fighter.wantFwd,
-    sx = d.z,
-    sz = -d.x;
-  spring(fighter, FRONT, MID.x + d.x * 0.22, 0, MID.z + d.z * 0.22, 90, 8, 5);
+    sx = d.z * z,
+    sz = -d.x * z;
+  spring(fighter, FRONT, MID.x + d.x * 0.22 * z, 0, MID.z + d.z * 0.22 * z, 90, 8, 5);
   spring(fighter, RSH, p[NECK].x + sx * 0.3, 0, p[NECK].z + sz * 0.3, 60, 6, 5);
   spring(fighter, LSH, p[NECK].x - sx * 0.3, 0, p[NECK].z - sz * 0.3, 60, 6, 5);
   spring(fighter, RHIP, p[PELV].x + sx * 0.16, 0, p[PELV].z + sz * 0.16, 40, 5, 5);
@@ -140,13 +142,13 @@ function forces(fighter) {
       const foot = s < 0 ? LFOOT : RFOOT,
         knee = s < 0 ? LKNEE : RKNEE,
         ph = fighter.phase + (s > 0 ? Math.PI : 0);
-      const sw = moving ? Math.sin(ph) * 0.32 : 0,
-        lift = moving ? Math.max(0, Math.cos(ph)) * 0.24 : 0;
+      const sw = moving ? Math.sin(ph) * 0.32 * z : 0,
+        lift = moving ? Math.max(0, Math.cos(ph)) * 0.24 * z : 0;
       spring(
         fighter,
         foot,
         p[PELV].x + sx * s * 0.17 + dx * sw,
-        fighter.groundY + 0.12 + lift,
+        fighter.groundY + 0.12 * z + lift,
         p[PELV].z + sz * s * 0.17 + dz * sw,
         moving ? 240 : 100,
         14
@@ -242,7 +244,7 @@ function forces(fighter) {
       );
     } else if (w.kind === 'melee') {
       if (fighter.punchT > 0.15 && fighter.punchHand === s) {
-        const hi = fighter.weapon === 'fists' ? 0.03 : 0.25;
+        const hi = fighter.weapon === 'fists' ? 0.03 : w.pound ? -0.85 : 0.25; // the sledgehammer slams down
         spring(
           fighter,
           hand,
@@ -266,7 +268,7 @@ function forces(fighter) {
           7,
           NECK
         );
-    } else if (w.kind === 'hitscan' || w.kind === 'rocket') {
+    } else if (isAimed(w)) {
       const back = fighter.recoilT > 0 ? -0.22 : 0,
         rk = w.kind === 'rocket' ? 0.14 : 0;
       if (s > 0)
@@ -430,7 +432,13 @@ function integrate(fighter) {
 /** Keep the ragdoll in one piece by restoring every stick constraint to its rest length. */
 function solveCons(fighter) {
   const p = fighter.pos;
-  for (const [a, b, rest] of CONS) {
+  if (fighter.frozenPose) {
+    holdFrozenShape(fighter); // frozen: the whole body moves as one ice block
+    return;
+  }
+  const z = fighter.size;
+  for (const [a, b, r0] of CONS) {
+    const rest = r0 * z;
     const pa = p[a],
       pb = p[b],
       dx = pb.x - pa.x,
@@ -452,7 +460,7 @@ function solveCons(fighter) {
 function collideWorld(fighter, final) {
   for (let i = 0; i < N; i++) {
     const p = fighter.pos[i],
-      rad = RAD[i];
+      rad = RAD[i] * fighter.size;
     for (const b of BOXES) {
       if (
         p.x < b.min.x - rad ||
@@ -497,7 +505,13 @@ function collideWorld(fighter, final) {
           vy = p.y - q.y,
           vz = p.z - q.z,
           vn = vx * nx + vy * ny + vz * nz;
-        const fr = i === LFOOT || i === RFOOT ? (fighter.moving ? 0.25 : 0.6) : 0.35,
+        const fr = fighter.frozenPose
+            ? 0.01
+            : i === LFOOT || i === RFOOT
+              ? fighter.moving
+                ? 0.25
+                : 0.6
+              : 0.35,
           k = 1 - fr,
           vnn = vn < 0 ? 0 : vn;
         q.set(
@@ -521,7 +535,7 @@ function collidePair(a, fighter, both) {
     const pi = a.pos[i];
     for (let j = 0; j < N; j++) {
       const pj = fighter.pos[j],
-        rr = RAD[i] + RAD[j],
+        rr = RAD[i] * a.size + RAD[j] * fighter.size,
         dx = pj.x - pi.x,
         dy = pj.y - pi.y,
         dz = pj.z - pi.z,

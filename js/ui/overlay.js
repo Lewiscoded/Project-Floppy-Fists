@@ -7,10 +7,12 @@ import { prefs } from '../core/prefs.js';
 import { $, V3, clamp, toCssHex } from '../core/util.js';
 import { bodies, localPlayer } from '../game/bodies.js';
 import { HEAD, PELV } from '../game/constants.js';
+import { piedAmount } from '../game/status.js';
 import { camera, renderer } from '../render/renderer.js';
 import { gamepad, mouse } from './input.js';
 
-const overlayLayer = $('ov'),
+const pieEl = $('pieSplat'),
+  overlayLayer = $('ov'),
   xhair = $('xhair'),
   hmEl = xhair.querySelector('.hm');
 
@@ -56,6 +58,11 @@ const BURST_WORDS = {
   boom: { words: ['KABOOM!', 'KA-BLAM!', 'BOOM!'], color: 'red' },
   throw: { words: ['YEET!', 'WHEEE!'], color: 'blue' },
   fall: { words: ['SPLAT!', 'OOF!', 'BYE!'], color: 'blue' },
+  slap: { words: ['SLAP!', 'THWAP!', 'SMACK!'], color: 'red' },
+  silly: { words: ['SPLOOSH!', 'HONK!', 'BOING!'], color: 'blue' },
+  flame: { words: ['FWOOSH!', 'TOASTED!', 'SIZZLE!'], color: 'red' },
+  freeze: { words: ['CRACK!', 'BRRR!', 'SHATTER!'], color: 'blue' },
+  shrink: { words: ['ZWOOP!', 'TINY!', 'BLIP!'], color: 'blue' },
 };
 
 /**
@@ -124,6 +131,8 @@ export function updateOverlay(dt) {
   }
   hitmarkerT -= dt;
   if (hitmarkerT <= 0) hmEl.classList.remove('on');
+  // pie to the face: cream covers your screen, wiping off over the last second
+  pieEl.style.opacity = playing ? piedAmount(me) * 0.93 : 0;
   // kill bursts (the pop animation itself is CSS; here they just follow the world point)
   for (let i = bursts.length - 1; i >= 0; i--) {
     const b = bursts[i];

@@ -100,7 +100,7 @@ export function renderHelp() {
     `<tr><td>Move / aim</td><td><kbd>${keyLabel('up')}</kbd><kbd>${keyLabel('left')}</kbd><kbd>${keyLabel('down')}</kbd><kbd>${keyLabel('right')}</kbd> + mouse · or a controller</td></tr>
     <tr><td>Attack</td><td>Left click (hold for the rifle)</td></tr>
     <tr><td>Block / parry</td><td>Hold right click or <kbd>${keyLabel('block')}</kbd> with a melee weapon · tap it just before a hit lands to parry</td></tr>
-    <tr><td>Switch weapon</td><td><kbd>${keyLabel('slot1')}</kbd> melee · <kbd>${keyLabel('slot2')}</kbd> gun · <kbd>${keyLabel('slot3')}</kbd> explosive, or the mouse wheel</td></tr>
+    <tr><td>Switch weapon</td><td><kbd>${keyLabel('slot1')}</kbd> <kbd>${keyLabel('slot2')}</kbd> <kbd>${keyLabel('slot3')}</kbd> your 3 equipped classes (1–7 in sandbox), or the mouse wheel</td></tr>
     <tr><td>Jump / grab</td><td><kbd>${keyLabel('jump')}</kbd> · hold <kbd>${keyLabel('grab')}</kbd> to grab a fighter, prop or ledge, let go to throw (hold <kbd>${keyLabel('jump')}</kbd> to lift first)</td></tr>
     <tr><td>Chat / emotes</td><td><kbd>${keyLabel('chat')}</kbd> chat · <kbd>${keyLabel('quick')}</kbd> quick chat · <kbd>${keyLabel('emote')}</kbd> emotes</td></tr>
     <tr><td>Loadout / menu</td><td><kbd>${keyLabel('loadout')}</kbd> · <kbd>Esc</kbd> · all keys can be changed in ⚙ Settings</td></tr>`;

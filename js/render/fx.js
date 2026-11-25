@@ -1,5 +1,6 @@
 /**
- * Short-lived visual effects: muzzle flashes, sparks, smoke, explosions, debris.
+ * Short-lived visual effects: muzzle flashes, sparks, smoke, explosions, debris,
+ * plus the moving puffs used by the flamethrower, leaf blower and other new weapons (streak()).
  */
 import * as THREE from 'three';
 import { game } from '../core/state.js';
@@ -47,6 +48,25 @@ export function puff(p, size, color, life) {
       m.scale.setScalar(size * 2 * (1 + f * 2.2));
       m.material.opacity = 0.65 * (1 - f) * (1 - f);
       m.position.y += rise * dt;
+    },
+  });
+}
+
+/** A puff that flies with velocity v while it grows and fades (flame jets, wind gusts, cream splats). */
+export function streak(p, v, size, color, life, additive = false, grow = 2) {
+  const m = sprite(color, additive ? 1 : 0.8, additive);
+  m.position.copy(p);
+  m.scale.setScalar(size);
+  const vel = v.clone();
+  fxParticles.push({
+    m,
+    t: 0,
+    life,
+    update(f, dt) {
+      m.position.addScaledVector(vel, dt);
+      vel.multiplyScalar(1 - dt * 1.5);
+      m.scale.setScalar(size * (1 + f * grow));
+      m.material.opacity = (additive ? 1 : 0.8) * (1 - f);
     },
   });
 }
@@ -174,8 +194,14 @@ export function muzzleFlash(p, k) {
 const tracerGeo = new THREE.CylinderGeometry(0.018, 0.018, 1, 5, 1, true);
 tracerGeo.translate(0, 0.5, 0);
 
+/** Beam colors for weapons that maps don't theme (a map's own tracer colors win). */
+const TRACER_COLORS = { grapple: 0x5a3e22, freeze: 0x7fe6ff, shrink: 0xff6ef0, minigun: 0xfff2a8 };
+/** How long a beam stays on screen (seconds); bullets are a flicker, the rope and rays linger. */
+const TRACER_LIFE = { grapple: 0.35, freeze: 0.3, shrink: 0.3 };
+
 export function tracer(a, b, k) {
-  const tc = THEME && THEME.tracer && THEME.tracer[k] !== undefined ? THEME.tracer[k] : 0xfff2a8;
+  const tc =
+    THEME && THEME.tracer && THEME.tracer[k] !== undefined ? THEME.tracer[k] : (TRACER_COLORS[k] ?? 0xfff2a8);
   const dark = new THREE.Color(tc).getHSL({}).l < 0.3;
   const m = new THREE.Mesh(
     tracerGeo,
@@ -191,15 +217,16 @@ export function tracer(a, b, k) {
     L = d.length();
   m.position.copy(a);
   m.quaternion.setFromUnitVectors(YAX, d.normalize());
-  m.scale.set(1, L, 1);
+  const thick = k === 'freeze' || k === 'shrink' ? 3 : k === 'grapple' ? 1.6 : 1;
+  m.scale.set(thick, L, thick);
   scene.add(m);
   fxParticles.push({
     m,
     t: 0,
-    life: 0.1,
+    life: TRACER_LIFE[k] || 0.1,
     update(f) {
       m.material.opacity = 0.95 * (1 - f);
-      m.scale.x = m.scale.z = 1 - f * 0.5;
+      m.scale.x = m.scale.z = thick * (1 - f * 0.5);
     },
   });
 }

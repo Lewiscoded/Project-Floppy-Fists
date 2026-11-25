@@ -3,7 +3,7 @@
  * Bump GAME_VERSION and add a line to CHANGELOG (newest first) when you ship an update.
  */
 
-export const GAME_VERSION = '0.10.1';
+export const GAME_VERSION = '0.11.0';
 export const GAME_NAME = 'Project Floppy Fists';
 
 export const AUTHOR = {
@@ -32,6 +32,12 @@ export const CREDITS = [
 
 /** Version history, newest first. */
 export const CHANGELOG = [
+  {
+    v: '0.11.0',
+    title: 'Seven weapon classes',
+    notes:
+      'Four new classes (Gadgets, Traps, Elemental, Silly) plus heavies for the old ones: sledgehammer, minigun, cluster bomb, grappling hook, gravity glove, leaf blower, banana peel, spring trap, sticky mine, flamethrower, freeze ray, shrink ray, slap glove, pie launcher and boxing glove. Carry 3 classes into a match (pick them on the new loadout screen); Sandbox unlocks all 7 on keys 1–7. Status effects: burning, frozen, shrunk and pied.',
+  },
   {
     v: '0.10.1',
     title: 'Block Party goes trap',
