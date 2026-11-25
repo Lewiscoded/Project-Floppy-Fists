@@ -111,4 +111,11 @@ Each fighter is a 16-point Verlet ragdoll held together by distance constraints.
 
 Online, each player's computer simulates its own fighter and sends its pose 20 times a second. Hits are sent to the owner of the fighter that was hit, and that computer applies the damage and knockback. The host relays all messages and simulates the bots.
 
-Everything is in one file, `index.html`.
+## Working on the code
+The code is split into small ES modules by system: physics, combat, maps, networking, UI and so on. See **[ARCHITECTURE.md](ARCHITECTURE.md)** for the folder map, how a frame runs, and recipes for adding maps, weapons and gadgets. There's no build step. GitHub Pages serves the files as-is.
+
+**Run it locally:** browsers won't load JS modules from a plain file, so serve the folder:
+- In VS Code, install **Live Server** (it's suggested when you open the folder), then right-click `index.html` → **Open with Live Server**.
+- Or run `python -m http.server` in the folder and open http://localhost:8000.
+
+**Formatting:** the code is formatted with Prettier (`.prettierrc.json`). With the Prettier extension, VS Code formats on save.
