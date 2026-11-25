@@ -4,6 +4,7 @@
 import { game } from '../core/state.js';
 import { ACTIONS, DEF_BINDS, applyVolume, keyLabel, keyName, prefs, savePrefs } from '../core/prefs.js';
 import { $ } from '../core/util.js';
+import { syncVolumes } from '../audio/engine.js';
 import { applyQuality } from '../render/renderer.js';
 import { menuIsOpen, renderLoadout } from './menu.js';
 import { openTutorial } from './tutorial.js';
@@ -18,6 +19,7 @@ export function renderSettings() {
   $('setGrid').innerHTML =
     rng('master', 'Master volume', 0, 1, 0.05, pct) +
     rng('fx', 'Effects volume', 0, 1, 0.05, pct) +
+    rng('music', 'Music volume', 0, 1, 0.05, pct) +
     rng('shake', 'Screen shake', 0, 1.5, 0.1, pct) +
     rng('cam', 'Camera distance', 0.75, 1.4, 0.05, pct) +
     chk('tags', 'Show name tags') +
@@ -39,6 +41,7 @@ $('setGrid').addEventListener('input', (e) => {
   prefs.set[k] = e.target.type === 'checkbox' ? e.target.checked : +e.target.value;
   savePrefs();
   applyVolume();
+  syncVolumes();
   const sm = e.target.parentElement.querySelector('small');
   if (sm) sm.textContent = Math.round(prefs.set[k] * 100) + '%';
 });

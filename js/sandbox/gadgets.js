@@ -4,7 +4,7 @@
  */
 import * as THREE from 'three';
 import { game } from '../core/state.js';
-import { sfx, volAt } from '../audio.js';
+import { sfx, volAt } from '../audio/sfx.js';
 import { V3, clamp, escapeHtml, now, round2 } from '../core/util.js';
 import { bodies, localPlayer } from '../game/bodies.js';
 import { addBot } from '../game/bots.js';

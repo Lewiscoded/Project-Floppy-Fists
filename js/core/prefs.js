@@ -48,7 +48,7 @@ export const prefs = {
   map: THEMES[saved.map] ? saved.map : 'kitchen',
   quality: saved.quality === 'low' ? 'low' : 'high',
   set: Object.assign(
-    { master: 0.8, fx: 1, shake: 1, cam: 1, tags: true, dmgNums: true, assist: true },
+    { master: 0.8, fx: 1, music: 0.5, shake: 1, cam: 1, tags: true, dmgNums: true, assist: true },
     saved.set || {}
   ),
   binds: Object.assign({}, DEF_BINDS, saved.binds || {}),

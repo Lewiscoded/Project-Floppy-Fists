@@ -3,7 +3,7 @@
  * Bump GAME_VERSION and add a line to CHANGELOG (newest first) when you ship an update.
  */
 
-export const GAME_VERSION = '0.9.0';
+export const GAME_VERSION = '0.10.0';
 export const GAME_NAME = 'Project Floppy Fists';
 
 export const AUTHOR = {
@@ -32,6 +32,12 @@ export const CREDITS = [
 
 /** Version history, newest first. */
 export const CHANGELOG = [
+  {
+    v: '0.10.0',
+    title: 'Sound update',
+    notes:
+      'Background music for the menu and every map, plus sounds for buttons, menus, typing, match start, results and kills. New Music volume slider.',
+  },
   {
     v: '0.9.0',
     title: 'Comic book update',

@@ -3,7 +3,7 @@
  */
 import * as THREE from 'three';
 import { game } from '../core/state.js';
-import { noise, sfx, volAt } from '../audio.js';
+import { noise, sfx, volAt } from '../audio/sfx.js';
 import { V3, clamp } from '../core/util.js';
 import { localPlayer } from '../game/bodies.js';
 import { G, PELV } from '../game/constants.js';

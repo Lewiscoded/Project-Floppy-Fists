@@ -3,7 +3,7 @@
  * kills and kill credit, plus floating messages over fighters.
  */
 import { game } from '../core/state.js';
-import { noise, sfx, volAt } from '../audio.js';
+import { noise, sfx, volAt } from '../audio/sfx.js';
 import { V3, clamp, escapeHtml, now, round2, toCssHex } from '../core/util.js';
 import { TMP, bodies } from './bodies.js';
 import { HEAD, LELB, LHAND, N, PELV, RAD, RELB, RHAND } from './constants.js';

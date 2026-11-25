@@ -2,7 +2,7 @@
  * Main menu buttons, loadout picker, pause menu, and the kill feed.
  */
 import { game } from '../core/state.js';
-import { initAudio } from '../audio.js';
+import { initAudio } from '../audio/engine.js';
 import { keyLabel, prefs, savePrefs } from '../core/prefs.js';
 import { $, toCssHex } from '../core/util.js';
 import { localPlayer } from '../game/bodies.js';

@@ -3,7 +3,7 @@
  * and leaving a game.
  */
 import { game } from '../core/state.js';
-import { sfx } from '../audio.js';
+import { sfx } from '../audio/sfx.js';
 import { keyLabel, prefs, savePrefs } from '../core/prefs.js';
 import { $, escapeHtml, now, toCssHex } from '../core/util.js';
 import { Body, bodies } from './bodies.js';

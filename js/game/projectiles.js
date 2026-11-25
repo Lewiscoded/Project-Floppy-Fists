@@ -3,7 +3,7 @@
  */
 import * as THREE from 'three';
 import { game } from '../core/state.js';
-import { sfx, volAt } from '../audio.js';
+import { sfx, volAt } from '../audio/sfx.js';
 import { V3, now } from '../core/util.js';
 import { TMP, bodies, localBodies } from './bodies.js';
 import { hitNotify, kill, rayBox } from './combat.js';

@@ -2,7 +2,7 @@
  * Text chat, quick-chat wheel and emote wheel.
  */
 import { game } from '../core/state.js';
-import { sfx } from '../audio.js';
+import { sfx } from '../audio/sfx.js';
 import { $, escapeHtml, now, toCssHex } from '../core/util.js';
 import { bodies, localPlayer } from '../game/bodies.js';
 import { startEmote } from '../game/physics.js';

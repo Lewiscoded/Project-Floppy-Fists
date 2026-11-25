@@ -2,7 +2,7 @@
  * Sandbox controls: the weapon wheel (X), the spawn bar (Z) with placement preview, and the free camera (C).
  */
 import { game } from '../core/state.js';
-import { sfx } from '../audio.js';
+import { sfx } from '../audio/sfx.js';
 import { keyLabel } from '../core/prefs.js';
 import { $, V3, clamp, escapeHtml, round2 } from '../core/util.js';
 import { bodies, localPlayer } from '../game/bodies.js';

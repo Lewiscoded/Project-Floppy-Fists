@@ -3,7 +3,7 @@
  * along, and struggling free.
  */
 import { game } from '../core/state.js';
-import { sfx, volAt } from '../audio.js';
+import { sfx, volAt } from '../audio/sfx.js';
 import { V3, clamp, now, round2 } from '../core/util.js';
 import { CP, bodies } from './bodies.js';
 import { flashMsg } from './combat.js';

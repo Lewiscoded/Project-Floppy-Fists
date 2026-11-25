@@ -13,7 +13,12 @@ css/
   hud.css             In-game HUD, kill feed, speech bubbles, POW bursts, wheels, spawn bar
 js/
   main.js             Entry point: loads modules, demo world, the frame loop
-  audio.js            Synthesized sound effects (no audio files)
+  audio/              All sound, synthesized live (no audio files)
+    engine.js         Audio context and volume channels (master / effects / music)
+    sfx.js            Game sound effects + UI sounds (clicks, swooshes, fanfare, POW)
+    music.js          The music sequencer: picks the song for the screen, crossfades, ducks on pause
+    instruments.js    Synthesized instruments (drums, basses, keys, leads)
+    tracks/           One file per song: menu, kitchen, office, castle, block-party
   core/               Helpers and state shared by everything
     util.js           $, V3, clamp, now, round2, escapeHtml
     about.js          Version number, changelog, credits and the "Made by" links
@@ -53,6 +58,7 @@ js/
     input.js          Keyboard / mouse / gamepad -> fighter controls
     menu.js, lobby.js, hud.js, settings.js, tutorial.js,
     map-select.js, customize.js, chat.js, overlay.js, info.js
+    ui-sounds.js      Hover/click/menu sounds for every button, wired up once for the whole page
 ```
 
 ## One frame (`frame()` in main.js)
@@ -89,6 +95,8 @@ Three window listeners are installed from `main.js` on purpose so they run after
 ## Recipes
 
 **Change the look:** edit the variables in `css/theme.css` (colors, fonts, outline thickness, shadows). Everything else in the CSS uses them.
+
+**Change a song:** open its file in `js/audio/tracks/`. Melodies are written as notes per bar (`'E5 - G5 . C6 - - -'`: note, `-` hold, `.` rest), drums as hit patterns (`'x . . . x . . .'`), and the bass and chords follow the `chords` list. `js/audio/music.js` explains every option. To give a new map music, add a track file and list it in `tracks/index.js` under the map's key.
 
 **Ship an update:** bump `GAME_VERSION` in `js/core/about.js` and add a line at the top of `CHANGELOG`. It shows up on the Info screen and the main menu.
 

@@ -2,7 +2,7 @@
  * Keyboard, mouse and gamepad input; turns them into fighter controls (move, aim, attack, block, grab).
  */
 import { game } from '../core/state.js';
-import { initAudio } from '../audio.js';
+import { initAudio } from '../audio/engine.js';
 import { prefs, savePrefs } from '../core/prefs.js';
 import { $, V3 } from '../core/util.js';
 import { TMP2, bodies, localPlayer } from '../game/bodies.js';

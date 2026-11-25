@@ -17,7 +17,7 @@ import './world/maps/office.js';
 import './world/maps/castle.js';
 import './world/maps/block-party.js';
 import './world/maps/index.js';
-import './audio.js';
+import './audio/engine.js';
 import './game/bodies.js';
 import './game/physics.js';
 import './game/grab.js';
@@ -42,6 +42,7 @@ import './ui/customize.js';
 import './ui/settings.js';
 import './ui/tutorial.js';
 import './ui/info.js';
+import './ui/ui-sounds.js';
 import './ui/map-select.js';
 import './ui/lobby.js';
 import './game/match.js';
@@ -51,6 +52,7 @@ import { installSandboxPointerListeners } from './sandbox/sandbox-ui.js';
 import { installCustomizeEscape } from './ui/customize.js';
 import { installMapScreenEscape } from './ui/map-select.js';
 
+import { updateMusic } from './audio/music.js';
 import { game } from './core/state.js';
 import { prefs } from './core/prefs.js';
 import { $, V3, now } from './core/util.js';
@@ -147,6 +149,7 @@ let physicsAccumulator = 0,
 function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000);
   last = t;
+  updateMusic();
   const L = localBodies();
   for (const r of L) {
     const c = r.bot ? botThink(r, dt) : playerCtrl(r);

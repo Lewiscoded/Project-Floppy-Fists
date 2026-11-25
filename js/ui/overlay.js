@@ -2,7 +2,7 @@
  * Screen overlay: crosshair, hitmarkers, damage numbers, off-screen arrows, speech bubbles.
  */
 import { game } from '../core/state.js';
-import { sfx } from '../audio.js';
+import { sfx, uiPow, volAt } from '../audio/sfx.js';
 import { prefs } from '../core/prefs.js';
 import { $, V3, clamp, toCssHex } from '../core/util.js';
 import { bodies, localPlayer } from '../game/bodies.js';
@@ -68,6 +68,7 @@ export function comicBurst(worldPos, kind) {
   el.className = 'burst' + (set.color ? ' ' + set.color : '');
   el.innerHTML = `<div class="star"><b>${set.words[(Math.random() * set.words.length) | 0]}</b></div>`;
   overlayLayer.appendChild(el);
+  uiPow(volAt(worldPos));
   bursts.push({ el, p: worldPos.clone().add(new V3(0, 0.6, 0)), t: 0 });
 }
 

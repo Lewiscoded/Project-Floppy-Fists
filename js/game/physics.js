@@ -2,7 +2,7 @@
  * Ragdoll physics: muscle springs that keep fighters standing and walking, verlet integration,
  * constraint solving, world/fighter collisions, emotes, and step() which advances one 1/120 s physics tick.
  */
-import { sfx } from '../audio.js';
+import { sfx } from '../audio/sfx.js';
 import { clamp, now } from '../core/util.js';
 import { CP, F, MID, TMP, TMP2, bodies, localBodies } from './bodies.js';
 import { checkMelee, kill } from './combat.js';

@@ -3,7 +3,7 @@
  * host migration if the host leaves. The host relays every message.
  */
 import { game } from '../core/state.js';
-import { sfx } from '../audio.js';
+import { sfx } from '../audio/sfx.js';
 import { matchLeft, prefs, savePrefs, setMatchClock } from '../core/prefs.js';
 import { $, escapeHtml, now } from '../core/util.js';
 import { bodies, localBodies, localPlayer } from '../game/bodies.js';
