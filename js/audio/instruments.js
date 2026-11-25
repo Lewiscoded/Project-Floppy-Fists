@@ -47,6 +47,18 @@ const gain = (dest) => {
   return g;
 };
 
+/** Soft-clipping curve for the 808 (adds the gritty harmonics that make it audible on small speakers). */
+let clipCurve = null;
+function softClip() {
+  if (!clipCurve) {
+    clipCurve = new Float32Array(1024);
+    for (let i = 0; i < 1024; i++) clipCurve[i] = Math.tanh(((i / 1023) * 2 - 1) * 3.2);
+  }
+  const ws = audio.ctx.createWaveShaper();
+  ws.curve = clipCurve;
+  return ws;
+}
+
 export const INSTRUMENTS = {
   // ---------- drums ----------
   kick(dest, t, n, d, v) {
@@ -124,7 +136,26 @@ export const INSTRUMENTS = {
     noiseSrc(t, 0.02, filter('highpass', 2500, 0.5, g));
   },
 
+  trapHat(dest, t, n, d, v) {
+    const g = gain(dest);
+    env(g, t, 0.14 * v, 0.0005, 0.003, 0.028);
+    noiseSrc(t, 0.04, filter('highpass', 9500, 0.9, g));
+  },
+
   // ---------- bass ----------
+  bass808(dest, t, n, d, v) {
+    // a long sine "boom" that starts a little sharp (the punch), through a soft clipper for grit
+    const g = gain(dest);
+    const end = env(g, t, 0.55 * v, 0.004, Math.max(0.12, d * 0.92), 0.18);
+    const ws = softClip();
+    ws.connect(g);
+    const drive = audio.ctx.createGain();
+    drive.gain.value = 1.6;
+    drive.connect(ws);
+    const o = osc('sine', midiToHz(n), t, end, drive);
+    o.frequency.setValueAtTime(midiToHz(n) * 2.2, t);
+    o.frequency.exponentialRampToValueAtTime(midiToHz(n), t + 0.05);
+  },
   synthBass(dest, t, n, d, v) {
     const f = filter('lowpass', 900, 4, gain(dest));
     const g = f.context.createGain();
@@ -207,6 +238,18 @@ export const INSTRUMENTS = {
     const g = gain(f);
     const end = env(g, t, 0.4 * v, 0.002, 0.01, 0.35);
     osc('sawtooth', midiToHz(n), t, end, g);
+  },
+
+  bell(dest, t, n, d, v) {
+    const g = gain(dest);
+    const end = env(g, t, 0.14 * v, 0.002, 0.02, Math.min(1.4, d + 0.7));
+    osc('sine', midiToHz(n), t, end, g);
+    const g2 = gain(dest);
+    env(g2, t, 0.05 * v, 0.001, 0.01, 0.35);
+    osc('sine', midiToHz(n) * 2.76, t, end, g2);
+    const g3 = gain(dest);
+    env(g3, t, 0.02 * v, 0.001, 0.005, 0.12);
+    osc('sine', midiToHz(n) * 5.4, t, end, g3);
   },
 
   // ---------- leads ----------

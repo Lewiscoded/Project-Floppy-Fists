@@ -1,6 +1,6 @@
 # Project Floppy Fists
 
-*Version 0.10.0, the Sound update.* Made by **Jesse J Lewis** ([lewiscoded.dev](https://www.lewiscoded.dev/)).
+*Version 0.10.1, the Sound update.* Made by **Jesse J Lewis** ([lewiscoded.dev](https://www.lewiscoded.dev/)).
 
 A wobbly ragdoll sandbox brawler built with three.js. Pick a map and a loadout, then bonk, blast and rocket your friends off it. Up to 5 players online.
 

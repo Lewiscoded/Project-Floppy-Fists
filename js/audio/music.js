@@ -7,7 +7,8 @@
  * How a song is written (see any file in audio/tracks/):
  *   chords: one chord per bar ('Am7'), or two for a split bar ('F G')
  *   parts: each part plays one instrument with ONE of these:
- *     pattern: drum hits per bar           'x . . . x . . .'   x = hit, X = loud hit, . = nothing
+ *     pattern: drum hits per bar           'x . . . x . . .'   x = hit, X = loud hit, . = nothing,
+ *                                                              r = 2 quick hits in one step, 3 = 3 hits (hi-hat rolls)
  *     bass:    chord tones per bar          'R . . 5 . . 8 .'   R root, 3 third, 5 fifth, 7 seventh, 8 octave,
  *                                                              6 sixth, ^ = half step below the next bar's root
  *     chord:   whole-chord hits per bar     'x . . . . . x .'
@@ -87,6 +88,12 @@ export function playStep(p, time) {
       const pat = Array.isArray(part.pattern) ? part.pattern[bar % part.pattern.length] : part.pattern;
       const t = tokens(pat)[step];
       if (t === 'x' || t === 'X') inst(p.out, time, 0, stepDur, vol * (t === 'X' ? 1 : 0.7));
+      else if (t === 'r' || t === '3') {
+        // rolls: split the step into 2 or 3 quick hits
+        const n = t === 'r' ? 2 : 3;
+        for (let i = 0; i < n; i++)
+          inst(p.out, time + (i * stepDur) / n, 0, stepDur / n, vol * (0.5 + 0.12 * i));
+      }
     } else if (part.bass) {
       const list = tokens(Array.isArray(part.bass) ? part.bass[bar % part.bass.length] : part.bass);
       const t = list[step];

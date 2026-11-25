@@ -3,7 +3,7 @@
  * Bump GAME_VERSION and add a line to CHANGELOG (newest first) when you ship an update.
  */
 
-export const GAME_VERSION = '0.10.0';
+export const GAME_VERSION = '0.10.1';
 export const GAME_NAME = 'Project Floppy Fists';
 
 export const AUTHOR = {
@@ -32,6 +32,12 @@ export const CREDITS = [
 
 /** Version history, newest first. */
 export const CHANGELOG = [
+  {
+    v: '0.10.1',
+    title: 'Block Party goes trap',
+    notes:
+      'New Block Party song: a 140 BPM hip hop trap beat with a heavy 808, rolling hi-hats and dark bells.',
+  },
   {
     v: '0.10.0',
     title: 'Sound update',
