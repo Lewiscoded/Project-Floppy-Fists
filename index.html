@@ -6,10 +6,14 @@
     <title>Project Floppy Fists</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/style.css" />
+    <!-- theme.css holds every color and font; the other files only use its variables -->
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/screens.css" />
+    <link rel="stylesheet" href="css/hud.css" />
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script type="importmap">
       {
@@ -53,7 +57,7 @@
 
     <div id="menu" class="screen">
       <div class="card">
-        <h1>PROJECT<span>FLOPPY FISTS</span></h1>
+        <h1 class="logo"><span class="kicker">Project</span><span class="title">Floppy Fists!</span></h1>
         <p class="tag">
           Wobbly ragdoll sandbox brawler. Bats, shotguns, rocket launchers. Up to 5 players online.
         </p>
@@ -86,43 +90,12 @@
         </div>
         <p id="status"></p>
         <div id="myStats"></div>
-        <table id="ctlTable">
-          <tr>
-            <td>Move / aim</td>
-            <td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + mouse</td>
-          </tr>
-          <tr>
-            <td>Attack</td>
-            <td>Left click (hold for the rifle)</td>
-          </tr>
-          <tr>
-            <td>Block / parry</td>
-            <td>
-              Hold right click or <kbd>F</kbd> with a melee weapon · tap it just before a hit lands to parry
-            </td>
-          </tr>
-          <tr>
-            <td>Switch weapon</td>
-            <td><kbd>1</kbd> melee · <kbd>2</kbd> gun · <kbd>3</kbd> explosive, or the mouse wheel</td>
-          </tr>
-          <tr>
-            <td>Jump / grab ledge</td>
-            <td><kbd>Space</kbd> · hold <kbd>E</kbd> while falling, then hold <kbd>Space</kbd> to climb</td>
-          </tr>
-          <tr>
-            <td>Sandbox mode</td>
-            <td>
-              hold <kbd>${kb('wheel')}</kbd> weapon wheel · <kbd>${kb('spawn')}</kbd> spawn menu (<kbd
-                >${kb('rotate')}</kbd
-              >
-              rotates) · <kbd>${kb('fly')}</kbd> free camera
-            </td>
-          </tr>
-          <tr>
-            <td>Loadout / menu</td>
-            <td><kbd>Q</kbd> · <kbd>Esc</kbd></td>
-          </tr>
-        </table>
+        <!-- filled in by renderHelp() in js/ui/settings.js -->
+        <table id="ctlTable"></table>
+        <div class="menu-foot">
+          <span><span class="version-tag" id="verTag"></span> made by Jesse J Lewis</span>
+          <button class="infoBtn">ℹ Info and credits</button>
+        </div>
       </div>
     </div>
 
@@ -137,7 +110,7 @@
     <div id="pause" class="screen hidden">
       <div class="card small">
         <h2>Paused</h2>
-        <p id="roomInfo" style="font-weight: 700; color: #5b6577"></p>
+        <p id="roomInfo" class="ms-note"></p>
         <button id="resume" class="go">Resume</button>
         <button id="pLoad">Change loadout</button>
         <button class="custBtn">👕 Customize</button>
@@ -145,6 +118,7 @@
         <button class="gfxBtn">Graphics: High</button>
         <button id="pInvite" class="blue">Copy invite link</button>
         <button id="endMatch">End match (back to lobby)</button>
+        <button class="infoBtn">ℹ Info</button>
         <button id="leave">Leave game</button>
       </div>
     </div>
@@ -153,7 +127,7 @@
       <div class="card">
         <div class="row" style="justify-content: space-between">
           <h2 id="lobbyTitle" style="margin: 0">Lobby</h2>
-          <span id="lobbyCode" style="font-weight: 800; color: #6b7486"></span>
+          <span id="lobbyCode"></span>
         </div>
         <div id="inviteRow" class="row" style="margin-top: 10px">
           <input id="inviteIn" readonly /><button id="copyInvite" class="blue">Copy invite link</button>
@@ -162,7 +136,7 @@
           <div>
             <h3>
               Players
-              <small id="lobbyCount" style="font-family: Nunito; font-size: 13px; color: #6b7486"></small>
+              <small id="lobbyCount"></small>
             </h3>
             <div id="lobbyPlayers" style="margin-top: 6px"></div>
           </div>
@@ -178,7 +152,7 @@
           ><button id="lobbyLoadout" class="blue">Loadout…</button><button class="custBtn blue">👕</button
           ><button class="setBtn">⚙</button><button id="lobbyLeave">Leave</button>
         </div>
-        <p id="lobbyNote" style="margin-top: 10px; font-weight: 700; color: #6b7486"></p>
+        <p id="lobbyNote" class="ms-note" style="margin-top: 10px"></p>
       </div>
     </div>
 
@@ -188,7 +162,7 @@
         <div id="podium"></div>
         <div class="awards" id="awards"></div>
         <table id="resTable"></table>
-        <p id="resNote" style="margin: 12px 0; font-weight: 700; color: #6b7486; text-align: center"></p>
+        <p id="resNote" class="ms-note" style="margin: 12px 0; text-align: center"></p>
         <div class="row">
           <button id="resAgain" class="go" style="flex: 1">Play again</button
           ><button id="resLobby" class="go" style="flex: 1">Back to lobby</button
@@ -203,9 +177,7 @@
         <div class="setg" id="setGrid"></div>
         <h3 style="margin-top: 16px">
           Controls
-          <small style="font-family: Nunito; font-size: 12px; color: #6b7486"
-            >click a key, then press the new one</small
-          >
+          <small>click a key, then press the new one</small>
         </h3>
         <div class="binds" id="binds"></div>
         <div class="row" style="margin-top: 14px">
@@ -228,7 +200,7 @@
           <h2 style="margin: 0">Choose a map</h2>
           <button id="mapClose">Close</button>
         </div>
-        <p id="mapNote" style="font-weight: 700; color: #6b7486; margin-top: 4px"></p>
+        <p id="mapNote" class="ms-note" style="margin-top: 4px"></p>
         <div class="mapGrid" id="mapGrid"></div>
       </div>
     </div>
@@ -247,6 +219,13 @@
           <div id="copts"></div>
         </div>
         <button id="custClose" class="go" style="width: 100%; margin-top: 12px">Done</button>
+      </div>
+    </div>
+    <div id="info" class="screen hidden" style="z-index: 22">
+      <div class="card wide">
+        <!-- content comes from js/core/about.js, rendered by js/ui/info.js -->
+        <div id="infoBody"></div>
+        <button id="infoClose" class="go" style="width: 100%; margin-top: 14px">Done</button>
       </div>
     </div>
     <div id="banner2" class="hidden"></div>

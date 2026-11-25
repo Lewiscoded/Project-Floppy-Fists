@@ -1,0 +1,48 @@
+/*
+ * Comic book theme.
+ *
+ * Every color, font and outline size the UI uses lives here. Change a value and the whole game follows.
+ * The other CSS files (base, screens, hud) only use these variables.
+ */
+:root {
+  /* ink and paper */
+  --ink: #1a1410; /* outlines, text */
+  --paper: #fff9ea; /* panels */
+  --paper-2: #fff1c7; /* inner panels, inputs */
+  --paper-3: #f6e3ad; /* pressed / dividers */
+  --muted: #6b5d4f; /* secondary text */
+
+  /* comic colors */
+  --red: #e8402f;
+  --red-dark: #a92a1e;
+  --yellow: #ffd93d;
+  --yellow-dark: #d6a60c;
+  --blue: #3b8fe8;
+  --blue-dark: #1f5fa8;
+  --cyan: #63d3f2;
+  --green: #3fbf5f;
+  --green-dark: #23803a;
+  --pink: #ff7ab8;
+
+  /* lines and shadows: comics use hard, offset shadows (no blur) */
+  --line: 3px;
+  --line-thick: 4px;
+  --pop: 4px 4px 0 var(--ink);
+  --pop-sm: 2px 2px 0 var(--ink);
+  --pop-lg: 8px 8px 0 var(--ink);
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  /* lettering */
+  --font-title: 'Bangers', Impact, 'Arial Black', sans-serif;
+  --font-body: 'Comic Neue', 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+
+  /* print textures */
+  --halftone: radial-gradient(circle, rgba(26, 20, 16, 0.16) 1.2px, transparent 1.5px) 0 0 / 9px 9px;
+  --halftone-light: radial-gradient(circle, rgba(255, 255, 255, 0.28) 1.3px, transparent 1.6px) 0 0 / 8px 8px;
+  --sunburst: repeating-conic-gradient(
+    from 0deg at 50% 42%,
+    rgba(255, 217, 61, 0.26) 0deg 8deg,
+    rgba(255, 217, 61, 0) 8deg 16deg
+  );
+}

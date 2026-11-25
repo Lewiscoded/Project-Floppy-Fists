@@ -28,6 +28,7 @@ import { closeChat, openChat, pickWheel, renderWheel, sendChat } from './chat.js
 import { closeCustom } from './customize.js';
 import { closeLoadout, openLoadout, togglePause } from './menu.js';
 import { closeSettings, renderHelp, renderSettings } from './settings.js';
+import { closeInfo } from './info.js';
 import { closeTutorial } from './tutorial.js';
 
 export const keys = new Set(),
@@ -80,6 +81,12 @@ addEventListener('keydown', (e) => {
   if (['Space', 'Tab'].includes(e.code) || e.code === prefs.binds.jump) e.preventDefault();
   keys.add(e.code);
   gamepad.active = false;
+  // Escape closes menu overlays on the main menu and in the lobby too
+  if (e.code === 'Escape' && game.state !== 'play') {
+    if (!$('info').classList.contains('hidden')) return closeInfo();
+    if (!$('settings').classList.contains('hidden')) return closeSettings();
+    if (!$('tutorial').classList.contains('hidden')) return closeTutorial();
+  }
   if (game.state !== 'play') return;
   const me = localPlayer();
   if (e.code === 'Escape') {
@@ -94,6 +101,10 @@ addEventListener('keydown', (e) => {
     }
     if (spawnOpen) {
       toggleSpawn();
+      return;
+    }
+    if (!$('info').classList.contains('hidden')) {
+      closeInfo();
       return;
     }
     if (!$('settings').classList.contains('hidden')) {

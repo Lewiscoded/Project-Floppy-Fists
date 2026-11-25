@@ -14,7 +14,7 @@ import { WEAPONS } from './weapons.js';
 import { net, send } from '../net/network.js';
 import { muzzleFlash, puff, spark, tracer } from '../render/fx.js';
 import { feed } from '../ui/menu.js';
-import { dmgDir, showHitFeedback } from '../ui/overlay.js';
+import { comicBurst, dmgDir, showHitFeedback } from '../ui/overlay.js';
 import { BOXES, wName } from '../world/world.js';
 
 export function checkMelee(fighter) {
@@ -220,6 +220,24 @@ export function onKill(vid, vname, vcol, by, wname) {
       : `<span style="color:${toCssHex(vcol)}">${escapeHtml(vname)}</span> <span style="opacity:.6">was taken by ${escapeHtml(wn || 'gravity')}</span>`
   );
   if (vid !== game.myBodyId && k && k.id === game.myBodyId) sfx(660, 0.25, 'triangle', 0.12);
+  // comic "POW!" over the fighter that went down
+  const victim = bodies.get(vid);
+  if (victim) comicBurst(victim.pos[HEAD], burstKind(by, wname));
+}
+
+/** Which comic word set fits a kill: melee, gun, boom, throw or fall. */
+function burstKind(by, wname) {
+  const w = WEAPONS[wname];
+  if (w)
+    return w.cls === 'boom' || w.kind === 'boom'
+      ? 'boom'
+      : w.cls === 'gun'
+        ? 'gun'
+        : w.cls === 'melee'
+          ? 'melee'
+          : 'throw';
+  if (!by) return 'fall';
+  return /pad|throw/i.test(wname || '') ? 'throw' : 'melee';
 }
 
 // rays

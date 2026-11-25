@@ -46,9 +46,7 @@ export function renderLobby() {
     online = net.mode !== 'off';
   const roster = host ? lobbyList() : game.lobbyRoster;
   $('lobbyTitle').textContent = online ? 'Lobby' : 'Practice';
-  $('lobbyCode').innerHTML = online
-    ? `Room <b style="font-family:'Lilita One';font-weight:400;letter-spacing:3px;color:#1d2433;font-size:20px">${net.code}</b>`
-    : 'Offline vs bots';
+  $('lobbyCode').innerHTML = online ? `Room <b class="room-code">${net.code}</b>` : 'Offline vs bots';
   $('inviteRow').classList.toggle('hidden', !online);
   $('inviteIn').value = online ? inviteURL() : '';
   const nb = Math.min(game.match.bots, MAX_PLAYERS - roster.length);
@@ -57,13 +55,13 @@ export function renderLobby() {
     roster
       .map(
         (r) =>
-          `<div class="lp"><i style="background:${toCssHex(r.col)}"></i>${escapeHtml(r.name)}${r.id === net.id ? ' <small style="color:#6b7486">(you)</small>' : ''}${online && !r.host ? `<span class="pg">${r.ping | 0} ms</span>` : ''}<span class="st ${r.host ? 'host' : r.ready ? 'ok' : ''}">${r.host ? 'Host' : r.ready ? 'Ready' : 'Not ready'}</span></div>`
+          `<div class="lp"><i style="background:${toCssHex(r.col)}"></i>${escapeHtml(r.name)}${r.id === net.id ? ' <small class="ms-note">(you)</small>' : ''}${online && !r.host ? `<span class="pg">${r.ping | 0} ms</span>` : ''}<span class="st ${r.host ? 'host' : r.ready ? 'ok' : ''}">${r.host ? 'Host' : r.ready ? 'Ready' : 'Not ready'}</span></div>`
       )
       .join('') +
     Array.from(
       { length: nb },
       (_, i) =>
-        `<div class="lp" style="opacity:.75"><i style="background:#cfd6e2"></i>Bot ${i + 1}<span class="st">${BOT_DIFF[game.match.diff].name}</span></div>`
+        `<div class="lp" style="opacity:.75"><i style="background:var(--paper-3)"></i>Bot ${i + 1}<span class="st">${BOT_DIFF[game.match.diff].name}</span></div>`
     ).join('');
   const seg = (k, opts) =>
     `<span class="seg">${opts.map(([v, l]) => `<button data-k="${k}" data-v="${v}" class="${game.match[k] === v ? 'sel' : ''}">${l}</button>`).join('')}</span>`;
@@ -78,7 +76,7 @@ export function renderLobby() {
       ['sb', 'Sandbox'],
     ])}</div>` +
     (sb
-      ? `<div class="ms" style="font-size:12px;color:#6b7486;font-weight:700">No score or time limit · every weapon · spawn props and gadgets</div>`
+      ? `<div class="ms ms-note">No score or time limit · every weapon · spawn props and gadgets</div>`
       : (game.match.mode === 'dm'
           ? `<div class="ms">Kill limit${num('killLimit', game.match.killLimit)}</div>`
           : `<div class="ms">Lives${num('lives', game.match.lives)}</div>`) +

@@ -5,13 +5,18 @@ The game is plain JavaScript ES modules: no bundler and no build step. `index.ht
 ## Folder map
 
 ```
-index.html            Markup for every screen (menu, lobby, HUD, settings, ...)
-css/style.css         All styling
+index.html            Markup for every screen (menu, lobby, HUD, settings, info, ...)
+css/
+  theme.css           Every color, font and outline size (the comic book theme)
+  base.css            Panels, lettering, buttons, inputs, tables
+  screens.css         Menu, map picker, customize, loadout, lobby, results, settings, info
+  hud.css             In-game HUD, kill feed, speech bubbles, POW bursts, wheels, spawn bar
 js/
   main.js             Entry point: loads modules, demo world, the frame loop
   audio.js            Synthesized sound effects (no audio files)
   core/               Helpers and state shared by everything
     util.js           $, V3, clamp, now, round2, escapeHtml
+    about.js          Version number, changelog, credits and the "Made by" links
     state.js          The shared `game` object (screen, match, menus, ...)
     prefs.js          Saved preferences, key binds, match settings
   game/               Gameplay rules and simulation
@@ -47,7 +52,7 @@ js/
   ui/                 Screens and input
     input.js          Keyboard / mouse / gamepad -> fighter controls
     menu.js, lobby.js, hud.js, settings.js, tutorial.js,
-    map-select.js, customize.js, chat.js, overlay.js
+    map-select.js, customize.js, chat.js, overlay.js, info.js
 ```
 
 ## One frame (`frame()` in main.js)
@@ -82,6 +87,10 @@ ES modules run in dependency order. Code that runs **when a file loads** (not in
 Three window listeners are installed from `main.js` on purpose so they run after the main keyboard handler (see the comment there).
 
 ## Recipes
+
+**Change the look:** edit the variables in `css/theme.css` (colors, fonts, outline thickness, shadows). Everything else in the CSS uses them.
+
+**Ship an update:** bump `GAME_VERSION` in `js/core/about.js` and add a line at the top of `CHANGELOG`. It shows up on the Info screen and the main menu.
 
 **Tweak a weapon:** edit its numbers in `js/game/weapons.js`. Themed names per map are in each map file's `names`.
 

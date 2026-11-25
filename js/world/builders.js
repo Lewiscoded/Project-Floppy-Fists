@@ -158,7 +158,7 @@ export function signBoard(text, x, y, z, w, h, bg, fg) {
   g.fillStyle = toCssHex(bg);
   g.fillRect(0, 0, c.width, c.height);
   g.fillStyle = toCssHex(fg);
-  g.font = `bold ${Math.round(c.height * 0.62)}px "Lilita One", Impact, sans-serif`;
+  g.font = `${Math.round(c.height * 0.62)}px Bangers, Impact, sans-serif`;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.fillText(text, c.width / 2, c.height / 2 + 2);

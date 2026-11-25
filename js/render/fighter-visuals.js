@@ -460,7 +460,7 @@ export class RagView {
     const cx = this.cv.getContext && this.cv.getContext('2d');
     if (!cx) return;
     cx.clearRect(0, 0, 256, 80);
-    cx.font = '800 34px Nunito, sans-serif';
+    cx.font = '700 34px "Comic Neue", sans-serif';
     cx.textAlign = 'center';
     cx.textBaseline = 'middle';
     cx.lineWidth = 7;

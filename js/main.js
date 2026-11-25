@@ -41,6 +41,7 @@ import './ui/menu.js';
 import './ui/customize.js';
 import './ui/settings.js';
 import './ui/tutorial.js';
+import './ui/info.js';
 import './ui/map-select.js';
 import './ui/lobby.js';
 import './game/match.js';

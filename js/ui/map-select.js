@@ -83,7 +83,7 @@ const weaponChips = (k) => {
 
 function curMapCard(k, canChange) {
   const t = THEMES[k];
-  return `<div class="thumb" style="background-image:${thumbs[k] ? `url(${thumbs[k]})` : 'none'}"></div><div class="grow"><small style="font-weight:800;color:#6b7486;font-size:12px">MAP</small><b>${t.icon} ${t.name}</b><span>${t.tag}</span></div>${canChange ? '<button class="blue mapOpen">Choose map ▸</button>' : ''}`;
+  return `<div class="thumb" style="background-image:${thumbs[k] ? `url(${thumbs[k]})` : 'none'}"></div><div class="grow"><small class="ms-note">MAP</small><b>${t.icon} ${t.name}</b><span>${t.tag}</span></div>${canChange ? '<button class="blue mapOpen">Choose map ▸</button>' : ''}`;
 }
 
 export function renderMaps() {

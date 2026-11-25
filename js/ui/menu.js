@@ -45,7 +45,9 @@ renderSwatches();
 
 export const menuIsOpen = () =>
   game.state !== 'play' ||
-  ['pause', 'loadout', 'settings', 'tutorial', 'custom'].some((id) => !$(id).classList.contains('hidden')) ||
+  ['pause', 'loadout', 'settings', 'tutorial', 'custom', 'info'].some(
+    (id) => !$(id).classList.contains('hidden')
+  ) ||
   !$('chatBox').classList.contains('hidden');
 
 $('practiceBtn').onclick = () => {
@@ -173,7 +175,7 @@ function updatePause() {
   $('endMatch').classList.toggle('hidden', !isHost());
   $('roomInfo').innerHTML =
     net.mode === 'host'
-      ? `Room <b style="letter-spacing:3px;color:#1d2433">${net.code}</b> · ${playerCount()}/${MAX_PLAYERS} fighters`
+      ? `Room <b class="room-code">${net.code}</b> · ${playerCount()}/${MAX_PLAYERS} fighters`
       : net.mode === 'client'
         ? `Room ${net.code} · ping ${net.ping} ms`
         : `Practice · ${playerCount()} fighters`;

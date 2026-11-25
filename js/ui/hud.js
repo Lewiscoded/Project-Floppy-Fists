@@ -73,7 +73,7 @@ export function updateHud(dt) {
   const list = [...bodies.values()].sort((a, b) => b.kills - a.kills || a.deaths - b.deaths);
   const online = net.mode !== 'off';
   $('board').innerHTML =
-    `<div style="color:#6b7486;font-size:12px"><span>FIGHTER</span><span>${game.match.mode === 'lms' ? 'LIVES · ' : ''}K / D</span></div>` +
+    `<div><span>FIGHTER</span><span>${game.match.mode === 'lms' ? 'LIVES · ' : ''}K / D</span></div>` +
     list
       .map((b) => {
         const isB = b.bot || b.isBot,

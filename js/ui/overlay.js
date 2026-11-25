@@ -16,7 +16,8 @@ const overlayLayer = $('ov'),
 
 const pools = { arrow: new Map(), bubble: new Map() },
   dnums = [],
-  ddirs = [];
+  ddirs = [],
+  bursts = [];
 
 let hitmarkerT = 0;
 
@@ -46,6 +47,28 @@ export function showHitFeedback(m) {
   el.textContent = m.pr ? 'shielded' : m.hs ? m.d + '!' : m.d;
   overlayLayer.appendChild(el);
   dnums.push({ el, p: new V3(m.p[0] + (Math.random() - 0.5) * 0.4, m.p[1], m.p[2]), t: 0 });
+}
+
+/** Comic sound words for kills, picked by how the fighter went down. */
+const BURST_WORDS = {
+  melee: { words: ['BONK!', 'WHAM!', 'THWACK!', 'SMACK!', 'POW!'], color: '' },
+  gun: { words: ['BLAM!', 'POW!', 'KO!', 'ZING!'], color: '' },
+  boom: { words: ['KABOOM!', 'KA-BLAM!', 'BOOM!'], color: 'red' },
+  throw: { words: ['YEET!', 'WHEEE!'], color: 'blue' },
+  fall: { words: ['SPLAT!', 'OOF!', 'BYE!'], color: 'blue' },
+};
+
+/**
+ * Show a comic burst ("POW!") over a point in the world.
+ * kind is one of the BURST_WORDS keys.
+ */
+export function comicBurst(worldPos, kind) {
+  const set = BURST_WORDS[kind] || BURST_WORDS.melee;
+  const el = document.createElement('div');
+  el.className = 'burst' + (set.color ? ' ' + set.color : '');
+  el.innerHTML = `<div class="star"><b>${set.words[(Math.random() * set.words.length) | 0]}</b></div>`;
+  overlayLayer.appendChild(el);
+  bursts.push({ el, p: worldPos.clone().add(new V3(0, 0.6, 0)), t: 0 });
 }
 
 export function dmgDir(by, pos) {
@@ -100,6 +123,19 @@ export function updateOverlay(dt) {
   }
   hitmarkerT -= dt;
   if (hitmarkerT <= 0) hmEl.classList.remove('on');
+  // kill bursts (the pop animation itself is CSS; here they just follow the world point)
+  for (let i = bursts.length - 1; i >= 0; i--) {
+    const b = bursts[i];
+    b.t += dt;
+    const s = proj(b.p);
+    b.el.style.left = s.x + 'px';
+    b.el.style.top = s.y + 'px';
+    b.el.style.visibility = s.behind ? 'hidden' : 'visible';
+    if (b.t > 1.15) {
+      b.el.remove();
+      bursts.splice(i, 1);
+    }
+  }
   // damage numbers
   for (let i = dnums.length - 1; i >= 0; i--) {
     const d = dnums[i];

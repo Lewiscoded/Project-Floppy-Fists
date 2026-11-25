@@ -360,7 +360,7 @@ export function graffiti() {
         x.fill();
       }
       x.globalAlpha = 1;
-      x.font = 'bold 64px "Lilita One", Impact, sans-serif';
+      x.font = '64px Bangers, Impact, sans-serif';
       x.textAlign = 'center';
       x.textBaseline = 'middle';
       x.lineJoin = 'round';

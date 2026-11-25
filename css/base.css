@@ -1,0 +1,241 @@
+/*
+ * Base building blocks: page reset, comic panels (.card), lettering, buttons, inputs, tables and keys.
+ * Colors and fonts come from theme.css.
+ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--cyan);
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--ink);
+  user-select: none;
+}
+canvas {
+  display: block;
+  cursor: crosshair;
+}
+.hidden {
+  display: none !important;
+}
+a {
+  color: var(--blue-dark);
+}
+
+/* ---------- full-screen menus: darkened scene + comic sunburst ---------- */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sunburst), rgba(26, 20, 16, 0.45);
+  z-index: 10;
+}
+
+/* ---------- comic panel ---------- */
+.card {
+  position: relative;
+  background: var(--paper);
+  border: var(--line-thick) solid var(--ink);
+  border-radius: var(--radius-lg);
+  padding: 26px 30px;
+  width: min(720px, 95vw);
+  max-height: 94vh;
+  overflow: auto;
+  box-shadow: var(--pop-lg);
+  animation: panel-in 0.22s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.card.small {
+  width: min(380px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card.wide {
+  width: min(1080px, 96vw);
+}
+@keyframes panel-in {
+  from {
+    transform: scale(0.92) rotate(-1deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ---------- lettering ---------- */
+h1 {
+  font-family: var(--font-title);
+  font-weight: 400;
+  line-height: 1;
+}
+/* game logo: "PROJECT" in a yellow caption box, "FLOPPY FISTS" as the big inked title */
+.logo .kicker {
+  display: inline-block;
+  font-size: 22px;
+  letter-spacing: 3px;
+  background: var(--yellow);
+  border: var(--line) solid var(--ink);
+  padding: 3px 10px 1px;
+  box-shadow: var(--pop-sm);
+  transform: rotate(-2deg);
+}
+.logo .title {
+  display: block;
+  margin-top: 8px;
+  font-size: 76px;
+  letter-spacing: 2px;
+  color: var(--red);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 5px 5px 0 var(--ink);
+  transform: rotate(-1deg);
+  transform-origin: left center;
+}
+h2 {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 40px;
+  letter-spacing: 1.5px;
+  line-height: 1;
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+h3 {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 1px;
+  line-height: 1.05;
+}
+h3 small,
+h2 small {
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+.tag {
+  margin: 14px 0 16px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* ---------- inputs ---------- */
+input {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+  background: #fff;
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  outline: none;
+  width: 180px;
+}
+input:focus {
+  background: #fffdf4;
+  box-shadow: 0 0 0 3px var(--yellow);
+}
+input[type='range'] {
+  accent-color: var(--red);
+}
+input[type='checkbox'] {
+  accent-color: var(--red);
+}
+
+/* ---------- buttons: ink outline + hard shadow that squashes when pressed ---------- */
+button {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--ink);
+  background: #fff;
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 7px 14px 5px;
+  cursor: pointer;
+  box-shadow: var(--pop);
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s,
+    background 0.12s;
+}
+button:hover {
+  transform: translate(-1px, -1px) rotate(-0.6deg);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+button.go {
+  background: var(--yellow);
+  font-size: 24px;
+  letter-spacing: 1.5px;
+}
+button.blue {
+  background: var(--blue);
+  color: #fff;
+  text-shadow: 1px 1px 0 var(--ink);
+}
+
+/* ---------- status line ---------- */
+#status {
+  min-height: 22px;
+  margin: 12px 0 4px;
+  color: var(--red-dark);
+}
+#status.ok {
+  color: var(--green-dark);
+}
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- tables and keys ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+  font-size: 14px;
+}
+td {
+  padding: 5px 6px;
+  border-bottom: 2px dashed var(--paper-3);
+}
+td:first-child {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  width: 140px;
+}
+kbd {
+  display: inline-block;
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  padding: 0 6px;
+  margin: 1px 1px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 18px;
+  box-shadow: 1px 1px 0 var(--ink);
+}

@@ -1,5 +1,7 @@
 # Project Floppy Fists
 
+*Version 0.9.0, the Comic Book update.* Made by **Jesse J Lewis** ([lewiscoded.dev](https://www.lewiscoded.dev/)).
+
 A wobbly ragdoll sandbox brawler built with three.js. Pick a map and a loadout, then bonk, blast and rocket your friends off it. Up to 5 players online.
 
 ## Play
@@ -117,5 +119,7 @@ The code is split into small ES modules by system: physics, combat, maps, networ
 **Run it locally:** browsers won't load JS modules from a plain file, so serve the folder:
 - In VS Code, install **Live Server** (it's suggested when you open the folder), then right-click `index.html` → **Open with Live Server**.
 - Or run `python -m http.server` in the folder and open http://localhost:8000.
+
+**Look and feel:** the whole UI is themed from `css/theme.css`, and the version and changelog live in `js/core/about.js`.
 
 **Formatting:** the code is formatted with Prettier (`.prettierrc.json`). With the Prettier extension, VS Code formats on save.
