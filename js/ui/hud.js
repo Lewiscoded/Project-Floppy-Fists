@@ -7,6 +7,7 @@ import { $, clamp, escapeHtml, now, toCssHex } from '../core/util.js';
 import { bodies, localPlayer } from '../game/bodies.js';
 import { isEliminated, slotsFor } from '../game/match.js';
 import { CLASSES, WEAPONS } from '../game/weapons.js';
+import { activeWorldTags } from '../game/world-controls.js';
 import { net } from '../net/network.js';
 import { camSubject } from '../render/camera.js';
 import { fly } from '../sandbox/sandbox-ui.js';
@@ -78,6 +79,11 @@ export function updateHud(dt) {
   hudT -= dt;
   if (hudT > 0) return;
   hudT = 0.3;
+  // world controls that are on (so everyone knows why gravity feels weird)
+  const tags = activeWorldTags()
+    .map((t) => `<span>${t}</span>`)
+    .join('');
+  if ($('worldTags').innerHTML !== tags) $('worldTags').innerHTML = tags;
   const list = [...bodies.values()].sort((a, b) => b.kills - a.kills || a.deaths - b.deaths);
   const online = net.mode !== 'off';
   $('board').innerHTML =

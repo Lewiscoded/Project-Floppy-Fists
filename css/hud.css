@@ -764,3 +764,62 @@
   max-width: 270px;
   line-height: 1.35;
 }
+
+/* world controls that are on, under the match banner */
+#worldTags {
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 60vw;
+  pointer-events: none;
+}
+#worldTags span {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 1px 9px 0;
+  font-size: 13px;
+  box-shadow: var(--pop-sm);
+}
+
+/* spawn bar tabs (Spawn / World) and the world panel inside the bar */
+#spawnMenu .sbtabs {
+  display: flex;
+  gap: 4px;
+}
+#spawnMenu .sbtabs button {
+  width: auto;
+  height: auto;
+  padding: 2px 10px 0;
+  font-family: var(--font-title);
+  font-size: 17px;
+  letter-spacing: 1px;
+}
+#spawnMenu .sbtabs button.sel {
+  background: var(--yellow);
+}
+#spawnMenu .wpanel {
+  width: min(640px, calc(100vw - 60px));
+}
+#spawnMenu .wpanel button {
+  width: auto;
+  height: auto;
+  flex-direction: row;
+  font-size: 13px;
+  padding: 3px 8px 2px;
+}
+#spawnMenu .wpanel .wtog {
+  justify-content: flex-start;
+}
+#spawnMenu .wpanel .wseg button.sel,
+#spawnMenu .sbtabs button.sel {
+  background: var(--yellow);
+}
+#spawnMenu .wpanel .wtog.on {
+  background: var(--green);
+}

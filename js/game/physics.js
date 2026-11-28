@@ -11,7 +11,6 @@ import {
   DAMP,
   DT,
   FRONT,
-  G,
   HEAD,
   ITER,
   LFOOT,
@@ -33,6 +32,7 @@ import {
 } from './constants.js';
 import { applyTethers, grabReach, tryGrab } from './grab.js';
 import {
+  bounceUp,
   collideBodyProp,
   collidePropProp,
   localProps,
@@ -43,6 +43,7 @@ import {
   props,
 } from './props.js';
 import { holdFrozenShape } from './status.js';
+import { gravity, wr } from './world-controls.js';
 import { WEAPONS, isAimed } from './weapons.js';
 import { gadgetContacts, gadgetForces, gadgets } from '../sandbox/gadgets.js';
 import { BOXES } from '../world/world.js';
@@ -81,7 +82,8 @@ function forces(fighter) {
     v = fighter.vel,
     a = fighter.acc,
     c = fighter.ctrl;
-  for (let i = 0; i < N; i++) a[i].set(0, -G, 0);
+  const grav = gravity(); // world control
+  for (let i = 0; i < N; i++) a[i].set(0, -grav, 0);
   computeFacing(fighter);
   if (fighter.stun > 0) {
     fighter.jumpEdge = false;
@@ -107,7 +109,7 @@ function forces(fighter) {
   const z = fighter.size; // 1 normally, smaller when shrunk: every body measurement below scales with it
   if (g) {
     const err = fighter.groundY + 0.88 * z - p[PELV].y,
-      ay = clamp(G * 0.92 + err * 140 - v[PELV].y * 12, 0, G * 3);
+      ay = clamp(grav * 0.92 + err * 140 - v[PELV].y * 12, 0, grav * 3);
     for (const i of UPPER) a[i].y += ay;
   }
   spring(fighter, HEAD, p[PELV].x, p[PELV].y + 0.9 * z, p[PELV].z, 160 * up, 12);
@@ -125,7 +127,7 @@ function forces(fighter) {
   spring(fighter, RHIP, p[PELV].x + sx * 0.16, 0, p[PELV].z + sz * 0.16, 40, 5, 5);
   spring(fighter, LHIP, p[PELV].x - sx * 0.16, 0, p[PELV].z - sz * 0.16, 40, 5, 5);
   const spd = fighter.blocking ? 2.1 : holding ? 3.1 : 3.9,
-    kk = g ? 9 : held ? 1 : 2.2;
+    kk = g ? (wr('ice') ? 1.8 : 9) : held ? 1 : 2.2; // on ice your feet barely grip
   if (g || moving) {
     const ax = clamp((mx * spd - v[PELV].x) * kk, -40, 40),
       az = clamp((mz * spd - v[PELV].z) * kk, -40, 40);
@@ -166,13 +168,14 @@ function forces(fighter) {
   }
   if (fighter.jumpEdge) {
     fighter.jumpEdge = false;
-    if (g && !hanging && !holding && fighter.jumpCd <= 0) {
+    const airJump = !g && wr('infJump'); // world control: jump again in mid-air
+    if ((g || airJump) && !hanging && !holding && fighter.jumpCd <= 0) {
       for (let i = 0; i < N; i++) {
         fighter.prev[i].y = p[i].y - 7.4 * DT;
         fighter.prev[i].x -= mx * 1.2 * DT;
         fighter.prev[i].z -= mz * 1.2 * DT;
       }
-      fighter.jumpCd = 0.45;
+      fighter.jumpCd = airJump ? 0.22 : 0.45;
       fighter.ground = 0;
       sfx(260, 0.15, 'sine', 0.05);
     }
@@ -458,6 +461,8 @@ function solveCons(fighter) {
 
 /** Push a fighter's particles out of map boxes and record whether it is standing on ground. */
 function collideWorld(fighter, final) {
+  const bouncy = wr('bouncy') && !final; // bouncy floors: caught on the first collision pass
+  let impact = 0;
   for (let i = 0; i < N; i++) {
     const p = fighter.pos[i],
       rad = RAD[i] * fighter.size;
@@ -496,6 +501,7 @@ function collideWorld(fighter, final) {
         pen = rad - d;
         if (pen <= 0) continue;
       }
+      if (bouncy && ny > 0.6) impact = Math.min(impact, p.y - fighter.prev[i].y); // speed into the floor
       p.x += nx * pen;
       p.y += ny * pen;
       p.z += nz * pen;
@@ -507,11 +513,13 @@ function collideWorld(fighter, final) {
           vn = vx * nx + vy * ny + vz * nz;
         const fr = fighter.frozenPose
             ? 0.01
-            : i === LFOOT || i === RFOOT
-              ? fighter.moving
-                ? 0.25
-                : 0.6
-              : 0.35,
+            : wr('ice') && ny > 0.6
+              ? 0.03
+              : i === LFOOT || i === RFOOT
+                ? fighter.moving
+                  ? 0.25
+                  : 0.6
+                : 0.35,
           k = 1 - fr,
           vnn = vn < 0 ? 0 : vn;
         q.set(
@@ -526,6 +534,8 @@ function collideWorld(fighter, final) {
       }
     }
   }
+  // a hard landing on a bouncy floor bounces the whole fighter back up
+  if (impact < -0.03) bounceUp(fighter.pos, fighter.prev, impact, 0.8);
 }
 
 /** Push two overlapping fighters apart. */

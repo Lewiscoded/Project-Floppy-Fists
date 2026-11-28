@@ -92,6 +92,16 @@ Outfits sync to everyone online, and bots wear random outfits.
 - A first-time tutorial (you can reopen it from Settings)
 
 ## Weapon classes
+## World controls
+The host can change the rules for everyone, in the **World** box in the lobby or mid-game from the **World** tab of the Sandbox spawn bar (Z). Whatever is on shows under the match banner.
+
+| Control | Settings |
+|---|---|
+| Gravity | Moon, Low, Normal, Heavy, Jupiter |
+| Game speed | Slow-mo, Half, Normal, Fast, Turbo |
+| Knockback | Soft, Normal, Big, Huge, Cartoon |
+| Chaos toggles | Big heads (easier headshots), Bouncy floors, Ice, Explosive props (every prop blows up like a barrel), Infinite jump, One-hit KOs, Rocket rain |
+
 ## Weapons
 There are 7 classes. In a normal match you **carry 3 of them** (keys 1–3), chosen on the loadout screen (Q). In Sandbox you get all 7.
 

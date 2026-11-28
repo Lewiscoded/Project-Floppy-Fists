@@ -5,7 +5,10 @@
 import * as THREE from 'three';
 import { game } from '../core/state.js';
 import { V3, clamp, now, round2 } from '../core/util.js';
-import { DT, G, N, PELV, RAD } from './constants.js';
+import { DT, N, PELV, RAD } from './constants.js';
+import { gravity, wr } from './world-controls.js';
+
+const BOOM_PROP_HP = 35; // hit points of normal props when Explosive props is on
 import { addVel } from './physics.js';
 import { explode } from './projectiles.js';
 import { WEAPONS } from './weapons.js';
@@ -301,7 +304,7 @@ export function clearProps() {
 export function propStepForces(prop) {
   for (let i = 0; i < prop.pos.length; i++) {
     prop.vel[i].subVectors(prop.pos[i], prop.prev[i]).divideScalar(DT);
-    prop.acc[i].set(0, -G, 0);
+    prop.acc[i].set(0, -gravity(), 0);
   }
 }
 
@@ -345,7 +348,9 @@ export function propSolve(prop) {
 }
 
 export function propWorld(prop, final) {
-  const d = prop.def;
+  const d = prop.def,
+    bouncy = wr('bouncy');
+  let impact = 0; // hardest landing this pass (for bouncy floors)
   for (let i = 0; i < prop.pos.length; i++) {
     const p = prop.pos[i],
       rad = prop.rad[i];
@@ -384,6 +389,8 @@ export function propWorld(prop, final) {
         pen = rad - dd;
         if (pen <= 0) continue;
       }
+      const floor = ny > 0.6;
+      if (floor && bouncy) impact = Math.min(impact, p.y - prop.prev[i].y); // speed into the floor, before the push-out
       p.x += nx * pen;
       p.y += ny * pen;
       p.z += nz * pen;
@@ -393,7 +400,7 @@ export function propWorld(prop, final) {
           vy = p.y - q.y,
           vz = p.z - q.z,
           vn = vx * nx + vy * ny + vz * nz,
-          k = 1 - d.fric;
+          k = 1 - (floor && wr('ice') ? 0.02 : d.fric); // world controls: ice floors, bouncy floors
         const nb = vn < 0 ? -vn * d.bounce : vn;
         q.set(
           p.x - (nx * nb + (vx - nx * vn) * k),
@@ -402,6 +409,18 @@ export function propWorld(prop, final) {
         );
       }
     }
+  }
+  if (impact < -0.02) bounceUp(prop.pos, prop.prev, impact, Math.max(d.bounce, 0.75));
+}
+
+/**
+ * Bouncy floors (world control): the whole object bounces at once, so its linked points don't drag
+ * each other back down. impact = how far it moved into the floor this step (negative).
+ */
+export function bounceUp(pos, prev, impact, keep) {
+  for (let i = 0; i < pos.length; i++) {
+    const vy = pos[i].y - prev[i].y;
+    prev[i].y = pos[i].y - Math.max(-impact * keep, vy); // moving up at least as fast as it hit
   }
 }
 
@@ -483,7 +502,10 @@ export function applyPropHit(prop, j, imp, dmg, by) {
     addVel(prop, i, imp.x * m, imp.y * m, imp.z * m);
   }
   if (by) prop.lastHitBy = by;
-  if (prop.def.hp && dmg > 0) {
+  // explosive props (world control): every prop gets hit points and blows up like a barrel
+  const maxHp = prop.def.hp || (wr('boomProps') ? BOOM_PROP_HP : 0);
+  if (maxHp && dmg > 0) {
+    if (!(prop.hp > 0)) prop.hp = maxHp;
     prop.hp -= dmg;
     if (prop.hp <= 0) detonateProp(prop);
   }

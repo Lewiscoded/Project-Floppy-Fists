@@ -34,6 +34,8 @@ js/
     weapon-kinds.js   Cone weapons, beams, grappling hook, sledgehammer shockwave, weapon visuals (wfx)
     traps.js          Banana peels, spring traps, sticky mines: arming, triggering, 3-per-player limit
     status.js         Burning, frozen, shrunk, pied: timers, effects, syncing over the network
+    world-controls.js World controls (gravity, speed, knockback, chaos toggles): settings + helpers
+    rocket-rain.js    The Rocket rain world control (host drops rockets from the sky)
     projectiles.js    Rockets, grenades, cluster bombs, pies, traps in flight, explosions
     props.js          Crates, barrels, balls, pins (host-owned physics)
     bots.js           Bot AI
@@ -52,7 +54,7 @@ js/
     maps/             One file per map + index.js listing them
   sandbox/            Sandbox mode
     gadgets.js        Trampolines, launch pads, fans, spawning
-    sandbox-ui.js     Weapon wheel, spawn bar, free camera
+    sandbox-ui.js     Weapon wheel, spawn bar (Spawn / World tabs), free camera
   net/                Online play
     network.js        Host / join / lobby / reconnect / host migration
     messages.js       Message handling, pose streaming, proxies
@@ -62,6 +64,7 @@ js/
     menu.js, lobby.js, hud.js, settings.js, tutorial.js,
     map-select.js, customize.js, chat.js, overlay.js, info.js
     ui-sounds.js      Hover/click/menu sounds for every button, wired up once for the whole page
+    world-panel.js    World controls panel (lobby World box + Sandbox spawn bar World tab)
 ```
 
 ## One frame (`frame()` in main.js)
@@ -111,6 +114,8 @@ Three window listeners are installed from `main.js` on purpose so they run after
 1. Add it to `WEAPONS` in `js/game/weapons.js`, list it in its class's `types` in `CLASSES`, and give it an icon in `WEAPON_ICONS`.
 2. Pick a `kind`. Existing kinds (melee, hitscan, rocket, lob, trap, cone, beam, grapple) need nothing else. A new kind goes in `FIRE_KINDS` in `js/game/weapon-kinds.js`.
 3. Optional: a held model in `NEW_WEAPON_LOOKS` (`js/render/fighter-visuals.js`), a themed name in each map's `names`, a sound in `gunSfx()` (`combat.js`).
+
+**World controls:** the settings live in `game.match.world`, so they reach every player with the match settings. Game code reads them with `wr('key')` from `js/game/world-controls.js` (it returns the default outside a match). To add one: put its default in `WORLD_DEFAULTS`, describe it in `WORLD_STEPS` (a few fixed values) or `WORLD_TOGGLES` (on/off) so the panel (`js/ui/world-panel.js`) shows it, then use `wr('yourKey')` where it should take effect. Game speed scales `dt` in `frame()` (UI, camera and networking keep using real time).
 
 **Weapon classes and slots:** a fighter has `loadout` (chosen weapon per class), `equip` (the 3 classes carried) and `slot` (class in hand). `slotsFor()` in `js/game/match.js` decides which classes you can switch between: all 7 in Sandbox, melee in melee-only matches, otherwise your 3.
 

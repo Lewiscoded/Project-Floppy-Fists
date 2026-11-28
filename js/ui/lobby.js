@@ -8,6 +8,7 @@ import { bodies } from '../game/bodies.js';
 import { BOT_DIFF } from '../game/bots.js';
 import { MAX_PLAYERS } from '../game/constants.js';
 import { startMatchHost } from '../game/match.js';
+import { renderLobbyWorld } from './world-panel.js';
 import { projs, removeProj } from '../game/projectiles.js';
 import { clearProps } from '../game/props.js';
 import { removeBody } from '../net/messages.js';
@@ -98,6 +99,7 @@ export function renderLobby() {
       ['hard', 'Hard'],
     ])}</div>`;
   renderMaps();
+  renderLobbyWorld();
   const clients = roster.filter((r) => !r.host),
     readyN = clients.filter((r) => r.ready).length;
   $('readyBtn').classList.toggle('hidden', host);

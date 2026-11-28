@@ -15,6 +15,7 @@ import { dropOwner, handle, removeBody } from './messages.js';
 import { BCPeer } from './test-peer.js';
 import { enterLobby, renderLobby } from '../ui/lobby.js';
 import { feed, myName } from '../ui/menu.js';
+import { worldMaybeChanged } from '../ui/world-panel.js';
 import { loadMap, mapKey } from '../world/world.js';
 
 const PeerCls = () => (window.__BC ? BCPeer : window.Peer);
@@ -342,6 +343,7 @@ function clientRecv(m) {
     case 'lobby':
       game.lobbyRoster = m.roster;
       game.match = m.match;
+      worldMaybeChanged();
       net.code = m.code;
       if (game.state === 'lobby') {
         if (game.match.map !== mapKey) loadMap(game.match.map);

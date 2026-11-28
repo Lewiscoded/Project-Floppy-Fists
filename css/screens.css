@@ -869,3 +869,92 @@
   font-size: 20px;
   z-index: 30;
 }
+
+/* ---------- world controls panel (lobby "World" box and the Sandbox spawn bar's World tab) ---------- */
+#worldBox {
+  margin: 4px 0 12px;
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper-2, #fff8e6);
+  padding: 6px 10px;
+}
+#worldBox summary {
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+#worldBox summary small {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  margin-left: 8px;
+  letter-spacing: 0;
+}
+#worldSet {
+  margin-top: 8px;
+}
+.wpanel .wrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+  font-size: 15px;
+}
+.wpanel .wname {
+  white-space: nowrap;
+}
+.wpanel .wseg {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.wpanel .wseg button {
+  padding: 3px 8px 1px;
+  font-size: 14px;
+}
+.wpanel .wseg button.sel {
+  background: var(--yellow);
+}
+.wpanel .wtogs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 6px;
+  margin: 10px 0 8px;
+}
+.wpanel .wtog {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 3px;
+  font-size: 14px;
+  text-align: left;
+  background: #fff;
+}
+.wpanel .wtog span {
+  font-size: 18px;
+}
+.wpanel .wtog.on {
+  background: var(--green);
+}
+.wpanel .wfoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.wpanel .wfoot button {
+  padding: 3px 10px 1px;
+  font-size: 14px;
+}
+/* guests see the settings but can't press anything */
+.wpanel.ro button {
+  pointer-events: none;
+}
+.wpanel.ro .wseg button:not(.sel),
+.wpanel.ro .wtog:not(.on) {
+  opacity: 0.4;
+}

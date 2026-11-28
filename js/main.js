@@ -59,7 +59,9 @@ import { $, V3, now } from './core/util.js';
 import { Body, bodies, localBodies, localPlayer } from './game/bodies.js';
 import { BOT_DIFF, BOT_NAMES, addBot, botThink, randomEquip, randomLoadout } from './game/bots.js';
 import { applyHit, raycast, weaponUpdate } from './game/combat.js';
+import { updateRocketRain } from './game/rocket-rain.js';
 import { updateStatus } from './game/status.js';
+import { wr } from './game/world-controls.js';
 import { COLORS, DT, LHAND, RHAND } from './game/constants.js';
 import { breakFree, buildTethers, dropHolds, holdTarget, throwTarget } from './game/grab.js';
 import {
@@ -75,7 +77,7 @@ import {
 import { randomOutfit } from './game/outfits.js';
 import { startEmote, step } from './game/physics.js';
 import { onBoom, projs, updateProjs } from './game/projectiles.js';
-import { props, sendProps, spawnMapProps, updateProps } from './game/props.js';
+import { applyPropHit, props, sendProps, spawnMapProps, updateProps } from './game/props.js';
 import { WEAPONS } from './game/weapons.js';
 import { sendState, stepProxies } from './net/messages.js';
 import { broadcastLobby, joinGame, lostHost, net, send, setStatus } from './net/network.js';
@@ -146,7 +148,9 @@ let physicsAccumulator = 0,
 
 /** Main loop, called every animation frame. */
 function frame(t) {
-  const dt = Math.min(0.05, (t - last) / 1000);
+  // realDt: wall-clock time (UI, camera, network). dt: game time, scaled by the Game speed world control.
+  const realDt = Math.min(0.05, (t - last) / 1000);
+  const dt = realDt * (game.state === 'play' ? wr('speed') : 1);
   last = t;
   updateMusic();
   const L = localBodies();
@@ -208,16 +212,17 @@ function frame(t) {
     }
   }
   for (const b of bodies.values()) updateStatus(b, dt);
-  stepProxies(dt);
+  stepProxies(realDt);
+  updateRocketRain(dt);
   buildTethers();
   physicsAccumulator += dt;
   let n = 0;
-  while (physicsAccumulator >= DT && n < 6) {
+  while (physicsAccumulator >= DT && n < 12) {
     step();
     physicsAccumulator -= DT;
     n++;
   }
-  if (n === 6) physicsAccumulator = 0;
+  if (n === 12) physicsAccumulator = 0;
   updateProjs(dt);
   updateProps(dt);
   animateGadgets(dt);
@@ -225,7 +230,7 @@ function frame(t) {
   updateFx(dt);
   for (const b of bodies.values()) b.view.update(b, dt);
   if (net.mode !== 'off') {
-    sendT -= dt;
+    sendT -= realDt;
     if (sendT <= 0) {
       sendT = 0.05;
       if (game.state === 'play') {
@@ -234,14 +239,14 @@ function frame(t) {
       }
     }
     if (net.mode === 'client') {
-      pingT -= dt;
+      pingT -= realDt;
       if (pingT <= 0) {
         pingT = 2;
         send({ t: 'ping', ts: now() });
       }
       if (!net.reconnecting && net.lastHost && now() - net.lastHost > 6500) lostHost('timeout');
     } else {
-      lobbyT -= dt;
+      lobbyT -= realDt;
       if (lobbyT <= 0) {
         lobbyT = 2;
         broadcastLobby();
@@ -250,18 +255,18 @@ function frame(t) {
     }
   }
   hostMatchCheck();
-  if (game.state === 'play') updateHud(dt);
-  updateOverlay(dt);
-  if (prev && !$('custom').classList.contains('hidden')) prev.render(dt);
-  game.hurtFlash = Math.max(0, game.hurtFlash - dt);
+  if (game.state === 'play') updateHud(realDt);
+  updateOverlay(realDt);
+  if (prev && !$('custom').classList.contains('hidden')) prev.render(realDt);
+  game.hurtFlash = Math.max(0, game.hurtFlash - realDt);
   renderer.domElement.style.filter =
     quality !== 'high' && game.hurtFlash > 0
       ? `saturate(${1 + game.hurtFlash * 2}) brightness(${1 + game.hurtFlash * 0.4})`
       : '';
-  updateCamera(dt);
+  updateCamera(realDt);
   skyDome.position.copy(camera.position);
   const tt = now() / 1000;
-  for (const f of animated) f(tt, dt);
+  for (const f of animated) f(tt, realDt);
   renderFrame();
   requestAnimationFrame(frame);
 }
@@ -282,6 +287,7 @@ addEventListener('resize', () => {
 });
 
 window.__game = {
+  applyPropHit,
   WEAPONS,
   weaponUpdate,
   slotsFor,

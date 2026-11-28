@@ -15,6 +15,7 @@ import { SHRUNK_KNOCK, applyStatus } from './status.js';
 import { limitTraps } from './traps.js';
 import { FIRE_KINDS, hitWord, shockwave, spinUp } from './weapon-kinds.js';
 import { WEAPONS } from './weapons.js';
+import { headScale, hitDamage, knockMul } from './world-controls.js';
 import { net, send } from '../net/network.js';
 import { muzzleFlash, puff, spark, tracer } from '../render/fx.js';
 import { feed } from '../ui/menu.js';
@@ -36,7 +37,7 @@ export function checkMelee(fighter) {
     if (o === fighter || o.dead) continue;
     if (o.pos[PELV].distanceTo(ph) > 3 + (w.reach || 0)) continue;
     for (let j = 0; j < N; j++) {
-      const rr = RAD[j] * o.size + (w.reach ? 0.12 : RAD[h]) + 0.05;
+      const rr = RAD[j] * o.size * (j === HEAD ? headScale() : 1) + (w.reach ? 0.12 : RAD[h]) + 0.05;
       if (!pts.some((q) => q.distanceToSquared(o.pos[j]) < rr * rr)) continue;
       const rx = vh.x - o.vel[j].x,
         ry = vh.y - o.vel[j].y,
@@ -172,7 +173,8 @@ export function applyHit(other, j, dmg, imp, by, wname) {
       }
     }
   }
-  if (other.size < 0.9) imp = imp.clone().multiplyScalar(SHRUNK_KNOCK); // shrunk fighters are light
+  imp = imp.clone().multiplyScalar(knockMul()); // world control
+  if (other.size < 0.9) imp.multiplyScalar(SHRUNK_KNOCK); // shrunk fighters are light
   if (w && w.slip) slip(other, imp);
   else
     for (let i = 0; i < N; i++) {
@@ -186,6 +188,7 @@ export function applyHit(other, j, dmg, imp, by, wname) {
     other.lastHitT = now();
     other.lastHitW = wname;
   }
+  dmg = hitDamage(other, dmg); // one-hit KOs
   other.hp -= dmg;
   other.stun = Math.max(other.stun, imp.length() > 6 ? 0.7 : w && w.kind === 'melee' ? 0.18 : 0.05);
   if (w && w.stun) other.stun = Math.max(other.stun, w.stun);
@@ -317,7 +320,7 @@ export function raycast(o, d, maxT, ignore) {
         ocz = p.z - o.z,
         tca = ocx * d.x + ocy * d.y + ocz * d.z;
       if (tca < 0 || tca > t) continue;
-      const r = RAD[k] * bd.size + 0.06,
+      const r = RAD[k] * bd.size * (k === HEAD ? headScale() : 1) + 0.06,
         d2 = ocx * ocx + ocy * ocy + ocz * ocz - tca * tca;
       if (d2 > r * r) continue;
       const th = tca - Math.sqrt(r * r - d2);

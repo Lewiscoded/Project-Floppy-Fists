@@ -3,7 +3,7 @@
  * Bump GAME_VERSION and add a line to CHANGELOG (newest first) when you ship an update.
  */
 
-export const GAME_VERSION = '0.11.0';
+export const GAME_VERSION = '0.12.0';
 export const GAME_NAME = 'Project Floppy Fists';
 
 export const AUTHOR = {
@@ -32,6 +32,12 @@ export const CREDITS = [
 
 /** Version history, newest first. */
 export const CHANGELOG = [
+  {
+    v: '0.12.0',
+    title: 'World controls',
+    notes:
+      "The host can bend the rules: gravity (Moon to Jupiter), game speed (slow-mo to turbo), knockback (soft to cartoon), plus chaos toggles: big heads, bouncy floors, ice, explosive props, infinite jump, one-hit KOs and rocket rain. Set them in the lobby's World box, or mid-game from the World tab of the Sandbox spawn bar (Z). Active rules show under the match banner for everyone.",
+  },
   {
     v: '0.11.0',
     title: 'Seven weapon classes',

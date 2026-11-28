@@ -6,7 +6,8 @@
  *
  * Fields:
  *   state         Which screen the game is on: 'menu' | 'lobby' | 'play' | 'results'.  (set up in core/prefs.js)
- *   match         Current match settings: mode (dm / lms / sb), limits, bots, difficulty, map.  (set up in core/prefs.js)
+ *   match         Current match settings: mode (dm / lms / sb), limits, bots, difficulty, map, and
+ *                 world (the world controls, see game/world-controls.js).  (set up in core/prefs.js)
  *   matchEnd      Timestamp (ms) when the timed match ends, or 0.  (set up in core/prefs.js)
  *   lobbyRoster   Players shown in the lobby.  (set up in core/prefs.js)
  *   myReady       Whether you pressed Ready in the lobby.  (set up in core/prefs.js)

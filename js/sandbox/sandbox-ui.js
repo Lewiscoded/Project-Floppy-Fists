@@ -22,6 +22,8 @@ import {
 } from './gadgets.js';
 import { isActionDown, isKeyDown, mouse } from '../ui/input.js';
 import { boxUnder, mapKey, wName } from '../world/world.js';
+import { isHost } from '../net/network.js';
+import { onWorldChange, worldPanelClick, worldPanelHTML } from '../ui/world-panel.js';
 
 // every weapon, grouped by class, going clockwise from the top
 const WW_ORDER = CLASSES.flatMap((c) => c.types);
@@ -108,6 +110,9 @@ let ghostKind = null;
 
 const placeP = new V3();
 
+let worldTab = false; // spawn bar showing the World tab instead of spawnable items
+onWorldChange(() => spawnOpen && worldTab && renderSpawn());
+
 export function renderSpawn() {
   const el = $('spawnMenu');
   el.classList.toggle('hidden', !spawnOpen);
@@ -118,8 +123,14 @@ export function renderSpawn() {
       ? 'Click a prop, gadget or bot to remove it'
       : `Click to place · <kbd>${keyLabel('rotate')}</kbd> rotate · right click to stop`
     : 'Pick something, then click in the world';
+  const tabs = `<span class="sbtabs"><button data-tab="spawn" class="${worldTab ? '' : 'sel'}">Spawn</button><button data-tab="world" class="${worldTab ? 'sel' : ''}">🌍 World</button></span>`;
+  if (worldTab) {
+    // the World tab: same panel as the lobby's, so the host can change gravity etc. mid-game
+    el.innerHTML = `<div class="sbt">${tabs}<span class="hint">${isHost() ? 'Changes apply to everyone right away' : 'Only the host can change the world'}</span><kbd>${keyLabel('spawn')}</kbd></div>${worldPanelHTML()}`;
+    return;
+  }
   el.innerHTML =
-    `<div class="sbt"><b>SPAWN</b><span class="hint">${hint}</span><span class="cnt">${spawnedCount()}/${MAX_SPAWNED}</span><kbd>${keyLabel('spawn')}</kbd></div><div class="sbrow">` +
+    `<div class="sbt">${tabs}<span class="hint">${hint}</span><span class="cnt">${spawnedCount()}/${MAX_SPAWNED}</span><kbd>${keyLabel('spawn')}</kbd></div><div class="sbrow">` +
     SPAWN_ITEMS.map(
       ([cat, items]) =>
         `<div class="sbgrp ${cat === 'Tools' ? 'tools' : ''}"><div class="sbc">${cat}</div><div class="sbg">${items
@@ -134,6 +145,14 @@ export function renderSpawn() {
 
 $('spawnMenu').addEventListener('mousedown', (e) => {
   e.preventDefault();
+  const tab = e.target.closest('[data-tab]');
+  if (tab) {
+    worldTab = tab.dataset.tab === 'world';
+    if (worldTab) game.placing = null;
+    renderSpawn();
+    return;
+  }
+  if (worldPanelClick(e)) return;
   e.stopPropagation();
   const b = e.target.closest('button');
   if (!b) return;

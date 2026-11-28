@@ -26,6 +26,7 @@ import {
 } from '../game/constants.js';
 import { DEF_OUTFIT, outfitKey } from '../game/outfits.js';
 import { WEAPONS, isAimed } from '../game/weapons.js';
+import { headScale } from '../game/world-controls.js';
 import { YAX, ZAX, puff, streak } from './fx.js';
 import { R90, boxGeo, cone, cylinderGeo, sphereGeo } from './materials.js';
 import { scene } from './renderer.js';
@@ -726,11 +727,15 @@ export class RagView {
     const p = fighter.pos,
       fx = fighter.fx;
     // shrink: scale every body part (the ragdoll itself is shrunk by physics)
-    const z = fighter.size;
-    if (z !== this.size) {
+    // big heads (world control) scale just the head
+    const z = fighter.size,
+      hk = headScale();
+    if (z !== this.size || hk !== this.headK) {
       this.size = z;
-      for (const m of [this.torso, this.hips, this.head, ...this.hands, ...this.segs.map((s) => s.m)])
+      this.headK = hk;
+      for (const m of [this.torso, this.hips, ...this.hands, ...this.segs.map((s) => s.m)])
         m.scale.setScalar(z);
+      this.head.scale.setScalar(z * hk);
       for (const f of this.feet) f.scale.set(z, 0.7 * z, 1.5 * z);
     }
     // frozen: an ice block around the whole body

@@ -10,6 +10,7 @@ import { now } from '../core/util.js';
 import { N, PELV, UPPER } from './constants.js';
 import { addVel } from './physics.js';
 import { kill } from './combat.js';
+import { wr } from './world-controls.js';
 
 /** One letter per effect, used in the pose stream. */
 const LETTERS = { burn: 'b', freeze: 'f', shrink: 's', pie: 'p' };
@@ -60,7 +61,7 @@ export function updateStatus(f, dt) {
   if (fx.freeze > 0) f.stun = Math.max(f.stun, 0.1);
   else if (f.frozenPose) f.frozenPose = null;
   if (fx.burn > 0) {
-    f.hp -= BURN_DPS * dt;
+    f.hp -= wr('oneHit') ? f.hp : BURN_DPS * dt; // one-hit KOs: fire is instantly fatal too
     // panic: little random hops and shoves while on fire
     f.panicT = (f.panicT || 0) - dt;
     if (f.panicT <= 0) {

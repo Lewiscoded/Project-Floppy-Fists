@@ -3,7 +3,7 @@
  * plus explosions (damage falloff, knockback, wall blocking).
  *
  * How each kind flies:
- *   rocket            straight, explodes on contact
+ *   rocket, rain      straight, explode on contact (rain = rocket rain, see rocket-rain.js)
  *   grenade, cluster  arc and bounce, explode when the fuse runs out (cluster then scatters bomblets)
  *   pie               arc, splats on whatever it hits (cream in the face, see status.js)
  *   traps             arc, stick where they land, then traps.js decides when they go off
@@ -14,12 +14,13 @@ import { sfx, volAt } from '../audio/sfx.js';
 import { V3, now } from '../core/util.js';
 import { TMP, bodies, localBodies } from './bodies.js';
 import { dealHit, hitNotify, kill, rayBox } from './combat.js';
-import { FRONT, G, HEAD, N, PELV, RAD } from './constants.js';
+import { FRONT, HEAD, N, PELV, RAD } from './constants.js';
 import { addVel } from './physics.js';
 import { detonateProp, localProps, props } from './props.js';
 import { TRAP_LIFE, checkTrap, isTrap } from './traps.js';
 import { weaponFx } from './weapon-kinds.js';
 import { WEAPONS } from './weapons.js';
+import { gravity, hitDamage, knockMul, wr } from './world-controls.js';
 import { net, send } from '../net/network.js';
 import { ZAX, boomFx, glow, puff } from '../render/fx.js';
 import { scene } from '../render/renderer.js';
@@ -86,7 +87,7 @@ export function spawnProj(id, k, by, p, v, local) {
       mesh.add(m);
       return m;
     });
-  else if (k === 'rocket') {
+  else if (k === 'rocket' || k === 'rain') {
     const b = new THREE.Mesh(rocketGeo, rocketMat);
     b.rotation.x = Math.PI / 2;
     mesh.add(b);
@@ -97,6 +98,7 @@ export function spawnProj(id, k, by, p, v, local) {
   } else mesh.add(new THREE.Mesh(nadeGeo, nadeMat));
   mesh.traverse((o) => (o.castShadow = true));
   scene.add(mesh);
+  if (k === 'rain') sfx(1500, 1.1, 'sine', 0.04); // falling whistle
   projs.set(id, {
     id,
     k,
@@ -142,15 +144,16 @@ export function updateProjs(dt) {
     const n = 3,
       h = dt / n;
     let boom = false;
-    const trap = isTrap(q.k);
+    const trap = isTrap(q.k),
+      straight = q.k === 'rocket' || q.k === 'rain'; // flies in a straight line
     if (trap && q.stuck) q.armT += dt;
     for (let s = 0; s < n && !boom && !q.stuck; s++) {
-      if (q.k !== 'rocket') q.v.y -= G * h * (q.k === 'pie' ? 0.55 : 1);
+      if (!straight) q.v.y -= gravity() * h * (q.k === 'pie' ? 0.55 : 1);
       const old = q.p.clone();
       q.p.addScaledVector(q.v, h);
       const b = insideBox(q.p, 0.12);
       if (b) {
-        if (q.k === 'rocket' || q.k === 'pie') boom = true;
+        if (straight || q.k === 'pie') boom = true;
         else if (trap) {
           // traps stick to whatever they touch
           q.p.copy(old);
@@ -176,7 +179,7 @@ export function updateProjs(dt) {
           if (Math.abs(q.v[ax]) > 1.5) sfx(500, 0.04, 'square', 0.03 * volAt(q.p));
         }
       }
-      if ((q.k === 'rocket' || q.k === 'pie') && q.local) {
+      if ((straight || q.k === 'pie') && q.local) {
         for (const bd of bodies.values()) {
           if ((bd.id === q.by && q.t < 0.25) || bd.dead) continue;
           if (bd.pos[PELV].distanceTo(q.p) > 2.5) continue;
@@ -202,7 +205,7 @@ export function updateProjs(dt) {
     }
     if (q.fuse && q.t >= q.fuse) boom = true;
     q.mesh.position.copy(q.p);
-    if (q.k === 'rocket') {
+    if (straight) {
       TMP.copy(q.v).normalize();
       q.mesh.quaternion.setFromUnitVectors(ZAX, TMP);
       q.trail -= dt;
@@ -225,7 +228,7 @@ export function updateProjs(dt) {
       continue;
     }
     if (trap && q.local && checkTrap(q)) continue;
-    if (boom && !q.local && (q.k === 'rocket' || q.k === 'pie')) {
+    if (boom && !q.local && (straight || q.k === 'pie')) {
       q.v.set(0, 0, 0);
       q.mesh.visible = false;
     }
@@ -244,10 +247,12 @@ function blastProps(p, weapon, by) {
     if (d > R + 0.4) continue;
     const f = Math.max(0.1, 1 - d / R) * (blastBlocked(p, pr.c) ? 0.2 : 1);
     TMP.subVectors(pr.c, p).normalize();
-    const kb = (weapon.blast || 18) * f * 1.15;
+    const kb = (weapon.blast || 18) * f * 1.15 * knockMul();
     for (let i = 0; i < pr.pos.length; i++) addVel(pr, i, TMP.x * kb, TMP.y * kb + 5 * f, TMP.z * kb);
     if (by) pr.lastHitBy = by;
-    if (pr.def.hp) {
+    const maxHp = pr.def.hp || (wr('boomProps') ? 35 : 0); // explosive props world control
+    if (maxHp) {
+      if (!(pr.hp > 0)) pr.hp = maxHp;
       pr.hp -= weapon.dmg * f;
       if (pr.hp <= 0) {
         const q = pr;
@@ -323,8 +328,8 @@ export function onBoom(p, k, by) {
       if (d < R) {
         const f = (1 - d / R) * cover;
         TMP.subVectors(b.pos[i], p).normalize();
-        const kb = w.blast || 18;
-        addVel(b, i, TMP.x * kb * f, TMP.y * kb * f + 6 * f, TMP.z * kb * f);
+        const kb = (w.blast || 18) * knockMul();
+        addVel(b, i, TMP.x * kb * f, TMP.y * kb * f + 6 * f, TMP.z * kb * f); // kb includes the knockback control
       }
     }
     if (dmin < R && !b.dead) {
@@ -335,7 +340,7 @@ export function onBoom(p, k, by) {
         b.lastHitT = now();
         b.lastHitW = k;
       }
-      const dd = w.dmg * f * (self ? 0.4 : 1);
+      const dd = hitDamage(b, w.dmg * f * (self ? 0.4 : 1));
       b.hp -= dd;
       b.stun = Math.max(b.stun, 0.4 + f);
       if (b.id === game.myBodyId) {
